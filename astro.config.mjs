@@ -6,7 +6,7 @@ import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import { unified } from '@astrojs/markdown-remark';
 import { defineConfig, fontProviders } from 'astro/config';
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 
 // Why: one place to change when the site moves to its own domain. The sitemap
 // serializer below slices this prefix off, so it has to be the same string.
@@ -21,7 +21,10 @@ const posts = './src/content/blog';
 
 /** Post pathname -> the date the entry itself claims. Empty until a post lands. */
 const postDates = new Map(
-	readdirSync(posts, { recursive: true, withFileTypes: true })
+	// Why: the directory is empty until the first post, and git does not track
+	// empty directories — so a fresh CI checkout has no such path at all. Absent
+	// and empty mean the same thing here: no posts.
+	(existsSync(posts) ? readdirSync(posts, { recursive: true, withFileTypes: true }) : [])
 		.filter((e) => e.isFile() && /\.mdx?$/.test(e.name))
 		.flatMap((e) => {
 			const file = `${e.parentPath}/${e.name}`;
