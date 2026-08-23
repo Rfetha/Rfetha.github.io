@@ -5,7 +5,7 @@
 // KaTeX's own .katex-display margins.
 import 'katex/dist/katex.min.css';
 import '../styles/global.css';
-import { GITHUB_URL, LINKEDIN_URL, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { GITHUB_HANDLE, GITHUB_URL, LINKEDIN_URL, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 import { Font } from 'astro:assets';
 
 interface Props {
@@ -38,6 +38,7 @@ const schema = article
 			author: {
 				'@type': 'Person',
 				name: SITE_TITLE,
+				alternateName: GITHUB_HANDLE,
 				url: Astro.site?.href,
 				sameAs: [GITHUB_URL, LINKEDIN_URL],
 			},
@@ -46,6 +47,8 @@ const schema = article
 			'@context': 'https://schema.org',
 			'@type': 'Person',
 			name: SITE_TITLE,
+			// Why: people search the handle as often as the name.
+			alternateName: GITHUB_HANDLE,
 			description: SITE_DESCRIPTION,
 			url: Astro.site?.href,
 			sameAs: [GITHUB_URL, LINKEDIN_URL],

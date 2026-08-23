@@ -8,5 +8,6 @@ export const SITE_DESCRIPTION =
 /** Shown under the name on the home page and in the About header. */
 export const AFFILIATION = 'AI engineer · beginning graduate research';
 
-export const GITHUB_URL = 'https://github.com/Rfetha';
+export const GITHUB_HANDLE = 'Rfetha';
+export const GITHUB_URL = `https://github.com/${GITHUB_HANDLE}`;
 export const LINKEDIN_URL = 'https://www.linkedin.com/in/ferhat-ersoy-57ab81185/';
