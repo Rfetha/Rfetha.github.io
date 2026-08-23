@@ -4,6 +4,7 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
+import { unified } from '@astrojs/markdown-remark';
 import { defineConfig, fontProviders } from 'astro/config';
 
 const lmroman = './src/assets/fonts';
@@ -13,8 +14,12 @@ export default defineConfig({
 	site: 'https://rfetha.github.io',
 	integrations: [mdx(), sitemap()],
 	markdown: {
-		remarkPlugins: [remarkMath],
-		rehypePlugins: [rehypeKatex],
+		// Why: the flat remarkPlugins/rehypePlugins keys are deprecated and go in
+		// a future major. The pipeline is the same, it just hangs off `processor`.
+		processor: unified({
+			remarkPlugins: [remarkMath],
+			rehypePlugins: [rehypeKatex],
+		}),
 		// Why: `css-variables` hands syntax colour to global.css, so code blocks
 		// belong to this site's palette instead of importing a foreign theme.
 		shikiConfig: { theme: 'css-variables' },

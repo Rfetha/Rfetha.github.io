@@ -1,0 +1,55 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { SITE_TITLE } from '../consts';
+---
+
+<Layout
+	title={`Not found — ${SITE_TITLE}`}
+	description="No entry at this address."
+>
+	<main>
+		<div class="block">
+			<span class="mark">[?]</span>
+			<h1>Not found</h1>
+			<p class="lede">There is no entry at this address.</p>
+			<p>
+				The page may have been renamed, or the link that brought you here may be wrong.
+				The <a href="/blog">writing index</a> lists everything published, and{' '}<a
+					href="/">the front page</a
+				> is the shortest way back.
+			</p>
+		</div>
+	</main>
+</Layout>
+
+<style>
+	.block {
+		text-align: center;
+		padding-top: 1.5rem;
+	}
+	/* Why: the writing index numbers entries [4], [3], [2]. A missing one
+	   reads as [?] in the same voice, rather than a borrowed 404 graphic. */
+	.mark {
+		display: block;
+		font-size: 2.4em;
+		color: var(--faint);
+		font-variant-numeric: tabular-nums;
+		line-height: 1;
+		margin-bottom: 0.6rem;
+	}
+	h1 {
+		font-size: 1.45em;
+		margin-bottom: 0.4rem;
+	}
+	.lede {
+		font-style: italic;
+		color: var(--muted);
+		font-size: 0.9em;
+		margin-bottom: 1.4rem;
+	}
+	p {
+		text-align: left;
+		max-width: 34rem;
+		margin-inline: auto;
+	}
+</style>
