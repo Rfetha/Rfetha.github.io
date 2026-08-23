@@ -330,6 +330,20 @@ transparent track.
 - **In the index:** a caps-face red tag reading `placeholder` at the end of the meta line.
 - **Lifecycle:** both markers disappear when the flag flips. Nothing else in the system may borrow the red frame.
 
+### Share Card (generated)
+- **Character:** the site's face when a link is pasted somewhere else. Generated at build time by `src/pages/og/[...slug].png.ts` — satori composes the SVG, sharp writes the PNG. Nothing is drawn by hand and no post ever needs cover art.
+- **Canvas:** 1200×630 on white, 72px/80px padding, content pushed to the top and bottom edges. A 10px solid ink rule runs across the top — the masthead at card scale.
+- **Type:** title at 64px in the roman face, line-height 1.18, clipped at 230px so it stops after three lines; description beneath at 28px italic in muted, clipped at 124px. Both faces are the same woff files the site serves, so the card is set in the site's own voice rather than a system stack.
+- **Footer band:** a 2px hairline above, then a 14px Cornell red square — the Single Signal, appearing here as a mark rather than a link — followed by the name at 26px and the italic affiliation at 22px in muted.
+- **Variants:** the post card carries name and affiliation separately; the site card, whose title is already the name, drops the name from the band and runs `name · affiliation` as one italic line. The card must never print the name twice.
+- **Wiring:** `og:image` plus explicit `1200`/`630` dimensions and an alt equal to the page title; `twitter:card` is `summary_large_image`. Non-post pages fall back to `/og/default.png`.
+
+### Empty State
+- **Character:** one honest sentence. No illustration, no dashed placeholder box, no call to action pretending the absence is an opportunity.
+- **Style:** `0.9em` italic in muted with 0.6rem of top margin, replacing the writing index entirely rather than rendering an empty list.
+- **Copy:** it names the absence and offers the feed, so a visitor who arrives early has something to do. It never apologises and never promises a date.
+- **Companion rule:** the `/blog` count line is suppressed at zero rather than reading "0 entries" — a count that counts nothing is noise.
+
 ### Footer
 - **Style:** 1px hairline top border, content to 62rem, `0.79em` faint, copyright left and three links right, wrapping on narrow. Links are muted with a hairline underline that darkens to ink on hover.
 
