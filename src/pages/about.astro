@@ -9,8 +9,12 @@ import { AFFILIATION, GITHUB_HANDLE, GITHUB_URL, LINKEDIN_URL, SITE_TITLE } from
 >
 	<main>
 		<header class="titleblock">
-			<h1>{SITE_TITLE}</h1>
-			<p class="affiliation">{AFFILIATION}</p>
+			<!-- Why: the home page's h1 is already the bare name. Repeating it here gave
+			two URLs the same heading, which reads to a crawler as one page served twice.
+			The paper convention supplies the fix: the author note carries its own title
+			and the name drops to the byline beneath it. -->
+			<h1>About the author</h1>
+			<p class="affiliation">{SITE_TITLE}, {AFFILIATION}</p>
 		</header>
 
 		<h2>What I do</h2>

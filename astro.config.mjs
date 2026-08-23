@@ -6,13 +6,64 @@ import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import { unified } from '@astrojs/markdown-remark';
 import { defineConfig, fontProviders } from 'astro/config';
+import { readFileSync, readdirSync } from 'node:fs';
 
+// Why: one place to change when the site moves to its own domain. The sitemap
+// serializer below slices this prefix off, so it has to be the same string.
+const site = 'https://rfetha.github.io';
 const lmroman = './src/assets/fonts';
+const posts = './src/content/blog';
+
+// Why: the sitemap integration emits a bare <loc> for every route. Two things
+// are missing from that and neither is reachable from inside the integration:
+// a date per post, and the knowledge that /blog/ is an empty shell until the
+// first post exists. Both are read off disk here, once, at config time.
+
+/** Post pathname -> the date the entry itself claims. Empty until a post lands. */
+const postDates = new Map(
+	readdirSync(posts, { recursive: true, withFileTypes: true })
+		.filter((e) => e.isFile() && /\.mdx?$/.test(e.name))
+		.flatMap((e) => {
+			const file = `${e.parentPath}/${e.name}`;
+			// Why: updatedDate wins when present — lastmod means last modified, and
+			// claiming the original date for a revised post is the inaccuracy Google
+			// says makes it stop trusting the signal site-wide.
+			const raw = readFileSync(file, 'utf8').split(/^---$/m)[1] ?? '';
+			const stamp = (raw.match(/^updatedDate:\s*(.+)$/m) ??
+				raw.match(/^pubDate:\s*(.+)$/m))?.[1];
+			const date = stamp && new Date(stamp.trim().replace(/^['"]|['"]$/g, ''));
+			if (!date || Number.isNaN(date.valueOf())) return [];
+			const id = file
+				.slice(posts.length + 1)
+				.replace(/\.mdx?$/, '')
+				.replace(/(^|\/)index$/, '');
+			return [[`/blog/${id}/`.replace(/\/+$/, '/'), date]];
+		}),
+);
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://rfetha.github.io',
-	integrations: [mdx(), sitemap()],
+	site,
+	integrations: [
+		mdx(),
+		sitemap({
+			// Why: with no posts, /blog/ is a heading over an empty list. Submitting
+			// it asks Google to index a page with nothing on it. The check is a
+			// directory read, so the route returns to the sitemap on its own the
+			// build after the first post is written.
+			filter: (page) => postDates.size > 0 || !page.endsWith('/blog/'),
+			serialize(item) {
+				// Why: sliced rather than parsed with `new URL`. Every entry here was
+				// built by the integration from `site`, so the prefix is guaranteed —
+				// and slicing has no throwing path to guard against.
+				const date = postDates.get(item.url.slice(site.length));
+				// Why: no lastmod at all beats a guessed one. The static pages get
+				// none because nothing on disk records when they last changed.
+				if (date) item.lastmod = date.toISOString();
+				return item;
+			},
+		}),
+	],
 	markdown: {
 		// Why: the flat remarkPlugins/rehypePlugins keys are deprecated and go in
 		// a future major. The pipeline is the same, it just hangs off `processor`.
