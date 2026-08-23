@@ -1,63 +1,190 @@
 ---
-import AboutHeroImage from '../assets/blog-placeholder-about.jpg';
-import Layout from '../layouts/BlogPost.astro';
+import Layout from '../layouts/Layout.astro';
+import { AFFILIATION, GITHUB_URL, LINKEDIN_URL, SITE_TITLE } from '../consts';
 ---
 
 <Layout
-	title="About Me"
-	description="Lorem ipsum dolor sit amet"
-	pubDate={new Date('August 08 2021')}
-	heroImage={AboutHeroImage}
+	title={`About — ${SITE_TITLE}`}
+	description="Who writes here, what he works on, and why the writing exists."
 >
-	<p>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-		labore et dolore magna aliqua. Vitae ultricies leo integer malesuada nunc vel risus commodo
-		viverra. Adipiscing enim eu turpis egestas pretium. Euismod elementum nisi quis eleifend quam
-		adipiscing. In hac habitasse platea dictumst vestibulum. Sagittis purus sit amet volutpat. Netus
-		et malesuada fames ac turpis egestas. Eget magna fermentum iaculis eu non diam phasellus
-		vestibulum lorem. Varius sit amet mattis vulputate enim. Habitasse platea dictumst quisque
-		sagittis. Integer quis auctor elit sed vulputate mi. Dictumst quisque sagittis purus sit amet.
-	</p>
+	<main>
+		<header class="titleblock">
+			<h1>{SITE_TITLE}</h1>
+			<p class="affiliation">{AFFILIATION}</p>
+		</header>
 
-	<p>
-		Morbi tristique senectus et netus. Id semper risus in hendrerit gravida rutrum quisque non
-		tellus. Habitasse platea dictumst quisque sagittis purus sit amet. Tellus molestie nunc non
-		blandit massa. Cursus vitae congue mauris rhoncus. Accumsan tortor posuere ac ut. Fringilla urna
-		porttitor rhoncus dolor. Elit ullamcorper dignissim cras tincidunt lobortis. In cursus turpis
-		massa tincidunt dui ut ornare lectus. Integer feugiat scelerisque varius morbi enim nunc.
-		Bibendum neque egestas congue quisque egestas diam. Cras ornare arcu dui vivamus arcu felis
-		bibendum. Dignissim suspendisse in est ante in nibh mauris. Sed tempus urna et pharetra pharetra
-		massa massa ultricies mi.
-	</p>
+		<h2>What I do</h2>
+		<p>
+			I am an AI engineer at <a href="https://egeist.com.tr">Egeist Teknoloji</a> in İzmir.
+			Enough of the job has turned out to be architecture rather than modelling that a fair
+			amount of what I write here is about design.
+		</p>
+		<p>
+			I have recently started graduate study, heading toward research. That means I now read
+			papers with the intention of arguing with them rather than only applying them, and this
+			site is where a good deal of that arguing ends up.
+		</p>
 
-	<p>
-		Mollis nunc sed id semper risus in. Convallis a cras semper auctor neque. Diam sit amet nisl
-		suscipit. Lacus viverra vitae congue eu consequat ac felis donec. Egestas integer eget aliquet
-		nibh praesent tristique magna sit amet. Eget magna fermentum iaculis eu non diam. In vitae
-		turpis massa sed elementum. Tristique et egestas quis ipsum suspendisse ultrices. Eget lorem
-		dolor sed viverra ipsum. Vel turpis nunc eget lorem dolor sed viverra. Posuere ac ut consequat
-		semper viverra nam. Laoreet suspendisse interdum consectetur libero id faucibus. Diam phasellus
-		vestibulum lorem sed risus ultricies tristique. Rhoncus dolor purus non enim praesent elementum
-		facilisis. Ultrices tincidunt arcu non sodales neque. Tempus egestas sed sed risus pretium quam
-		vulputate. Viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare. Fringilla
-		urna porttitor rhoncus dolor purus non. Amet dictum sit amet justo donec enim.
-	</p>
+		<h2>Why this site exists</h2>
+		<p>
+			I write to understand. Explaining a thing is the fastest way I know to find the places
+			where I only thought I understood it — the step that seemed obvious until it had to be
+			written down in order, the constant nobody bothers to justify. So the posts here tend
+			to be written while the material is still difficult rather than after it stopped being.
+		</p>
+		<p>
+			The consequence is that they are written for someone in my position rather than for
+			someone who already knows. If a derivation is skipped, it is because I could genuinely
+			do it in my head, not because it was tedious to type.
+		</p>
 
-	<p>
-		Mattis ullamcorper velit sed ullamcorper morbi tincidunt. Tortor posuere ac ut consequat semper
-		viverra. Tellus mauris a diam maecenas sed enim ut sem viverra. Venenatis urna cursus eget nunc
-		scelerisque viverra mauris in. Arcu ac tortor dignissim convallis aenean et tortor at. Curabitur
-		gravida arcu ac tortor dignissim convallis aenean et tortor. Egestas tellus rutrum tellus
-		pellentesque eu. Fusce ut placerat orci nulla pellentesque dignissim enim sit amet. Ut enim
-		blandit volutpat maecenas volutpat blandit aliquam etiam. Id donec ultrices tincidunt arcu. Id
-		cursus metus aliquam eleifend mi.
-	</p>
+		<h2>What I write about</h2>
+		<p>
+			Machine learning systems, mostly, and the theory underneath them. Occasionally
+			something from the wider computer science that a problem dragged me into. Length
+			follows the subject: some entries are a page of reading notes, some are a long
+			derivation with the algebra left in.
+		</p>
 
-	<p>
-		Tempus quam pellentesque nec nam aliquam sem. Risus at ultrices mi tempus imperdiet. Id porta
-		nibh venenatis cras sed felis eget velit. Ipsum a arcu cursus vitae. Facilisis magna etiam
-		tempor orci eu lobortis elementum. Tincidunt dui ut ornare lectus sit. Quisque non tellus orci
-		ac. Blandit libero volutpat sed cras. Nec tincidunt praesent semper feugiat nibh sed pulvinar
-		proin gravida. Egestas integer eget aliquet nibh praesent tristique magna.
-	</p>
+		<h2>Background</h2>
+		<dl class="cv">
+			<dt>2025 &ndash;</dt>
+			<dd>
+				<b>AI Engineer</b>, Egeist Teknoloji &mdash; İzmir. Building ORKIKS: AI core,
+				LLM layer, and the backend architecture beneath both.
+			</dd>
+
+			<dt>2026 &ndash;</dt>
+			<dd>
+				<b>M.Sc. Computer Science</b>, Dokuz Eylül University. Thesis in progress:
+				moving what is currently bought with runtime prompt text &mdash; persona,
+				document faithfulness, tool use, flow discipline &mdash; into model weights,
+				and measuring whether those capabilities survive together rather than one at
+				a time. A direction rather than a result; it may still move.
+			</dd>
+
+			<dt>2021 &ndash; 2025</dt>
+			<dd><b>B.Sc. Computer Science</b>, Dokuz Eylül University.</dd>
+		</dl>
+
+		<h2>Selected work</h2>
+		<dl class="work">
+			<dt><a href="https://hub.orkiks.com">ORKIKS</a></dt>
+			<dd>
+				Multi-agent AI platform, in production. Three specialized agents behind a LangGraph
+				supervisor with intent routing; ReAct with per-SKU RAG over Postgres and pgvector;
+				transactional-outbox persistence; a TypeScript storefront and BFF integrating
+				Shopify, Trendyol and the WhatsApp Cloud API behind adapters.
+			</dd>
+
+			<dt><a href="https://github.com/Rfetha/Hukuk-SLM">Hukuk-SLM</a></dt>
+			<dd>
+				A Turkish legal small language model, in progress: a 9B Qwen-class model
+				fine-tuned with QLoRA down to a 4-bit GGUF that fits 8&nbsp;GB of VRAM, evaluated
+				on a
+				four-axis suite — groundedness gating, abstention against hard-negative trap sets,
+				and a dual LLM judge — over 21.5K grounded question–answer pairs synthesized from
+				real statutes. The scope changed partway on a negative result worth reporting:
+				supervised fine-tuning collapsed abstention from 0.74 to zero.
+			</dd>
+
+			<dt><a href="https://github.com/Rfetha/rfetha-skills">rfetha-skills</a></dt>
+			<dd>
+				A library of agent skills distilling software-design material — deep modules,
+				domain-driven design, hexagonal architecture, the GoF and PoEAA patterns — into
+				narrowly triggered, reusable form.
+			</dd>
+		</dl>
+		<p class="more-work">
+			The rest, including a PyTorch chess engine and a set of from-scratch computer-vision
+			builds, is on <a href={GITHUB_URL}>GitHub</a>.
+		</p>
+
+		<h2>Elsewhere</h2>
+		<p>
+			<a href={GITHUB_URL}>GitHub</a>{' · '}<a href={LINKEDIN_URL}>LinkedIn</a>
+		</p>
+	</main>
 </Layout>
+
+<style>
+	.titleblock {
+		text-align: center;
+		margin-bottom: 1.7rem;
+	}
+	h1 {
+		font-size: 1.55em;
+		margin-bottom: 0.2rem;
+	}
+	.affiliation {
+		font-style: italic;
+		font-size: 0.82em;
+		color: var(--muted);
+		margin: 0;
+	}
+	dl {
+		margin: 0;
+	}
+	.cv,
+	.work {
+		width: min(var(--fig), 100vw - 3rem);
+		margin-left: 50%;
+		transform: translateX(-50%);
+	}
+	.cv {
+		display: grid;
+		grid-template-columns: 7.5rem 1fr;
+		gap: 0 1rem;
+	}
+	.cv dt {
+		font-style: italic;
+		font-size: 0.82em;
+		color: var(--faint);
+		font-variant-numeric: tabular-nums;
+		padding-top: 0.32em;
+	}
+	.cv dd,
+	.work dd {
+		margin: 0 0 0.85rem;
+		font-size: 0.92em;
+		line-height: 1.55;
+	}
+	.cv dd b {
+		font-weight: 400;
+		font-family: var(--caps);
+		letter-spacing: 0.045em;
+		color: var(--ink);
+	}
+	/* Why: repository names are identifiers. The small-caps face renders
+	   `ORKIKS` full-height and `fin-cli` half-height off the same rule, which
+	   both mismatches their real spelling and reads as inconsistent sizing. */
+	.work dt {
+		font-size: 0.95em;
+		margin-top: 0.9rem;
+		color: var(--ink);
+	}
+	.work dt a {
+		color: var(--sig);
+	}
+	.more-work {
+		font-size: 0.92em;
+		color: var(--muted);
+	}
+	@media (max-width: 900px) {
+		.cv,
+		.work {
+			width: 100%;
+			margin-left: 0;
+			transform: none;
+		}
+	}
+	@media (max-width: 640px) {
+		.cv {
+			grid-template-columns: 1fr;
+			gap: 0;
+		}
+		.cv dt {
+			padding-top: 0.5rem;
+		}
+	}
+</style>

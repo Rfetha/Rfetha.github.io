@@ -1,49 +1,78 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
-import Header from '../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import PostList from '../components/PostList.astro';
+import { AFFILIATION, GITHUB_URL, LINKEDIN_URL, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+
+const all = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const recent = all.slice(0, 5);
 ---
 
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-	</head>
-	<body>
-		<Header />
-		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This template
-				serves as a lightweight, minimally-styled starting point for anyone looking to build a personal
-				website, blog, or portfolio with Astro.
+<Layout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+	<main>
+		<div class="titleblock">
+			<h1>{SITE_TITLE}</h1>
+			<p class="affiliation">{AFFILIATION}</p>
+			<div class="abstract">
+				<b>Abstract.</b> I write to understand. These are working notes on machine learning
+				systems and the theory underneath them, written while the material is still difficult
+				rather than after it stopped being. <a href="/about">More about me</a>.
+			</div>
+		</div>
+
+		<section>
+			<h2>Writing</h2>
+			<PostList posts={recent} startAt={all.length} />
+			{all.length > recent.length && <p class="all"><a href="/blog">All writing</a></p>}
+		</section>
+
+		<section>
+			<h2>Elsewhere</h2>
+			<p class="elsewhere">
+				<a href={GITHUB_URL}>GitHub</a>{' · '}<a href={LINKEDIN_URL}>LinkedIn</a>
 			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to
-				<a href="https://docs.astro.build/">read the docs</a>
-				or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out
-				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a>
-				by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
-		</main>
-		<Footer />
-	</body>
-</html>
+		</section>
+	</main>
+</Layout>
+
+<style>
+	.titleblock {
+		text-align: center;
+		margin-bottom: 1.9rem;
+	}
+	h1 {
+		font-size: 1.55em;
+		margin-bottom: 0.2rem;
+	}
+	.affiliation {
+		font-style: italic;
+		font-size: 0.82em;
+		color: var(--muted);
+		margin-bottom: 1.1rem;
+	}
+	.abstract {
+		text-align: left;
+		font-size: 0.9em;
+		line-height: 1.6;
+		color: var(--muted);
+		border-top: 1px solid var(--rule);
+		border-bottom: 1px solid var(--rule);
+		padding: 0.75rem 0;
+	}
+	.abstract b {
+		font-weight: 400;
+		font-style: italic;
+		color: var(--ink);
+	}
+	.all {
+		text-align: right;
+		font-size: 0.84em;
+		margin: 0.9rem 0 0;
+	}
+	.elsewhere {
+		font-size: 0.88em;
+		margin: 0;
+	}
+</style>

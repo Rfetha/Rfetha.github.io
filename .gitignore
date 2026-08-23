@@ -25,3 +25,9 @@ pnpm-debug.log*
 
 # taslaklar + agent calisma alani - yayina gitmez
 drafts/
+.impeccable/
+PRODUCT.md
+
+# obsidian vault ayarlari - drafts/ zaten ignore'da
+.obsidian/
+.vscode/

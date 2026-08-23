@@ -1,0 +1,106 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import FormattedDate from './FormattedDate.astro';
+
+interface Props {
+	posts: CollectionEntry<'blog'>[];
+	/** Numbering counts down from here, so the newest post carries the highest number. */
+	startAt?: number;
+}
+
+const { posts, startAt = posts.length } = Astro.props;
+---
+
+{
+	posts.length === 0 ? (
+		<p class="empty">
+			Nothing published yet. The <a href="/rss.xml">feed</a> is live if you want to be
+			told when that changes.
+		</p>
+	) : (
+		<ol style={`--start:${startAt + 1}`}>
+	{
+		posts.map((post) => (
+			<li>
+				<a href={`/blog/${post.id}/`}>{post.data.title}</a>
+				<span class="desc">{post.data.description}</span>
+				<span class="meta">
+					<FormattedDate date={post.data.pubDate} />
+					{post.data.placeholder && <em class="ph">placeholder</em>}
+				</span>
+			</li>
+		))
+			}
+		</ol>
+	)
+}
+
+<style>
+	.empty {
+		font-size: 0.9em;
+		color: var(--muted);
+		font-style: italic;
+		margin: 0.6rem 0 0;
+	}
+	ol {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		counter-reset: post var(--start);
+	}
+	li {
+		counter-increment: post -1;
+		display: grid;
+		grid-template-columns: 2.1rem 1fr;
+		gap: 0 0.75rem;
+		align-items: baseline;
+		padding: 0.68rem 0;
+		border-bottom: 1px dotted var(--rule);
+	}
+	li::before {
+		content: '[' counter(post) ']';
+		font-size: 0.79em;
+		color: var(--faint);
+		font-variant-numeric: tabular-nums;
+	}
+	li > * {
+		grid-column: 2;
+	}
+	a {
+		font-size: 0.98em;
+		line-height: 1.35;
+		color: var(--ink);
+		border-bottom: 0;
+	}
+	a:hover {
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+	.desc {
+		display: block;
+		font-size: 0.84em;
+		color: var(--muted);
+		line-height: 1.5;
+		margin-top: 0.1rem;
+	}
+	.meta {
+		display: block;
+		font-size: 0.76em;
+		color: var(--faint);
+		font-style: italic;
+		font-variant-numeric: tabular-nums;
+		margin-top: 0.26rem;
+	}
+	.ph {
+		font-style: normal;
+		font-family: var(--caps);
+		letter-spacing: 0.05em;
+		color: var(--sig);
+		margin-left: 0.5rem;
+	}
+	@media (max-width: 640px) {
+		li {
+			grid-template-columns: 1.8rem 1fr;
+		}
+	}
+</style>

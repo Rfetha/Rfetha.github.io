@@ -1,0 +1,42 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+
+interface Props {
+	title: string;
+	description: string;
+	article?: { pubDate: Date; updatedDate?: Date; headline: string };
+}
+
+const { title, description, article } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={title} description={description} article={article} />
+	</head>
+	<body>
+		<!--
+THESIS: A working engineer's notebook published as a preprint. It refuses the
+centered-column personal blog with gray metadata; here the page is a paper, so
+explaining is the format rather than the decoration.
+OWN-WORLD: Latin Modern Roman on white. Cornell red as the only chromatic mark.
+Hairline and dotted rules, drawn small caps for section heads, tabular italic
+dates, bracketed index numerals, plate-numbered figures breaking wider than the
+67-character measure.
+STORY: A stranger arriving from a link sees a titled paper by a named author,
+follows one argument end to end, and leaves convinced the author can explain.
+FIRST VIEWPORT: Rule-bound masthead at full width; centered name, italic
+affiliation, an Abstract block between hairlines; the bracketed writing index
+directly beneath.
+FORM: Preprint / arXiv article. Candidate 1 of 7, user-pinned over assigned
+index 6. Seed dcbb25f1.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+		-->
+		<Header />
+		<slot />
+		<Footer />
+	</body>
+</html>
