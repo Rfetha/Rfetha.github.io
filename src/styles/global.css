@@ -444,11 +444,17 @@ article.paper > p + p {
 	text-indent: 1.6em;
 }
 
-@media (min-width: 901px) {
-	article.paper > p {
-		text-align: justify;
-		hyphens: auto;
-	}
+/* Why NOT justified: justification is only legible when the renderer can
+   hyphenate, and browsers do not reliably ship Turkish hyphenation patterns —
+   measured here, `hyphens: auto` broke zero words across 28 lines. Justifying
+   anyway pushed the widest word space to 2.69× the narrowest and opened rivers
+   down the column; ragged right holds every space at a single width. Do not
+   re-add `text-align: justify` without first checking that hyphens actually
+   appear in Turkish prose.
+   `pretty` spends extra passes on the last few lines to avoid orphans, which is
+   what makes a ragged edge look deliberate rather than accidental. */
+article.paper > p {
+	text-wrap: pretty;
 }
 
 /* ── math ──────────────────────────────────────────────────────── */
