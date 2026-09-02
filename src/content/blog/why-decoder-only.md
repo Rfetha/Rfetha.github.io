@@ -74,7 +74,7 @@ Bir cümle veriyorsunuz; model, her kelime için o kelimenin *iki yönden de ba�
 
 ### Decoder-only (GPT-1, 2018)
 
-Yine tek yığın — ama bir kısıtla: **her token yalnızca kendinden öncekileri görebiliyor.** GPT-1'in kendi tarifiyle (Radford ve ark. 2018, §3): "12 katmanlı, maskeli self-attention başlıklı, yalnızca decoder'dan oluşan transformer."
+Yine tek yığın — ama bir kısıtla: **her token yalnızca kendinden öncekileri görebiliyor.** GPT-1'in kendi tarifiyle (Radford ve ark. 2018, §4.1): "12 katmanlı, maskeli self-attention başlıklı, yalnızca decoder'dan oluşan transformer."
 
 Bu kısıt keyfî değil; modelin işini tanımlıyor. Model, her pozisyonda tek bir soruyu cevaplıyor: *buraya kadarını gördüm, sıradaki token ne?* Eğitim de bundan ibaret — devasa bir metin yığınında, her pozisyon için sonraki token'ı tahmin et. Üretim, aynı işlemin dışarıda tekrarı: bir token üret, girdinin sonuna ekle, tekrar sor.
 
@@ -395,7 +395,7 @@ Artetxe ve ark., *On the Role of Bidirectionality in Language Model Pre-Training
 
 **Soldan-sağalık ne sağlar?** İki şey. Birincisi, eğitim ile üretim aynı işlemdir — model, dağıtımda yapacağı işin bire bir aynısıyla eğitilir, arada `[MASK]` gibi eğitime özgü yapay semboller yoktur. İkincisi, her token bir eğitim hedefidir: dizinin tamamı sinyal üretir. Bunun karşılığında her pozisyon, geleceği görmeden karar vermek zorundadır.
 
-Yani soru "hangisi doğru" değil; **"hangisi, hangi iş için"**. Ve bu, test edilmiş bir soru. Artetxe ve ark. (2022) tam olarak bunu yapmış — üstelik *çift yönlü bağlam* ile *çift yönlü attention*'ı birbirinden ayırıp her birini tek tek kontrol ederek, 6.7B parametreye kadar. Buldukları:
+Yani soru "hangisi doğru" değil; **"hangisi, hangi iş için"**. Ve bu, test edilmiş bir soru. Artetxe ve ark. (2022) tam olarak bunu yapmış — üstelik *çift yönlü bağlam* ile *çift yönlü attention*'ı birbirinden ayırıp her birini tek tek kontrol ederek, 6.7B parametreye kadar. Buldukları (a.g.e., özet):
 
 > "En iyi konfigürasyon büyük ölçüde uygulamaya bağlı (örneğin çift yönlü attention fine-tuning ve infilling için faydalı, ama sonraki-token tahmini ve zero-shot priming için zararlı)."
 
@@ -471,7 +471,7 @@ Ve bu mekanizma metne özgü değil. Google 2023'te zaman serisi tahmini için s
 
 <aside class="sidenote">
 
-Warner ve ark., *ModernBERT*, [arXiv:2412.13663](https://arxiv.org/abs/2412.13663) · BehnamGhader ve ark., *LLM2Vec*, [arXiv:2404.05961](https://arxiv.org/abs/2404.05961) · Zhang ve ark., *Qwen3 Embedding*, [arXiv:2506.05176](https://arxiv.org/abs/2506.05176) · Zhang ve ark., *Encoder-Decoder Gemma* (T5Gemma), [arXiv:2504.06225](https://arxiv.org/abs/2504.06225) ve devamı *T5Gemma 2*, [arXiv:2512.14856](https://arxiv.org/abs/2512.14856).
+Warner ve ark., *Smarter, Better, Faster, Longer* (ModernBERT), [arXiv:2412.13663](https://arxiv.org/abs/2412.13663) · BehnamGhader ve ark., *LLM2Vec*, [arXiv:2404.05961](https://arxiv.org/abs/2404.05961) · Zhang ve ark., *Qwen3 Embedding*, [arXiv:2506.05176](https://arxiv.org/abs/2506.05176) · T5Gemma'nın künyesi §7'de; devamı Zhang ve ark., *T5Gemma 2: Seeing, Reading, and Understanding Longer*, [arXiv:2512.14856](https://arxiv.org/abs/2512.14856).
 
 </aside>
 

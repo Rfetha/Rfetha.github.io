@@ -343,7 +343,7 @@ bunun hakkında.
 ### 2.4 Cross-attention
 
 Üçüncü çeşit, ikinci ekseni oynatıyor: sorgu bir yığından, anahtar ve değer
-**başka bir yığından** geliyor. 2017'nin tarifi (a.g.e., §3.2.3):
+**başka bir yığından** geliyor. 2017'nin tarifi (Vaswani ve ark. 2017, §3.2.3):
 
 > "'Encoder-decoder attention' katmanlarında sorgular bir önceki decoder
 > katmanından, bellek anahtarları ve değerleri ise encoder'ın çıktısından gelir.
@@ -470,8 +470,14 @@ sunucuda bunun ne anlama geldiği açık.
 
 ### 3.2 Asıl darboğaz hesap değil, bant genişliği
 
+<aside class="sidenote">
+
+Shazeer, *Fast Transformer Decoding: One Write-Head is All You Need*, [arXiv:1911.02150](https://arxiv.org/abs/1911.02150). Artımlı decode'un bellek/aritmetik oranı §2.4.1'de, eğitiminki §2.3.1'de, multi-query önerisi §3'te ve kendi oranı §3.1'de; deneyler §4'te (Tablo 1 kalite, Tablo 2 hız). Aynı yazarın bu yazıda geçen diğer iki makalesi ayrı kaynaklar: sparsely-gated MoE (Shazeer ve ark. 2017) ve GLU çeşitleri (Shazeer 2020); künyeleri bu yazının §6.2 ve §8 bölümlerinde.
+
+</aside>
+
 Buraya kadar cache'i bir kapasite problemi gibi anlattım. Asıl mesele daha
-ince, ve bu yazının döndüğü mil o. Shazeer 2019 §2.3'te artımlı üretimin
+ince, ve bu yazının döndüğü mil o. Shazeer (2019, §2.4.1) artımlı üretimin
 aritmetik ve bellek erişimi oranını çıkarıyor: bellek erişiminin işlem sayısına
 oranı $\Theta\!\left(\frac{n}{d}+\frac{1}{b}\right)$, ve
 
@@ -480,7 +486,7 @@ oranı $\Theta\!\left(\frac{n}{d}+\frac{1}{b}\right)$, ve
 > açıyor."
 
 Karşılaştırma için: aynı analiz **eğitim** için yapıldığında oran
-$O(1/k + 1/(bn))$ çıkıyor — yani çok küçük. Cümlenin tamamı şu: **artımlı
+$O(1/k + 1/(bn))$ çıkıyor (a.g.e., §2.3.1) — yani çok küçük. Cümlenin tamamı şu: **artımlı
 decode, eğitimden temelden daha kötü bir donanım rejimi.** Eğitimde çip hesap
 yapıyor; decode'da çip çoğunlukla bekliyor.
 
@@ -518,7 +524,7 @@ attention, multi-head ile birebir aynı; tek fark, farklı kafaların tek bir
 anahtar ve değer kümesini paylaşması."*
 
 Formülde $h_{	ext{kv}} = 1$ demek: cache $h$ kat küçülüyor. Yeni bellek/aritmetik
-oranı $\Theta\!\left(\frac{1}{d}+\frac{n}{dh}+\frac{1}{b}\right)$ — kendi
+oranı $\Theta\!\left(\frac{1}{d}+\frac{n}{dh}+\frac{1}{b}\right)$ (a.g.e., §3.1) — kendi
 ifadesiyle, *"can sıkıcı $\frac{n}{d}$ terimini $h$ kat küçülttük."*
 
 Ölçülen kazanç çeviri deneyinde şöyle (Tablo 2): temel modelde decoder adımı
@@ -571,7 +577,7 @@ yalnızca mütevazı yavaşlamalara yol açıyor, MHA'ya yaklaştıkça maliyet
 artıyor. Uygun bir orta yol olarak 8 grup seçtik."* Tek bir labın kendi eğrisi
 üzerinde seçtiği bir orta nokta; türetilmiş bir optimum değil.
 
-**Ve makalenin kendi sınırlar bölümü, bu yazının en dürüst alıntısı:**
+**Ve makalenin kendi sınırlar bölümü, bu yazının en dürüst alıntısı** (a.g.e., *Limitations*)**:**
 
 > "Sınırlı hesap nedeniyle, XXL GQA modelimizi sıfırdan eğitilmiş karşılaştırmalı
 > bir modelle de karşılaştırmıyoruz, dolayısıyla uptraining'in sıfırdan eğitime
@@ -593,9 +599,15 @@ Ainslie ve ark., *GQA: Training Generalized Multi-Query Transformer Models from 
 
 ### 4.3 MLA — anahtarı ve değeri hiç saklama
 
+<aside class="sidenote">
+
+DeepSeek-AI, *DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model*, [arXiv:2405.04434](https://arxiv.org/abs/2405.04434) — yazıda **2024a**. MLA'nın tanımı §2.1.2'de, RoPE uyuşmazlığı ve decoupled çözümü §2.1.3'te. DeepSeek-V3'ün teknik raporu ayrı bir kaynak (2024b, §6.2'deki künye).
+
+</aside>
+
 DeepSeek üçüncü bir yol seçiyor. MQA ve GQA anahtar/değer **kafalarını**
 azaltıyor; MLA anahtar ve değeri hiç saklamıyor, onların yerine düşük ranklı tek
-bir **latent vektör** saklıyor (DeepSeek-V2, §2.1.2): *"Çıkarım sırasında MLA
+bir **latent vektör** saklıyor (DeepSeek-AI 2024a, §2.1.2): *"Çıkarım sırasında MLA
 yalnızca $\mathbf{c}_t^{KV}$'yi cache'lemek zorunda, dolayısıyla KV-cache'i
 yalnızca $d_c l$ eleman."*
 
@@ -610,7 +622,7 @@ Kendi karşılaştırma tabloları, token başına eleman cinsinden:
 
 Kendi ayarlarıyla ($d_c = 4 d_h$, $d_h^R = d_h/2$) bunun anlamı şu:
 *"KV-cache'i yalnızca 2.25 gruplu bir GQA'ya eşit, ama performansı MHA'dan daha
-güçlü."* DeepSeek-V2'nin özeti rakamları veriyor: DeepSeek 67B'ye kıyasla
+güçlü."* Raporun özeti rakamları veriyor: DeepSeek 67B'ye kıyasla
 *"eğitim maliyetinin %42.5'ini tasarruf ediyor, KV-cache'i %93.3 azaltıyor ve
 maksimum üretim verimini 5.76 katına çıkarıyor."*
 
@@ -650,7 +662,7 @@ tek bir bileşeninden gelen fark.
 MLA'nın hikâyesinde, bu yazıdaki en güzel ayrıntı duruyor: yöntem, bağımsız bir
 gerekçeyle seçilmiş başka bir bileşenle **matematiksel olarak uyuşmuyor.**
 
-DeepSeek-V2, §2.1.3:
+DeepSeek-AI 2024a, §2.1.3:
 
 > "Ancak RoPE, düşük ranklı KV sıkıştırmasıyla uyumsuz. Somut olarak, RoPE hem
 > anahtarlar hem sorgular için konuma duyarlı. Anahtarlara RoPE uygularsak,
@@ -705,7 +717,7 @@ doğrusal bir fonksiyonu olarak yazılabiliyor."*
 Bu cümlenin altını çizin: istenen şey **bağıl** konum, elde edilen şey ise
 modelin bunu **öğrenebileceği** bir mutlak sinyal. Umut, garanti değil.
 
-Ve hemen ardından gelen cümle, bu bölümün en şaşırtıcı bilgisi:
+Ve hemen ardından gelen cümle, bu bölümün en şaşırtıcı bilgisi (a.g.e., §3.5):
 
 > "Öğrenilen konum gömmelerini kullanmayı da denedik ve iki sürümün neredeyse
 > **birebir aynı** sonuçları ürettiğini gördük (Tablo 3, satır (E)). Sinüzoidal
@@ -874,7 +886,14 @@ token görüyor, ikincisi iki, üçüncüsü üç — maskenin kendisi bir saya�
 
 Kazemnejad ve ark. (2023) bunu sistematik olarak ölçüyor: sıfırdan eğitilmiş
 decoder-only modellerde APE, T5-bağıl, ALiBi, RoPE ve hiçbir kodlama olmayan
-NoPE'yi uzunluk genellemesinde karşılaştırıyorlar. Sonuç:
+NoPE'yi uzunluk genellemesinde karşılaştırıyorlar. Özetlerinin sonucu:
+
+<aside class="sidenote">
+
+Kazemnejad ve ark., *The Impact of Positional Encoding on Length Generalization in Transformers*, [arXiv:2305.19466](https://arxiv.org/abs/2305.19466). Alıntı özetten; deney kurgusu §3'te, karşılaştırma §4'te.
+
+</aside>
+
 
 > "Bulgularımız, ALiBi, Rotary ve APE gibi en yaygın kullanılan konum kodlama
 > yöntemlerinin aşağı akış görevlerinde uzunluk genellemesi için pek uygun
@@ -972,7 +991,7 @@ Gerçek konfigürasyonlar şöyle:
 | gpt-oss-20b (2025) | 32 | **4** |
 
 DeepSeek-V3'ün sayısını doğru ifade etmek gerekiyor, çünkü genelde yanlış
-aktarılıyor. Rapor şöyle diyor (DeepSeek-AI 2024, §4.2): *"Her MoE katmanı 1 paylaşılan uzman ve
+aktarılıyor. Rapor şöyle diyor (DeepSeek-AI 2024b, §4.2): *"Her MoE katmanı 1 paylaşılan uzman ve
 256 yönlendirilen uzmandan oluşuyor... Yönlendirilen uzmanlar arasından her
 token için 8 uzman aktive ediliyor."* Paylaşılan uzman her zaman açık olduğu
 için toplam dokuz uzman çalışıyor (a.g.e., §5.2). Yani "256 uzman, 9 aktif"
@@ -982,7 +1001,7 @@ yani **%5.5**'i.
 
 <aside class="sidenote">
 
-Shazeer ve ark., *Outrageously Large Neural Networks*, [arXiv:1701.06538](https://arxiv.org/abs/1701.06538) · Fedus ve ark., *Switch Transformers*, [arXiv:2101.03961](https://arxiv.org/abs/2101.03961) · Dai ve ark., *DeepSeekMoE*, [arXiv:2401.06066](https://arxiv.org/abs/2401.06066) · DeepSeek-AI, *DeepSeek-V3 Technical Report*, [arXiv:2412.19437](https://arxiv.org/abs/2412.19437) · Qwen ekibi, *Qwen3 Technical Report*, [arXiv:2505.09388](https://arxiv.org/abs/2505.09388) · OpenAI, *gpt-oss-120b & gpt-oss-20b Model Card*, [arXiv:2508.10925](https://arxiv.org/abs/2508.10925).
+Shazeer ve ark., *Outrageously Large Neural Networks*, [arXiv:1701.06538](https://arxiv.org/abs/1701.06538) · Fedus ve ark., *Switch Transformers*, [arXiv:2101.03961](https://arxiv.org/abs/2101.03961) · Dai ve ark., *DeepSeekMoE*, [arXiv:2401.06066](https://arxiv.org/abs/2401.06066) · DeepSeek-AI, *DeepSeek-V3 Technical Report*, [arXiv:2412.19437](https://arxiv.org/abs/2412.19437) — yazıda **2024b** · Qwen ekibi, *Qwen3 Technical Report*, [arXiv:2505.09388](https://arxiv.org/abs/2505.09388) · OpenAI, *gpt-oss-120b & gpt-oss-20b Model Card*, [arXiv:2508.10925](https://arxiv.org/abs/2508.10925).
 
 </aside>
 
@@ -1099,7 +1118,7 @@ var.
 
 </figure>
 
-Xiong ve ark. (2020) bunu teorik olarak gösteriyor:
+Xiong ve ark. (2020) bunu teorik olarak gösteriyor (a.g.e., özet):
 
 > "Ortalama alan teorisiyle kanıtlıyoruz ki, başlangıçta, katman
 > normalizasyonunu artık blokların arasına yerleştiren orijinal tasarımlı
@@ -1129,7 +1148,7 @@ Xiong ve ark., *On Layer Normalization in the Transformer Architecture*, [arXiv:
 
 İkinci değişiklik normalizasyonun kendi içinde. LayerNorm iki şey yapıyor:
 ortalamayı çıkarıyor (yeniden merkezleme) ve standart sapmaya bölüyor (yeniden
-ölçekleme). Zhang ve Sennrich (2019) birincisinin gereksiz olduğunu öne sürüyor:
+ölçekleme). Zhang ve Sennrich (2019) birincisinin gereksiz olduğunu öne sürüyor (a.g.e., özet):
 
 > "LayerNorm'daki yeniden merkezleme değişmezliğinin vazgeçilebilir olduğunu
 > öne sürüyoruz ve karesel ortalama karekök katman normalizasyonunu, yani
@@ -1282,7 +1301,7 @@ log-perplexity):
 | GEGLU | **1.942** | **1.633** |
 | SwiGLU | 1.944 | 1.636 |
 
-Kazanç gerçek ama mütevazı. Asıl mesele makalenin **sonuç cümlesi**:
+Kazanç gerçek ama mütevazı. Asıl mesele makalenin **sonuç cümlesi** (a.g.e., §4):
 
 > "Bu mimarilerin neden işe yaradığına dair hiçbir açıklama sunmuyoruz;
 > başarılarını, her şey gibi, ilahi lütfa bağlıyoruz."
