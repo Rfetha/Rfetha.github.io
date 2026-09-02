@@ -6,7 +6,7 @@ export const SITE_DESCRIPTION =
 	'Working notes on machine learning systems and the theory underneath them.';
 
 /** Shown under the name on the home page and in the About header. */
-export const AFFILIATION = 'AI engineer · beginning graduate research';
+export const AFFILIATION = 'AI engineer · beginning graduate researcher';
 
 export const GITHUB_HANDLE = 'Rfetha';
 export const GITHUB_URL = `https://github.com/${GITHUB_HANDLE}`;
