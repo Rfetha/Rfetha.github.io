@@ -40,20 +40,20 @@
   <g text-anchor="end">
     <text class="ser" x="172" y="126" font-size="11" fill="#1a1a1a">Decode belleği ve</text>
     <text class="ser" x="172" y="140" font-size="11" fill="#1a1a1a">bant genişliği</text>
-    <text class="mon" x="172" y="155" font-size="9.5" fill="#6e6e6e">§6, §7</text>
+    <text class="mon" x="172" y="155" font-size="9.5" fill="#6e6e6e">§3, §4</text>
 
     <text class="ser" x="172" y="202" font-size="11" fill="#1a1a1a">Parametre başına</text>
     <text class="ser" x="172" y="216" font-size="11" fill="#1a1a1a">hesap</text>
-    <text class="mon" x="172" y="231" font-size="9.5" fill="#6e6e6e">§9</text>
+    <text class="mon" x="172" y="231" font-size="9.5" fill="#6e6e6e">§6</text>
 
     <text class="ser" x="172" y="278" font-size="11" fill="#1a1a1a">Eğitim kararlılığı</text>
-    <text class="mon" x="172" y="293" font-size="9.5" fill="#6e6e6e">§8, §10</text>
+    <text class="mon" x="172" y="293" font-size="9.5" fill="#6e6e6e">§5, §7</text>
 
     <text class="ser" x="172" y="346" font-size="11" fill="#1a1a1a">Bağlam uzunluğu</text>
-    <text class="mon" x="172" y="361" font-size="9.5" fill="#6e6e6e">§8</text>
+    <text class="mon" x="172" y="361" font-size="9.5" fill="#6e6e6e">§5</text>
 
     <text class="ser" x="172" y="408" font-size="11" font-style="italic" fill="#6e6e6e">Adı konmamış</text>
-    <text class="mon" x="172" y="423" font-size="9.5" fill="#6e6e6e">§11</text>
+    <text class="mon" x="172" y="423" font-size="9.5" fill="#6e6e6e">§8</text>
   </g>
 
   <!-- ================= şerit çizgileri ================= -->

@@ -17,10 +17,10 @@ konmuş bir baskının cevabı olarak girmiş.
 
 DÖRT BASKI — ayrı tutulacak (E§0 V7). MoE'yi KV-cache hikâyesine katmak
 bu yazıda yapılabilecek en kötü hata.
-  1. Decode belleği / bant genişliği  → §6, §7
-  2. Parametre başına hesap           → §9
-  3. Ölçekte eğitim kararlılığı       → §8.4, §10
-  4. Bağlam uzunluğu                  → §8
+  1. Decode belleği / bant genişliği  → §3, §4
+  2. Parametre başına hesap           → §6
+  3. Ölçekte eğitim kararlılığı       → §5.4, §7
+  4. Bağlam uzunluğu                  → §5
 
 SINIR: /blog/why-decoder-only/ maskenin SEÇİMİNİ anlatıyor. Bu yazı o seçimin
 sonrasını anlatıyor. Maske matematiği, prefix_len, -∞ argümanı, üç aile
@@ -100,19 +100,19 @@ bu baskılar dört tane.
 **Decode belleği ve bant genişliği.** Model bir token üretirken, o ana kadarki
 her token'ın anahtar ve değerini bellekten okumak zorunda. Üretimin asıl
 maliyeti bu okuma — hesap değil. MQA, GQA, MLA ve kayan pencere attention'ın
-hepsi bu okumayı küçültme girişimi (§6, §7).
+hepsi bu okumayı küçültme girişimi (§3, §4).
 
 **Parametre başına hesap.** Bir modeli büyütmenin maliyeti toplam parametre
 sayısıyla değil, token başına *çalışan* parametre sayısıyla ölçülüyor.
-Mixture-of-Experts bu ikisini birbirinden ayırıyor (§9).
+Mixture-of-Experts bu ikisini birbirinden ayırıyor (§6).
 
 **Ölçekte eğitim kararlılığı.** Belli bir boyutun üstünde eğitim kaybı görünür
 bir sebep olmadan ıraksıyor. Pre-LN, RMSNorm, QK-Norm ve attention sink'lerinin
-hepsi bu ıraksamaya karşı alınmış önlemler (§8, §10).
+hepsi bu ıraksamaya karşı alınmış önlemler (§5, §7).
 
 **Bağlam uzunluğu.** 512 token için tasarlanmış bir konum kodlaması 128.000
 token'da çalışmıyor. RoPE'un taban frekansının yeniden ölçeklenmesi ve NoPE
-tartışması buradan çıkıyor (§8).
+tartışması buradan çıkıyor (§5).
 
 Bu dördü ayrı tutulmalı, çünkü karıştırmak hem kolay hem yanlış: MoE'nin
 KV-cache ile hiçbir ilgisi yok, QK-Norm'un bağlam uzunluğuyla hiçbir ilgisi yok.
@@ -133,22 +133,48 @@ geldiğinde geri çağrılmış hâlleri.
 
 Envantere değişmeyen parçadan başlayalım.
 
-## 2. Self-attention
+## 2. Attention mekanizması
+
+<!--
+BÖLÜM ŞEMSİYESİ. Aşağıdaki giriş yazıldı; 2.1–2.4'ün gövdeleri sırada.
+Bu bölüm 2017'nin tasarım uzayı: KİM KİME BAKIYOR. K/V'nin nasıl
+saklandığı (MQA/GQA/MLA) ayrı bir eksen ve §3–§4'e ait.
+-->
+
+"Attention" tek bir işlemin adı. Bu yazıda sayacağım dört çeşidi ayrı
+mekanizmalar değil — aynı işlemin farklı argümanlarla çağrılmış hâlleri. Önce
+işlemin kendisini kuralım, sonra çeşitleri tek tek gezelim; aralarındaki fark
+yalnızca iki şeyde toplanıyor: **sorgunun bakabildiği pozisyonlar**, ve
+**anahtar ile değerin nereden geldiği**.
+
+Dördü şunlar: her token'ın aynı dizideki herkese baktığı **self-attention**
+(§2.1); aynı işlemin paralel ve dar kopyalarını koşturan **multi-head
+attention** (§2.2); bakışı geçmişle sınırlayan **causal attention** (§2.3); ve
+anahtarla değeri başka bir yığından alan **cross-attention** (§2.4).
+
+Burada olmayan bir şeyi de baştan söyleyeyim. MQA, GQA ve MLA da "attention
+çeşidi" diye anılır, ama farklı bir eksende dururlar: kimin kime bakabildiğini
+değiştirmezler, anahtar ve değerin **nasıl saklandığını** değiştirirler. O eksen
+2017'nin tasarım uzayında yok — sonradan, üretim maliyeti bir problem hâline
+gelince açıldı. Bu yüzden onlar §4'te, ve aralarında §3 duruyor: problemi
+tanımlayan bölüm.
+
+### 2.1 Self-attention
 
 <!--
 NE: değişmeyen parça. Formül, √d_k'nin neden orada olduğu, karesel maliyet.
 ŞERH (E§0 V8): "2017'den beri değişmedi" şerh istiyor — gpt-oss softmax
-paydasına öğrenilen bias koyuyor. Tek cümle haber ver, hesabı §10.4'te.
+paydasına öğrenilen bias koyuyor. Tek cümle haber ver, hesabı §7.4'te.
 
 KANIT: M§1.1 tanım · M§1.2 varyans argümanı · M§7 Vaswani Tablo 1.
 ~550 kelime · figür yok (formül + karmaşıklık tablosu) · Kod 1: √d_k varyansı.
 -->
 
-## 3. Multi-head attention
+### 2.2 Multi-head attention
 
 <!--
 NE: kafalar d_model'i BÖLÜYOR, çoğaltmıyor. Ve 2017'nin kendi ablasyonu:
-d_k'yi küçültmek kaliteyi düşürüyor → §7'yi kuruyor (MQA/GQA d_k'yi değil
+d_k'yi küçültmek kaliteyi düşürüyor → §4'ü kuruyor (MQA/GQA d_k'yi değil
 KV kafa sayısını kısıyor, farklı düğme).
 
 ŞERH (E§0 V1): OLMo 2 için YALNIZCA konfigürasyon gerçeği. "Ablasyon MHA'yı
@@ -158,12 +184,12 @@ KANIT: Vaswani §3.2.2 (h=8, d_k=d_v=64) · §6.2 satır (B) · M§1.3 · E§3.
 ~500 kelime · Figür 2: 1 geniş kafa vs 8 dar kafa, aynı parametre · kod yok.
 -->
 
-## 4. Causal attention ve prefix-invariance
+### 2.3 Causal attention ve prefix-invariance
 
 <!--
 NE: maske tanımı İKİ CÜMLE + link. Asıl içerik prefix-invariance: token eklemek
 önceki K/V'yi değiştirmiyor, bidirectional'da değiştiriyor. Cache'i mümkün kılan
-şey bu; §6'dan §7'ye kadar her şey buradan doğuyor.
+şey bu; §3'ten §4'e kadar her şey buradan doğuyor.
 
 SINIR: maske matematiği, prefix_len, -∞ argümanı BURAYA GİRMEYECEK.
 
@@ -174,7 +200,7 @@ Kod 2 (_src/prefix_inv.py, çıktı hazır):
   çift yönlü  1.38e+00
 -->
 
-## 5. Cross-attention
+### 2.4 Cross-attention
 
 <!--
 NE: tanım yayındaki yazıda. Payı MALİYET: encoder bir kez koşuyor, cross-attn
@@ -188,11 +214,11 @@ KANIT: Vaswani §3.2.3 birebir · M§6.4-1.
 ~350 kelime — en kısa bölüm · figür yok · kod yok.
 -->
 
-## 6. KV-cache
+## 3. KV-cache
 
 <!--
-NE: §4'ün lemması cache'i mümkün kıldı; burada ne kadar tuttuğu ve neden bedava
-olmadığı. Bölümün sonu §7'nin kapısı.
+NE: §2.3'ün lemması cache'i mümkün kıldı; burada ne kadar tuttuğu ve neden bedava
+olmadığı. Bölümün sonu §4'ün kapısı.
 
 ANAHTAR: Shazeer'in oranı — incremental decode eğitimden TEMELDEN daha kötü bir
 donanım rejimi. Yazının döndüğü mil.
@@ -209,18 +235,18 @@ birebir · Pope §2 birebir.
 Kod 3: formül vLLM'in sayısını üretiyor (okuyucu alıntıyla karşılaştırabilsin).
 -->
 
-## 7. MQA, GQA, MLA
+## 4. MQA, GQA, MLA
 
 <!--
-Omurga bölümü. §6'nın problemine üç cevap, kronolojik. ~1500 kelime.
+Omurga bölümü. §3'ün problemine üç cevap, kronolojik. ~1500 kelime.
 
-7.1 MQA (2019) — kafalar tek K/V kümesi paylaşıyor. ASIL ARGÜMAN Shazeer'in
+4.1 MQA (2019) — kafalar tek K/V kümesi paylaşıyor. ASIL ARGÜMAN Shazeer'in
 KARŞILAŞTIRMALI tablosu: MQA kaliteden bir şey alıyor ama aynı tasarrufu veren
 alternatifler (kafa sayısı ↓, d_k ↓) daha çok alıyor. Kazanma sebebi bu.
   KANIT: §3 tanım birebir · §3.1 oran · Tablo 1 (ln PPL 1.424→1.439, BLEU
   26.7→26.5, beam-4'te MQA 28.5 ile EN YÜKSEK) · Tablo 2 (decoder 46→3.8 µs).
 
-7.2 GQA (2023) — tek parametreli ara değer, G=1 MQA / G=h MHA. Uptraining
+4.2 GQA (2023) — tek parametreli ara değer, G=1 MQA / G=h MHA. Uptraining
 (mean-pooling, α=0.05). "8 grup" bir labın eğrisindeki favorable middle ground.
   ZORUNLU ŞERH (E§0 V2): Limitations BİREBİR alıntılanacak — GQA yalnızca
   encoder-decoder'da ölçüldü, sıfırdan eğitimle karşılaştırılmadı, decoder-only
@@ -228,10 +254,10 @@ alternatifler (kafa sayısı ↓, d_k ↓) daha çok alıyor. Kazanma sebebi bu.
   prefix_len paralelliği BİR CÜMLE, uzatma — o numara öbür yazının malı.
   KANIT: Ainslie §2.2 · §2.1 · §3.3 · Llama 2 §2.1.
 
-7.3 MLA (2024) — K/V yerine düşük-ranklı latent. Bölümün en iyi paragrafı:
+4.3 MLA (2024) — K/V yerine düşük-ranklı latent. Bölümün en iyi paragrafı:
 RoPE ile MATEMATİKSEL UYUMSUZLUK (RoPE matrisi W^Q ile W^UK arasına giriyor,
 matris çarpımı değişmeli değil → absorpsiyon bozuluyor) ve decoupled RoPE.
-V3'teki d_h^R=64 tam olarak RoPE'a ayrılmış oyuk. §7'yi §8'e bağlıyor.
+V3'teki d_h^R=64 tam olarak RoPE'a ayrılmış oyuk. §4'ü §5'e bağlıyor.
   ŞERH (E§0 V6): "MLA MHA'dan iyi" DeepSeek'in kendi iddiası, Ek D.1, tek lab.
   KANIT: DS-V2 §2.1.2 · Tablo 1 ("GQA with only 2.25 groups") · abstract
   (%93.3, 5.76×, %42.5) · §2.1.3 BİREBİR · DS-V3 §4.2 konfigürasyon.
@@ -241,34 +267,34 @@ Figür 6: 8.6 GiB'e karşı 488 GiB, tek bar çifti, log ölçek YOK.
 Kod 4: DeepSeek-V3 aritmetiği — 35.136 vs 1.998.848 eleman/token = 56.9×.
 -->
 
-## 8. Positional encoding
+## 5. Positional encoding
 
 <!--
 NE: konum bilgisi modele nasıl giriyor — 2017'de toplanarak, bugün döndürerek.
 Arkın gerçek şekli "yanlıştı, düzeltildi" DEĞİL. ~1400 kelime.
 
-8.1 Sinüzoidal — Vaswani §3.5 formül BİREBİR. Embedding'e EKLENİR, en altta,
+5.1 Sinüzoidal — Vaswani §3.5 formül BİREBİR. Embedding'e EKLENİR, en altta,
 bir kez. Ve kendi ablasyonu: öğrenilen PE ile "nearly identical results";
 sinüzoidal seçiminin gerekçesi YALNIZCA ekstrapolasyon.
   ARK (E§0 V5): 2017'de ölçülemeyen eksen bugün her şeyin ayarlandığı eksen.
   Ama "yanlış seçimdi" DENMEYECEK.
 
-8.2 RoPE — beş adım (E§8.2, hepsi birebir):
+5.2 RoPE — beş adım (E§8.2, hepsi birebir):
   1 gereksinim (Denk. 11) → 2 2B rotasyon (Denk. 12-13) → 3 blok-köşegen
   R^d_{Θ,m}, θ_i = 10000^{-2(i-1)/d} (Denk. 14-15) → 4 özdeşlik (Denk. 16) →
   5 ortogonallik, norm korunur.
   VURGU: 10000 sabiti VASWANI'NİN sabiti. RoPE sinüsleri değiştirmedi, hesaba
-  giriş biçimini değiştirdi. §8.3'ün düğmesi bu yüzden var.
+  giriş biçimini değiştirdi. §5.3'ün düğmesi bu yüzden var.
 
-8.3 Base frekansı ayar düğmesine dönüştü — OLMo 2 (1e4→5e5) · Qwen3 (10k→1M,
+5.3 Base frekansı ayar düğmesine dönüştü — OLMo 2 (1e4→5e5) · Qwen3 (10k→1M,
 ABF+YaRN+DCA) · Gemma 3 (global 1M / yerel 10k). Gözlem: tek model içinde iki
 farklı θ; PE modelin global bir özelliği olmaktan çıktı.
 
-8.4 QK-Norm — Henry 2020 köken · ViT-22B §2 BİREBİR (8B'de ıraksama, logitler
+5.4 QK-Norm — Henry 2020 köken · ViT-22B §2 BİREBİR (8B'de ıraksama, logitler
 50.000'i aşıyor) · Qwen3/OLMo 2/Gemma 3 benimseme.
   BASKI UYARISI: KARARLILIK sütunu, bağlam uzunluğu sütunu DEĞİL.
 
-8.5 NoPE — Kazemnejad 2023 birebir: ALiBi/Rotary/APE uzunluk genellemesi için
+5.5 NoPE — Kazemnejad 2023 birebir: ALiBi/Rotary/APE uzunluk genellemesi için
 uygun değil, NoPE hepsini geçiyor. KAPSAM SINIRI: sıfırdan eğitilmiş göreve özgü
 modeller, üretim modelleri RoPE'u bıraksın demek değil. Kanıtladığı: causal maske
 zaten konum bilgisi taşıyor. Bölümü bitirecek not bu.
@@ -278,7 +304,7 @@ RoPE'da küre üzerinde kayıyor, boy sabit. Denklemsiz.
 Kod 5: (R_m q)·(R_n k) = q·R_{n-m} k özdeşliği + ‖R_m q‖ = ‖q‖.
 -->
 
-## 9. Mixture-of-Experts
+## 6. Mixture-of-Experts
 
 <!--
 NE: FARKLI BİR BASKI — parametre başına hesap. KV-cache hikâyesine
@@ -307,13 +333,13 @@ shared farklı biçimle. Yakınsama olmadığını figür göstermeli.
 Kod 6: C(16,2)=120 vs C(64,8)=4.426.165.368 — makalenin rakamını birebir üretiyor.
 -->
 
-## 10. Normalizasyon
+## 7. Normalizasyon
 
 <!--
 NE: önce NE OLDUĞU, sonra hangisinin kazandığı. Okuyucu iki bloğu gözünde
 canlandırabilmeli. ~900 kelime.
 
-10.1 Post-LN / Pre-LN — tek fark: normalizasyon ANA YOLDA mı, DALDAKİ KOPYADA mı.
+7.1 Post-LN / Pre-LN — tek fark: normalizasyon ANA YOLDA mı, DALDAKİ KOPYADA mı.
   Post-LN (2017): x_{l+1} = LayerNorm(x_l + Sublayer(x_l))
   Pre-LN (bugün): x_{l+1} = x_l + Sublayer(LayerNorm(x_l))
   İkincisinde ilk katmandan sonuncuya hiçbir şeyin yeniden ölçeklemediği temiz
@@ -323,16 +349,16 @@ canlandırabilmeli. ~900 kelime.
   ÇERÇEVE: Pre-LN KALİTEYLE kazanmadı. Boyutla ayarlama maliyeti büyüyen bir
   hiperparametreyi (warm-up) ortadan kaldırdığı için kazandı.
 
-10.2 RMSNorm — Zhang & Sennrich abstract birebir (re-centering gereksiz,
+7.2 RMSNorm — Zhang & Sennrich abstract birebir (re-centering gereksiz,
 %7-64 hız). Qwen3/Gemma 3/OLMo 2/gpt-oss.
 
-10.3 2024-25 varyantları — OLMo 2 reordered norm birebir · Gemma 3 "post-norm
+7.3 2024-25 varyantları — OLMo 2 reordered norm birebir · Gemma 3 "post-norm
 and pre-norm with RMSNorm" (aynı blokta ikisi de).
   ŞERH (E§10.3): OLMo 2'nin ikinci denklemi basılı hâliyle MLP(x) diyor, blok
   yapısı MLP(h) gerektiriyor — dizgi hatası. Düzeltilmiş hâli ALINTI diye
   sunulmayacak.
 
-10.4 Attention sinks — V8'in kapandığı yer, YAZININ KAPANIŞ HAMLESİ.
+7.4 Attention sinks — V8'in kapandığı yer, YAZININ KAPANIŞ HAMLESİ.
   StreamingLLM §3.1 birebir: sink'ler softmax'ın 1'e toplanma zorunluluğu
   yüzünden var. 4 token yetiyor, 22.2× hızlanma.
   gpt-oss §2 birebir: softmax PAYDASINDA öğrenilen bias, "pay no attention to
@@ -346,7 +372,7 @@ yolun üstünde norm kutusu, Pre-LN'de yol temiz + tepede final LayerNorm.
 Kod yok.
 -->
 
-## 11. FFN ve aktivasyon
+## 8. FFN ve aktivasyon
 
 <!--
 NE: bloğun en az konuşulan ama parametrelerin çoğunu tutan yarısı. Ve yazının
@@ -367,18 +393,18 @@ söyleyecek: modern bloktaki her şey açıklanmış değil, alan da biliyor.
 Figür yok, kod yok. Tablo yeterli.
 -->
 
-## 12. Encoder bloğu
+## 9. Encoder bloğu
 
 <!--
 NE: 2017 temeli, bir kez, Post-LN etiketiyle. Kısa. ~350 kelime.
 KANIT: Vaswani §3.1 birebir (N=6, iki alt katman, residual + LayerNorm).
-İŞ BÖLÜMÜ (E§12.1): bu bölüm Post-LN'i GÖSTERİR, §10 AÇIKLAR. Mekanizma burada
+İŞ BÖLÜMÜ (E§12.1): bu bölüm Post-LN'i GÖSTERİR, §7 AÇIKLAR. Mekanizma burada
 tekrarlanmayacak; ileri referans bir yan cümle.
 Figür 10: encoder bloğu 2017, Post-LN açıkça etiketli. Altyazı: bugün shipped
-hiçbir modelde bu yerleşim yok, sebebi §10'da.
+hiçbir modelde bu yerleşim yok, sebebi §7'de.
 -->
 
-## 13. Decoder bloğu
+## 10. Decoder bloğu
 
 <!--
 NE: her şey monte. Sonra beş model yan yana, ve asıl argüman: BİLEŞEN
