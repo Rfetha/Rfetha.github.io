@@ -61,6 +61,16 @@ const sections = headings.filter((h) => h.depth === 2);
 			</header>
 			<slot />
 		</article>
+
+		{/* Why: figures are dense enough that the 952px column is not always
+		    enough to read a label. Native <dialog> gives Esc, the focus trap and
+		    the backdrop for free; without JS it simply never opens. */}
+		<dialog class="lightbox" aria-label="Figür — tam ekran">
+			<button class="lb-close" type="button" aria-label="Kapat">&#215;</button>
+			{/* Why: the image element is built on first open rather than shipped
+			    with an empty source, so it can never render as a broken box. */}
+			<div class="lb-stage"></div>
+		</dialog>
 	</main>
 </Layout>
 
@@ -85,6 +95,56 @@ const sections = headings.filter((h) => h.depth === 2);
 
 		addEventListener('scroll', sync, { passive: true });
 		sync();
+	}
+</script>
+
+<script>
+	// Figures open full screen on click, then toggle between fit and zoomed.
+	// Additive: without JS the figures stay exactly as they are in the column.
+	const box = document.querySelector<HTMLDialogElement>('dialog.lightbox');
+	const stage = box?.querySelector<HTMLElement>('.lb-stage');
+
+	if (box && stage) {
+		let shown: HTMLImageElement | null = null;
+
+		const open = (from: HTMLImageElement) => {
+			if (!shown) {
+				shown = document.createElement('img');
+				stage.append(shown);
+			}
+			shown.src = from.currentSrc || from.src;
+			shown.alt = from.alt;
+			box.classList.remove('zoomed');
+			stage.scrollTo(0, 0);
+			box.showModal();
+		};
+
+		for (const img of document.querySelectorAll<HTMLImageElement>('article.paper figure img')) {
+			img.addEventListener('click', () => open(img));
+		}
+
+		// Why: anchor the zoom on the point clicked, otherwise zooming always
+		// lands at the top-left corner and reads as a bug.
+		stage.addEventListener('click', (e) => {
+			if (e.target !== shown || !shown) return box.close();
+
+			const r = shown.getBoundingClientRect();
+			const fx = (e.clientX - r.left) / r.width;
+			const fy = (e.clientY - r.top) / r.height;
+
+			box.classList.toggle('zoomed');
+			if (!box.classList.contains('zoomed')) return;
+
+			stage.scrollTo({
+				left: fx * stage.scrollWidth - stage.clientWidth / 2,
+				top: fy * stage.scrollHeight - stage.clientHeight / 2,
+			});
+		});
+
+		box.querySelector('.lb-close')?.addEventListener('click', () => box.close());
+		box.addEventListener('click', (e) => {
+			if (e.target === box) box.close();
+		});
 	}
 </script>
 
@@ -119,5 +179,63 @@ const sections = headings.filter((h) => h.depth === 2);
 		font-family: var(--caps);
 		font-weight: 400;
 		letter-spacing: 0.05em;
+	}
+
+	/* ── figure, full screen ─────────────────────────────────────── */
+
+	.lightbox {
+		width: 100vw;
+		max-width: 100vw;
+		height: 100dvh;
+		max-height: 100dvh;
+		padding: 0;
+		border: 0;
+		background: var(--paper);
+	}
+	.lightbox::backdrop {
+		background: rgb(26 26 26 / 0.9);
+	}
+
+	.lb-stage {
+		display: flex;
+		width: 100%;
+		height: 100%;
+		padding: var(--gutter);
+		overflow: auto;
+	}
+	/* Why: margin:auto centres a flex item without clipping it once it
+	   overflows, which `place-items: center` does. */
+	.lb-stage :global(img) {
+		margin: auto;
+		max-width: 100%;
+		max-height: 100%;
+		cursor: zoom-in;
+	}
+	/* Why: flex-shrink would pull the enlarged image straight back to the
+	   width of the stage, so the zoom has to opt out of flexing. */
+	.lightbox.zoomed .lb-stage :global(img) {
+		flex: none;
+		max-width: none;
+		max-height: none;
+		width: 240%;
+		cursor: zoom-out;
+	}
+
+	.lb-close {
+		position: absolute;
+		top: 0.6rem;
+		right: 0.9rem;
+		z-index: 1;
+		padding: 0.1em 0.35em;
+		border: 0;
+		background: none;
+		color: var(--faint);
+		font-family: var(--caps);
+		font-size: 1.55em;
+		line-height: 1.24;
+		cursor: pointer;
+	}
+	.lb-close:hover {
+		color: var(--sig);
 	}
 </style>

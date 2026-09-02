@@ -364,6 +364,12 @@ figure {
 	margin-bottom: 1.6rem;
 }
 
+/* Why: the affordance for the full-screen viewer in BlogPost.astro. Only
+   images get it — figures holding an equation have nothing to enlarge. */
+figure img {
+	cursor: zoom-in;
+}
+
 figcaption {
 	margin-top: 0.7rem;
 	font-size: 0.79em;
