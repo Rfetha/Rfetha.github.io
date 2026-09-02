@@ -50,7 +50,7 @@ Cevaba gitmeden önce daha temel bir soruyu halletmek gerekiyor: decoder-only ta
 
 <figure>
 
-<img src="/figures/why-decoder-only/fig-0-transformer-2017.svg" alt="2017 Transformer'ının tam mimarisi: encoder yığınında self-attention ve feed-forward alt katmanları; decoder yığınında masked self-attention, encoder çıktısını okuyan cross-attention ve feed-forward; en üstte linear ve softmax.">
+<img loading="lazy" decoding="async" src="/figures/why-decoder-only/fig-0-transformer-2017.svg" alt="2017 Transformer'ının tam mimarisi: encoder yığınında self-attention ve feed-forward alt katmanları; decoder yığınında masked self-attention, encoder çıktısını okuyan cross-attention ve feed-forward; en üstte linear ve softmax.">
 
 <figcaption><b>Figure 0.</b> Orijinal Transformer (Vaswani ve ark., 2017). İki yığın, her alt katmanın ardından bir artık bağlantı ve normalizasyon. Decoder'ın ortasındaki <b>cross-attention</b> alt katmanı, encoder'ın çıktısını anahtar ve değer olarak okur — yazının geri kalanında en çok bu kutuyu konuşacağız.</figcaption>
 
@@ -66,7 +66,7 @@ Bir cümle veriyorsunuz; model, her kelime için o kelimenin *iki yönden de ba�
 
 <figure>
 
-<img src="/figures/why-decoder-only/fig-1a-encoder-only.svg" alt="Encoder-only mimarisi: girdi token'ları fully-visible bir self-attention yığınından geçip her pozisyon için bir temsil vektörü üretiyor, üstüne sınıflandırma başlığı ekleniyor.">
+<img loading="lazy" decoding="async" src="/figures/why-decoder-only/fig-1a-encoder-only.svg" alt="Encoder-only mimarisi: girdi token'ları fully-visible bir self-attention yığınından geçip her pozisyon için bir temsil vektörü üretiyor, üstüne sınıflandırma başlığı ekleniyor.">
 
 <figcaption><b>Figure 1a.</b> Encoder-only. Tek yığın, fully-visible maske: her token her token'ı görüyor. Çıktısı token değil, temsil.</figcaption>
 
@@ -82,7 +82,7 @@ Bu kısıt keyfî değil; modelin işini tanımlıyor. Model, her pozisyonda tek
 
 <figure>
 
-<img src="/figures/why-decoder-only/fig-1b-decoder-only.svg" alt="Decoder-only mimarisi: girdi token'ları causal bir self-attention yığınından geçip sonraki token dağılımını üretiyor; örneklenen token girdinin sonuna eklenip döngü tekrarlanıyor.">
+<img loading="lazy" decoding="async" src="/figures/why-decoder-only/fig-1b-decoder-only.svg" alt="Decoder-only mimarisi: girdi token'ları causal bir self-attention yığınından geçip sonraki token dağılımını üretiyor; örneklenen token girdinin sonuna eklenip döngü tekrarlanıyor.">
 
 <figcaption><b>Figure 1b.</b> Decoder-only. Tek yığın, causal maske. Eğitimdeki işlem ile üretimdeki işlem aynı: sonraki token'ı tahmin et, ekle, tekrar sor.</figcaption>
 
@@ -92,7 +92,7 @@ Bu kısıt keyfî değil; modelin işini tanımlıyor. Model, her pozisyonda tek
 
 <figure>
 
-<img src="/figures/why-decoder-only/fig-1e-decoder-block.svg" alt="Decoder-only bloğunun tam içi: token embedding artı positional encoding, ardından N kez masked self-attention, add and norm, feed-forward, add and norm; en üstte linear ve softmax. 2017 decoder'ındaki cross-attention alt katmanı yok.">
+<img loading="lazy" decoding="async" src="/figures/why-decoder-only/fig-1e-decoder-block.svg" alt="Decoder-only bloğunun tam içi: token embedding artı positional encoding, ardından N kez masked self-attention, add and norm, feed-forward, add and norm; en üstte linear ve softmax. 2017 decoder'ındaki cross-attention alt katmanı yok.">
 
 <figcaption><b>Figure 1e.</b> Decoder-only bloğu, tam hâliyle. Figure 0'ın decoder'ıyla aynı — bir alt katman eksik: <b>cross-attention</b> çıkarılmış, çünkü bakacak bir encoder yok.</figcaption>
 
@@ -106,7 +106,7 @@ Bu kısıt keyfî değil; modelin işini tanımlıyor. Model, her pozisyonda tek
 
 <figure>
 
-<img src="/figures/why-decoder-only/fig-1c-encoder-decoder.svg" alt="Encoder-decoder mimarisi: fully-visible encoder girdiyi okuyor, causal decoder çıktıyı üretiyor, decoder cross-attention ile encoder temsillerine bakıyor.">
+<img loading="lazy" decoding="async" src="/figures/why-decoder-only/fig-1c-encoder-decoder.svg" alt="Encoder-decoder mimarisi: fully-visible encoder girdiyi okuyor, causal decoder çıktıyı üretiyor, decoder cross-attention ile encoder temsillerine bakıyor.">
 
 <figcaption><b>Figure 1c.</b> Encoder-decoder. İki yığın ve bir köprü: cross-attention'da sorgu decoder'dan, anahtar ve değer encoder'dan geliyor. "Oku" ve "yaz" ayrı modüller.</figcaption>
 
@@ -118,7 +118,7 @@ Tek yığın, karma maske: dizinin başındaki "prefix" kısmında herkes herkes
 
 <figure>
 
-<img src="/figures/why-decoder-only/fig-1d-prefix-lm.svg" alt="Prefix-LM mimarisi: tek yığın, karma maske — prefix token'ları üzerinde fully-visible, devamında causal.">
+<img loading="lazy" decoding="async" src="/figures/why-decoder-only/fig-1d-prefix-lm.svg" alt="Prefix-LM mimarisi: tek yığın, karma maske — prefix token'ları üzerinde fully-visible, devamında causal.">
 
 <figcaption><b>Figure 1d.</b> Prefix-LM. Tek yığın, karma maske. Tek bir parametre — <code>prefix_len</code> — bu melezi belirliyor.</figcaption>
 
@@ -130,7 +130,7 @@ Dördünü ayrı ayrı anlattım ama aslında ayrı tasarımlar değiller. Aynı
 
 <figure>
 
-<img src="/figures/why-decoder-only/fig-1f-three-cuts.svg" alt="Üç aile tek bir tasarımın kesitleri olarak: encoder-only encoder bloğunu aynen tutuyor, decoder-only decoder bloğunu cross-attention alt katmanı çıkarılmış hâlde tutuyor, encoder-decoder iki yığını da cross-attention'la birlikte tutuyor.">
+<img loading="lazy" decoding="async" src="/figures/why-decoder-only/fig-1f-three-cuts.svg" alt="Üç aile tek bir tasarımın kesitleri olarak: encoder-only encoder bloğunu aynen tutuyor, decoder-only decoder bloğunu cross-attention alt katmanı çıkarılmış hâlde tutuyor, encoder-decoder iki yığını da cross-attention'la birlikte tutuyor.">
 
 <figcaption><b>Figure 1f.</b> Üç kesit. Hiçbirinde yeni bir mekanizma icat edilmiyor — encoder-only encoder bloğunu alıyor, decoder-only decoder bloğunu alıp cross-attention'ı atıyor, encoder-decoder ikisini de bütün tutuyor.</figcaption>
 
@@ -185,7 +185,7 @@ Tek bir tamsayı. `prefix_len=0` GPT'yi veriyor, `prefix_len=n` BERT'i. "Tek yö
 
 <figure>
 
-<img src="/figures/why-decoder-only/fig-2-masks.svg" alt="Aynı altı token'lık dizi üzerinde üç attention maskesi: fully-visible (tüm hücreler açık), causal (alt üçgen açık), prefix-causal (ilk iki sütun tüm satırlara açık, sonrası causal).">
+<img loading="lazy" decoding="async" src="/figures/why-decoder-only/fig-2-masks.svg" alt="Aynı altı token'lık dizi üzerinde üç attention maskesi: fully-visible (tüm hücreler açık), causal (alt üçgen açık), prefix-causal (ilk iki sütun tüm satırlara açık, sonrası causal).">
 
 <figcaption><b>Figure 2.</b> Aynı dizinin üç maskesi. Satır: sorgu pozisyonu, sütun: anahtar pozisyonu. Açık hücre 0, kapalı hücre &minus;&infin;. Üçü arasındaki tek fark <code>prefix_len</code>.</figcaption>
 
@@ -213,7 +213,7 @@ Decoder-only'nin eğitimi ise **autoregressive**: sonraki token'ı yalnızca ge�
 
 <figure>
 
-<img src="/figures/why-decoder-only/fig-3b-mlm-vs-ar.svg" alt="Aynı cümle iki eğitim hedefi altında. MLM'de tokenların yaklaşık yüzde on beşi maskeleniyor, bağlam iki yönden geliyor ve kayıp yalnızca maskeli pozisyonlarda. Otoregresif eğitimde her token kendinden öncekilerden tahmin ediliyor ve kayıp her pozisyonda.">
+<img loading="lazy" decoding="async" src="/figures/why-decoder-only/fig-3b-mlm-vs-ar.svg" alt="Aynı cümle iki eğitim hedefi altında. MLM'de tokenların yaklaşık yüzde on beşi maskeleniyor, bağlam iki yönden geliyor ve kayıp yalnızca maskeli pozisyonlarda. Otoregresif eğitimde her token kendinden öncekilerden tahmin ediliyor ve kayıp her pozisyonda.">
 
 <figcaption><b>Figure 3b.</b> İki hedef, aynı cümle. MLM'de sinyal yalnızca maskeli pozisyonlardan gelir ve girdide gerçek metinde hiç bulunmayan bir <code>[MASK]</code> sembolü vardır. Otoregresif eğitimde her pozisyon bir hedeftir ve eğitim, üretimin birebir provasıdır.</figcaption>
 
@@ -307,7 +307,7 @@ Bu cevap sadece yanlış değil, **tam tersi** doğru. Ölçülebilen her yerde 
 
 <figure>
 
-<img src="/figures/why-decoder-only/fig-3-t5-table2.svg" alt="T5 Tablo 2, eşit hesap bütçesinde: GLUE'da encoder-decoder 83.28, prefix-LM 81.82, decoder-only 74.70; SQuAD'da sırasıyla 80.88, 78.94 ve 61.14.">
+<img loading="lazy" decoding="async" src="/figures/why-decoder-only/fig-3-t5-table2.svg" alt="T5 Tablo 2, eşit hesap bütçesinde: GLUE'da encoder-decoder 83.28, prefix-LM 81.82, decoder-only 74.70; SQuAD'da sırasıyla 80.88, 78.94 ve 61.14.">
 
 <figcaption><b>Figure 3.</b> T5 §3.2, Tablo 2 — eşit FLOP, denoising hedefi. SQuAD'daki 19.7 puanlık fark tablodaki en büyük ayrım; prefix-LM tek bir maske değişikliğiyle bunun neredeyse tamamını kapatıyor.</figcaption>
 
@@ -371,7 +371,7 @@ Peki mimariyi ölçekle sistematik karşılaştıran biri oldu mu? Evet — Tay 
 
 <figure>
 
-<img src="/figures/why-decoder-only/fig-4-scaling.svg" alt="Şematik log-log ölçek eğrisi: kayıp, hesapla birlikte düz bir çizgi hâlinde düşüyor. Grafikte yalnızca decoder-only ailesi ölçülmüş; karşılaştırma eğrisi hiç çizilmemiş.">
+<img loading="lazy" decoding="async" src="/figures/why-decoder-only/fig-4-scaling.svg" alt="Şematik log-log ölçek eğrisi: kayıp, hesapla birlikte düz bir çizgi hâlinde düşüyor. Grafikte yalnızca decoder-only ailesi ölçülmüş; karşılaştırma eğrisi hiç çizilmemiş.">
 
 <figcaption><b>Figure 4.</b> Şematik. Ölçek yasalarının ölçtüğü tek aile decoder-only; kesikli çizgi bir ölçüm değil, hiç yapılmamış deneyin yeri.</figcaption>
 
@@ -455,7 +455,7 @@ Buna bir de görev birleştirmesi ekleniyor, ve ikisi birbirini besliyor. T5'in 
 
 <figure>
 
-<img src="/figures/why-decoder-only/fig-5-option-value.svg" alt="Dönüşüm asimetrisi: causal decoder ucuza non-causal decoder'a, oradan encoder-decoder'a dönüşüyor; ters yön sıfırdan eğitmekten daha kötü sonuç veriyor.">
+<img loading="lazy" decoding="async" src="/figures/why-decoder-only/fig-5-option-value.svg" alt="Dönüşüm asimetrisi: causal decoder ucuza non-causal decoder'a, oradan encoder-decoder'a dönüşüyor; ters yön sıfırdan eğitmekten daha kötü sonuç veriyor.">
 
 <figcaption><b>Figure 5.</b> Asimetri. Causal decoder diğer her şeyin üzerinde ucuz bir opsiyon; encoder-decoder ise geri dönüşü olmayan bir taahhüt.</figcaption>
 
@@ -491,7 +491,7 @@ LLM2Vec'in (BehnamGhader ve ark. 2024) ilk adımı özellikle güzel: *causal ma
 
 <figure>
 
-<img src="/figures/why-decoder-only/fig-6-conversions-2025.svg" alt="Aynı dönüşüm grafiği, 2024-2025 sistemleriyle: LLM2Vec ve Qwen3-Embedding decoder-only checkpoint'i encoder'a, T5Gemma ve T5Gemma 2 encoder-decoder'a dönüştürüyor.">
+<img loading="lazy" decoding="async" src="/figures/why-decoder-only/fig-6-conversions-2025.svg" alt="Aynı dönüşüm grafiği, 2024-2025 sistemleriyle: LLM2Vec ve Qwen3-Embedding decoder-only checkpoint'i encoder'a, T5Gemma ve T5Gemma 2 encoder-decoder'a dönüştürüyor.">
 
 <figcaption><b>Figure 6.</b> Aynı graf, gerçek isimlerle. 2024-25'in bütün "geri dönüşleri" tek bir decoder-only checkpoint'ten türetilmiş dönüşümler.</figcaption>
 
