@@ -480,6 +480,46 @@ $O(1/k + 1/(bn))$ çıkıyor (a.g.e., §2.3.1) — yani çok küçük. Cümlenin
 decode, eğitimden temelden daha kötü bir donanım rejimi.** Eğitimde çip hesap
 yapıyor; decode'da çip çoğunlukla bekliyor.
 
+Oranı gerçek bir çipe oturtunca ne kadar kötü olduğu görünüyor. Bir H100 SXM
+yoğun bf16'da 989,5 TFLOPS yapıyor ve HBM'i 3,35 TB/s okuyor; bölünce çipin
+doyması için okunan her bayta 295 işlem düşmesi gerektiği çıkıyor. OLMo 2 7B ile:
+
+<aside class="sidenote">
+
+Çip sayıları NVIDIA'nın [H100 ürün sayfasındaki](https://www.nvidia.com/en-us/data-center/h100/) teknik tablodan. Tablodaki 1.979 TFLOPS'un dipnotu *"With sparsity"* diyor; yoğun karşılığı olan 989,5 türetilmiş değer, tabloda ayrıca yazılmıyor. Model sayıları §8'deki `config.json`'dan. Ağırlık trafiği adım başına bir kez okunuyor varsayımıyla; gerçek bir sunucuda parçalama ve önbellek bunu değiştirir, mertebeyi değiştirmez.
+
+</aside>
+
+```python
+denge = 989.5e12 / 3.35e12          # H100 SXM: yoğun bf16 ÷ HBM. Çip doymak için bu kadar ister.
+P, L, h_kv, d_h, s = 7.30e9, 32, 32, 128, 4096      # OLMo 2 7B — MHA, config.json
+
+for b in (1, 16, 64):
+    agirlik = 2 * P                                  # adım başına bir kez okunuyor
+    kv = 2 * b * s * L * h_kv * d_h * 2              # her dizi kendi cache'ini taşıyor
+    yogunluk = 2 * P * b / (agirlik + kv)
+    print(f"b={b:<3d} yoğunluk {yogunluk:5.2f} FLOP/bayt"
+          f"   hesap kullanımı %{100*yogunluk/denge:4.2f}"
+          f"   KV trafiği %{100*kv/(agirlik+kv):.0f}")
+print(f"çipi doyuran nokta: {denge:.0f} FLOP/bayt")
+```
+
+```
+b=1   yoğunluk  0.87 FLOP/bayt   hesap kullanımı %0.30   KV trafiği %13
+b=16  yoğunluk  4.77 FLOP/bayt   hesap kullanımı %1.62   KV trafiği %70
+b=64  yoğunluk  6.15 FLOP/bayt   hesap kullanımı %2.08   KV trafiği %90
+çipi doyuran nokta: 295 FLOP/bayt
+```
+
+Tek bir istek servis edilirken çip hesap kapasitesinin **binde üçünü**
+kullanıyor. Geri kalan zaman bellek bekliyor. Ve ikinci sütun, akla ilk gelen
+çözümün neden yetmediğini söylüyor: batch büyütmek yoğunluğu yükseltiyor ama
+64'te bile %2'yi geçmiyor, çünkü **KV trafiği de batch'le birlikte büyüyor** —
+ağırlıklar bir kez okunup bütün diziler arasında paylaşılırken cache
+paylaşılmıyor. b=64'te okunan her yüz baytın doksanı KV.
+
+Sıradaki bölümün üç yöntemi de bu son cümleye saldırıyor.
+
 Pope ve ark. bunu 500B+ ölçekte somutluyor (2022, §2): batch 512 ve 2048 token
 bağlamla KV-cache toplam **3TB**'a ulaşıyor — *"modelin parametrelerinin üç
 katı"* — ve *"çipin hesap çekirdeği esasen boşta beklerken"* bu cache üretilen
@@ -821,6 +861,49 @@ $\theta$.** Yerel katmanlar yalnızca 1024 token görüyor, o yüzden gerilmiş
 frekansa ihtiyaçları yok. Konum kodlaması modelin global bir özelliği olmaktan
 çıkıp katman tipine göre seçilen bir ayara dönüşmüş durumda.
 
+Peki $\theta$'yı büyütmek tam olarak neyi satın alıyor? OLMo 2'nin gerekçesi
+*"çözünürlüğü artırıyor"* diyordu; frekansları yazınca bunun böyle olmadığı
+görünüyor. RoPE'un en hızlı dönen düzleminin frekansı $\theta^{0} = 1$, yani
+dalga boyu $2\pi$ — **$\theta$ ne olursa olsun 6,28 token.** Oynayan yalnızca
+öteki uç:
+
+```python
+# theta_i = theta^(-2i/d), i = 0 .. d/2-1  ->  dalga boyu 2*pi / theta_i
+band = lambda th, d: (2*np.pi, 2*np.pi * th ** ((d-2)/d))
+
+for ad, th, d, ctx in (("Gemma 3 yerel ", 1e4, 128,   1024), ("OLMo 2 7B     ", 5e5, 128,   4096),
+                       ("Gemma 3 global", 1e6, 128, 131072), ("Qwen3-235B    ", 1e6, 128,  40960),
+                       ("DeepSeek-V3   ", 1e4,  64, 163840)):   # decoupled RoPE: yalnız 64 boyut
+    ince, kaba = band(th, d)
+    print(f"{ad} θ={th:>9.0f}  d={d:3d}   en hızlı {ince:.2f} token"
+          f"   en yavaş {kaba:11,.0f}   bağlam/en yavaş {ctx/kaba:5.2f}")
+```
+
+```
+Gemma 3 yerel  θ=    10000  d=128   en hızlı 6.28 token   en yavaş      54,410   bağlam/en yavaş  0.02
+OLMo 2 7B      θ=   500000  d=128   en hızlı 6.28 token   en yavaş   2,559,196   bağlam/en yavaş  0.00
+Gemma 3 global θ=  1000000  d=128   en hızlı 6.28 token   en yavaş   5,063,256   bağlam/en yavaş  0.03
+Qwen3-235B     θ=  1000000  d=128   en hızlı 6.28 token   en yavaş   5,063,256   bağlam/en yavaş  0.01
+DeepSeek-V3    θ=    10000  d= 64   en hızlı 6.28 token   en yavaş      47,117   bağlam/en yavaş  3.48
+```
+
+Alınan şey çözünürlük değil **menzil**: 10k'dan 1M'ye çıkmak en yavaş düzlemin
+dalga boyunu 54 binden 5 milyona taşıyor, en hızlısına dokunmuyor.
+
+Son satır ayrı bir hikâye, ve §4.4'ün devamı. DeepSeek-V3 taban frekansını hiç
+oynatmamış — sevk edilen konfigürasyonda $\theta$ hâlâ 10.000, yani Vaswani'nin
+sabiti. Üstelik decoupled RoPE yalnızca 64 boyutu döndürdüğü için üs de küçülüyor
+ve en yavaş dalga boyu 47 bine iniyor. 163.840 token'lık bağlamda bu **3,48 tam
+tur** demek: beşi içinde bağlamı en yavaş dalga boyunu aşan tek model. §4.4'te
+"konfigürasyon dosyasında görünür bir sayı olarak kalmış" dediğimiz uzlaşmanın
+ikinci yarısı burada — o oyuk, konum çözünürlüğünden ödünç alınmış.
+
+<aside class="sidenote">
+
+Frekans tanımı Su ve ark. 2021, Denk. 15. Konfigürasyonlar modellerin yayımlanmış `config.json` dosyalarından: `deepseek-ai/DeepSeek-V3` (`rope_theta` 10000, `qk_rope_head_dim` 64, `max_position_embeddings` 163840), `google/gemma-3-27b-it` (`rope_theta` 1e6, `rope_local_base_freq` 1e4), `allenai/OLMo-2-1124-7B` (5e5), `Qwen/Qwen3-235B-A22B` (1e6). Oranın 1'in altında olması YaRN'a ihtiyaç olmadığı anlamına gelmiyor — Qwen3 de kullanıyor, sebebi eğitim uzunluğu. DeepSeek-V3 telafiyi çalışma zamanında yapıyor: `rope_scaling` YaRN, `factor` 40, `original_max_position_embeddings` 4096.
+
+</aside>
+
 ### 5.4 QK-Norm — ve ölçülmüş bir bedeli
 
 Bu bölümdeki tek bileşen bağlam uzunluğu baskısına değil, **kararlılık**
@@ -873,6 +956,38 @@ gerekçeleri farklı eksenlerde. QK-Norm eğitimi kurtarıyor, uzun bağlamdan b
 Son ihtimal, konum kodlamasını tamamen çıkarmak. Sezgiye aykırı görünüyor ama
 bir gerekçesi var: causal maske zaten konum bilgisi taşıyor. İlk pozisyon bir
 token görüyor, ikincisi iki, üçüncüsü üç — maskenin kendisi bir sayaç.
+
+Bu bir benzetme değil. Kazemnejad ve ark. maskenin konumu *taşıyabildiğini*
+ispatlamakla kalmıyor, ağırlıkları açıkça inşa ediyor (a.g.e., Ek C.1): gömmenin
+bir boyutu her token'da 1, bir boyutu yalnız ilk token'da 1 olsun; anahtar
+birinciyi, değer ikinciyi okusun. O zaman bütün anahtarlar özdeş olur, softmax
+causal önek üzerinde düzleşir, ve çıktı tam olarak önekin uzunluğunun tersi
+çıkar. Konum kodlaması olmadan:
+
+```python
+rng = np.random.default_rng(0); T, d = 8, 16
+H = rng.normal(0, 1, (T, d))
+H[:, 0] = 1                                   # 1. boyut: her token'da 1
+H[:, 1] = [1] + [0] * (T - 1)                 # 2. boyut: yalnız ilk token'da 1
+
+Q = H @ rng.normal(0, 1, (d, 4))              # sorgu projeksiyonu keyfî olabilir
+K = H[:, [0]] @ np.ones((1, 4))               # anahtar 1. boyutu okuyor -> hepsi aynı
+V = H[:, [1]]                                 # değer 2. boyutu okuyor -> yalnız ilk token 1
+
+S = np.where(np.tril(np.ones((T, T))) == 1, Q @ K.T, -np.inf)   # causal maske, konum kodu YOK
+A = np.exp(S - S.max(-1, keepdims=True)); A /= A.sum(-1, keepdims=True)
+print("attention çıktısı :", np.round((A @ V).ravel(), 4))
+print("1 / çıktı         :", np.round(1 / (A @ V).ravel()).astype(int))
+```
+
+```
+attention çıktısı : [1.     0.5    0.3333 0.25   0.2    0.1667 0.1429 0.125 ]
+1 / çıktı         : [1 2 3 4 5 6 7 8]
+```
+
+Tek bir attention katmanı, hiçbir konum sinyali verilmeden, her pozisyonun
+sırasını okunabilir biçimde taşıyor. Maskenin sayaç olması bir sezgi değil,
+kurulabilir bir yapı.
 
 Kazemnejad ve ark. (2023) bunu sistematik olarak ölçüyor: sıfırdan eğitilmiş
 decoder-only modellerde APE, T5-bağıl, ALiBi, RoPE ve hiçbir kodlama olmayan
