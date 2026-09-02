@@ -45,6 +45,21 @@
 	--mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, monospace;
 }
 
+/* ── the narrow tier ───────────────────────────────────────────────
+   Why: the full-width margin strips need ~1520px, which a 1080p screen at
+   125–150% OS scaling never reaches — the author cannot see the site's own
+   margins. Narrower strips and a slightly shorter measure fit from 1200px up.
+   Only the four measurements are re-declared; the rail and sidenote rules are
+   written in terms of them and follow on their own. */
+@media (min-width: 1200px) and (max-width: 1519.98px) {
+	:root {
+		--measure: 52rem; /* 832px — still ~85 characters */
+		--fig: 52rem;
+		--sidenote-w: 11rem;
+		--sidenote-gap: 1.25rem;
+	}
+}
+
 *,
 *::before,
 *::after {
@@ -109,7 +124,7 @@ main {
 	display: none;
 }
 
-@media (min-width: 1520px) {
+@media (min-width: 1200px) {
 	.toc {
 		display: block;
 		position: fixed;
@@ -170,11 +185,12 @@ main {
 	hyphens: none;
 }
 
-/* Wide enough that centring the measure leaves a full margin strip on BOTH
-   sides: --measure + 2 × (--sidenote-w + --sidenote-gap) ≈ 1512px, rounded up
-   to clear a scrollbar. Only then does the note leave the flow, so it never
+/* Wide enough that centring the measure leaves a margin strip on BOTH sides:
+   --measure + 2 × (--sidenote-w + --sidenote-gap). With the narrow tier's
+   measurements that is 832 + 2 × 196 = 1224px, so 1200px clears it once the
+   gutter is counted. Only then does the note leave the flow, so it never
    forces a horizontal scrollbar. */
-@media (min-width: 1520px) {
+@media (min-width: 1200px) {
 	.sidenote {
 		float: right;
 		clear: right;
@@ -235,10 +251,22 @@ h6 {
 }
 
 h1 {
-	font-size: 1.45em;
+	font-size: 1.55em; /* display */
 }
 
-h2,
+/* Why: a section head set one step above the body in the caps face reads as
+   emphasised prose, not as a heading — the two were 1.03em and 0.95em against
+   a 1.03em body, an 8% gap between h2 and h3. Each level now takes its own
+   step of the documented ramp, and h2 leaves the caps face: at headline size
+   the small caps fight the Turkish dotless ı, and a paper's section head is
+   set in the text face anyway. */
+h2 {
+	font-size: 1.45em; /* headline */
+	font-weight: 700;
+	font-style: italic;
+	margin: 2.6rem 0 0.7rem;
+}
+
 h3,
 h4 {
 	font-family: var(--caps);
@@ -246,16 +274,12 @@ h4 {
 	margin: 1.85rem 0 0.5rem;
 }
 
-h2 {
-	font-size: 1.03em;
-}
-
 h3 {
-	font-size: 0.95em;
+	font-size: 1.03em; /* title */
 }
 
 h4 {
-	font-size: 0.9em;
+	font-size: 0.95em; /* subtitle */
 	color: var(--muted);
 }
 
