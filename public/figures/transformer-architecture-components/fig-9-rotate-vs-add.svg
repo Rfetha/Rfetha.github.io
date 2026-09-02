@@ -1,0 +1,39 @@
+<svg viewBox="0 0 1000 372" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t9">
+  <title id="t9">İki daire, konum bilgisinin vektöre iki farklı şekilde girmesini karşılaştırıyor. Solda toplamalı kodlama: gömme vektörüne bir konum vektörü ekleniyor ve toplamın ucu dairenin dışına çıkıyor, yani vektörün boyu değişiyor. Sağda RoPE: vektör aynı yarıçapta bir açı kadar döndürülüyor, uç daire üzerinde kalıyor ve boy korunuyor. Ölçülen değer: gömmenin normu 7.315344, döndürülmüş hâlinin normu yine 7.315344. Rotasyon matrisi ortogonal olduğu için bu bir tesadüf değil, garanti.</title>
+  <style>
+    .ser { font-family: Georgia, 'Times New Roman', serif; }
+    .mon { font-family: Consolas, Menlo, monospace; }
+  </style>
+
+  <text class="ser" x="60" y="46" font-size="15" fill="#1a1a1a">Toplamak</text>
+  <text class="ser" x="60" y="64" font-size="12.6" font-style="italic" fill="#6e6e6e">konum kodlaması gömmeye ekleniyor — 2017</text>
+  <circle cx="258" cy="186" r="92" fill="none" stroke="#dadada" stroke-width="1"/>
+  <circle cx="258" cy="186" r="2.4" fill="#6e6e6e"/>
+  <line x1="258" y1="186" x2="330.5" y2="129.4" stroke="#1a1a1a" stroke-width="1.8"/>
+  <text class="mon" x="337.5" y="124.4" font-size="12" fill="#1a1a1a">x</text>
+  <line x1="330.5" y1="129.4" x2="380.0" y2="145.4" stroke="#6e6e6e" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <text class="mon" x="361.2" y="131.4" font-size="12" fill="#6e6e6e">PE</text>
+  <line x1="258" y1="186" x2="380.0" y2="145.4" stroke="#8c1515" stroke-width="1.8"/>
+  <circle cx="380.0" cy="145.4" r="3" fill="#8c1515"/>
+  <text class="mon" x="388.0" y="149.4" font-size="12" fill="#8c1515">x + PE</text>
+  <text class="ser" x="258" y="302" font-size="13.2" font-style="italic" fill="#8c1515" text-anchor="middle">uç küreden kayıyor — boy değişti</text>
+
+  <line x1="500" y1="36" x2="500" y2="312" stroke="#dadada" stroke-width="1"/>
+
+  <text class="ser" x="540" y="46" font-size="15" fill="#1a1a1a">Döndürmek</text>
+  <text class="ser" x="540" y="64" font-size="12.6" font-style="italic" fill="#6e6e6e">konum bir açıya dönüşüyor — RoPE</text>
+  <circle cx="726" cy="186" r="92" fill="none" stroke="#dadada" stroke-width="1"/>
+  <circle cx="726" cy="186" r="2.4" fill="#6e6e6e"/>
+  <line x1="726" y1="186" x2="798.5" y2="129.4" stroke="#dadada" stroke-width="1.8"/>
+  <text class="mon" x="805.5" y="131.4" font-size="12" fill="#6e6e6e">x</text>
+  <path d="M 798.5 129.4 A 92 92 0 0 0 706.9 96.0" fill="none" stroke="#8c1515" stroke-width="1.2" stroke-dasharray="3 3"/>
+  <line x1="726" y1="186" x2="706.9" y2="96.0" stroke="#8c1515" stroke-width="1.8"/>
+  <circle cx="706.9" cy="96.0" r="3" fill="#8c1515"/>
+  <text class="mon" x="696.9" y="87.0" font-size="12" fill="#8c1515" text-anchor="end">R x</text>
+  <text class="mon" x="698" y="128" font-size="12" fill="#8c1515" text-anchor="middle">mθ</text>
+  <text class="ser" x="726" y="302" font-size="13.2" font-style="italic" fill="#454545" text-anchor="middle">uç küre üzerinde kalıyor — boy korunuyor</text>
+
+  <line x1="60" y1="322" x2="940" y2="322" stroke="#dadada" stroke-width="1"/>
+  <text class="mon" x="60" y="346" font-size="12" fill="#1a1a1a">‖x‖ = 7.315344      ‖R x‖ = 7.315344</text>
+  <text class="ser" x="60" y="366" font-size="12.6" font-style="italic" fill="#454545">Tesadüf değil: rotasyon matrisi ortogonal, normu değiştirmesi mümkün değil.</text>
+</svg>

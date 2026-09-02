@@ -6,8 +6,8 @@ placeholder: true
 ---
 
 <!--
-İLK TAM SÜRÜM. Metin uçtan uca yazıldı; figürler (Figure 1 hariç) henüz
-çizilmedi, yerleri yorum olarak işaretli.
+Metin uçtan uca yazıldı. On bir figürün onu çizildi; §9.2'deki karşılaştırmalı
+blok şeması bilerek atlandı (ASCII şema onu zaten taşıyor).
 Kanıt: drafts/research-transformer-components-evidence.md (E§n)
        drafts/research-decoder-only-math.md (M§n)
 Plan:  drafts/outline-transformer-components.md
@@ -237,7 +237,13 @@ $512 = 8 \times 64$. Sekiz kafa, tek geniş bir kafayla aşağı yukarı aynı
 parametre ve aynı hesap maliyetinde çalışıyor; kazanılan şey kapasite değil,
 **çeşitlilik** — sekiz farklı alt uzayda sekiz farklı ilişki öğrenilebiliyor.
 
-<!-- FİGÜR: 1 geniş kafa (d=512) vs 8 dar kafa (8×64), aynı toplam genişlik. -->
+<figure>
+
+<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-3-heads.svg" alt="Aynı toplam genişlikte iki kutu dizisi: solda 512 boyutunda tek bir attention kafası, sağda her biri 64 boyutunda sekiz kafa. Altta 512 eşittir 8 çarpı 64.">
+
+<figcaption><b>Figure 3.</b> Kafalar modeli genişletmiyor, <b>bölüyor</b>. Sekiz dar kafa tek geniş kafayla aşağı yukarı aynı parametre ve aynı hesap maliyetinde çalışıyor; kazanılan şey kapasite değil, sekiz ayrı alt uzayda sekiz ayrı ilişki. Bu kutuları daraltmak 2017'nin kendi ablasyonunda kaliteyi düşürmüş — §4'ün üç yöntemi de o yüzden başka bir çarpana basıyor.</figcaption>
+
+</figure>
 
 Buradaki takasın bir sınırı var ve onu da yine 2017 ölçmüş. Makalenin ablasyon
 tablosunda kafa sayısı ve kafa genişliği ayrı ayrı oynatılıyor, ve sonuç
@@ -322,7 +328,13 @@ Sapmanın *yaklaşık* değil **tam** sıfır olması argümanın kendisi: causa
 token'ı hiç okumuyor, dolayısıyla aritmetik bit düzeyinde aynı kalıyor. Kayan
 nokta hatası bile yok, çünkü hesaplanan ifade birebir aynı ifade.
 
-<!-- FİGÜR: iki panel — causal'da ilk beş K/V hücresi değişmemiş, çift yönlüde hepsi değişmiş. -->
+<figure>
+
+<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-4-prefix-invariance.svg" alt="İki panel, her biri üç katman ve altı pozisyonluk bir anahtar-değer ızgarası. Causal maskede ilk beş sütun değişmemiş, sapma sıfır; maske olmayanda bütün sütunlar değişmiş, sapma 1.38.">
+
+<figcaption><b>Figure 4.</b> Aynı yığın, altıncı token eklenmeden önce ve sonra. Causal maskede ilk beş pozisyonun anahtar ve değeri <b>bit düzeyinde</b> aynı kalıyor; maske kalkınca hepsi değişiyor. Soldaki sıfır, KV-cache'i mümkün kılan şeyin kendisi.</figcaption>
+
+</figure>
 
 Bu, bir dizi optimizasyonun kapısını açıyor: eğer önceki anahtar ve değerler
 değişmiyorsa, onları yeniden hesaplamak yerine saklayabilirsiniz. §3 tam olarak
@@ -374,7 +386,13 @@ katmanında bilgi $W$ token ilerleyebiliyorsa, $k$ katman sonra $k \times W$
 token ilerlemiş oluyor. Kendi konfigürasyonlarıyla — $W = 4096$, 32 katman —
 *"son katmanda yaklaşık 131K token'lık teorik bir attention menzilimiz oluyor."*
 
-<!-- FİGÜR: katman katman genişleyen etki alanı — k×W yayılımı. -->
+<figure>
+
+<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-5-sliding-window.svg" alt="Sağda sorgulayan token, soluna doğru uzanan altı çubuk. Bir katmanda 4096 token, iki katmanda 8192, dört katmanda 16.384, sekizde 32.768, on altıda 65.536, otuz ikide 131.072.">
+
+<figcaption><b>Figure 5.</b> Tek bir katmanda doğrudan bakış 4096 token, ama menzil katman sayısıyla çarpılıyor. Mistral'in 32 katmanının sonunda 131.072 token'lık teorik bir menzil kalıyor. Ölçek doğrusal — 24 piksel 4096 token.</figcaption>
+
+</figure>
 
 Yani "kayan pencere bağlamı kesiyor" sezgisi yanlış: pencere tek bir katmandaki
 doğrudan bakışı sınırlıyor, katman yığını ise dolaylı yolu açık tutuyor. Bunun
@@ -416,7 +434,7 @@ $$
 \text{KV bayt} = 2 \times b \times s \times L \times h_{	ext{kv}} \times d_{	ext{head}} \times \text{bayt}_{\text{dtype}}
 $$
 
-<figcaption><b>Figure 3.</b> Baştaki 2 anahtar ve değer için; <i>b</i> yığın boyutu, <i>s</i> o ana kadarki token sayısı, <i>L</i> katman sayısı, <i>h<sub>kv</sub></i> <b>anahtar/değer</b> kafa sayısı, <i>d<sub>head</sub></i> kafa başına boyut.</figcaption>
+<figcaption><b>Figure 6.</b> Baştaki 2 anahtar ve değer için; <i>b</i> yığın boyutu, <i>s</i> o ana kadarki token sayısı, <i>L</i> katman sayısı, <i>h<sub>kv</sub></i> <b>anahtar/değer</b> kafa sayısı, <i>d<sub>head</sub></i> kafa başına boyut.</figcaption>
 
 </figure>
 
@@ -619,7 +637,13 @@ MLA (gerçek) : 35,136 eleman/token   -> 56.9x küçük
 Tek bir isteğin 128K bağlamdaki cache'i 488 GiB yerine 8.6 GiB. Bu, mimarinin
 tek bir bileşeninden gelen fark.
 
-<!-- FİGÜR: MHA / GQA / MQA / MLA'nın KV ayak izi, token başına eleman formülleriyle. -->
+<figure>
+
+<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-7-kv-footprint.svg" alt="Dört yatay çubuk: MHA 1.998.848 eleman ve 488 GiB, GQA-8 124.928 eleman ve 30,5 GiB, MQA 15.616 eleman ve 3,8 GiB, MLA 35.136 eleman ve 8,6 GiB. MLA'nın çubuğu MHA'nınkinin elli yedide biri.">
+
+<figcaption><b>Figure 7.</b> Aynı model, dört mekanizmayla. Yalnız <b>MLA</b> sevk edildi; diğer üçü DeepSeek-V3'ün konfigürasyonuna uygulanmış hâlleri. Kapasite sütunu DeepSeek'in kendi etiketleri — bağımsız bir ölçüm değil.</figcaption>
+
+</figure>
 
 ### 4.4 RoPE ile çarpışma
 
@@ -669,7 +693,7 @@ PE_{(pos,\,2i)} = \sin\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right), \q
 PE_{(pos,\,2i+1)} = \cos\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right)
 $$
 
-<figcaption><b>Figure 4.</b> Sinüzoidal konum kodlaması. Dalga boyları 2&pi;'den 10000 &middot; 2&pi;'ye uzanan geometrik bir dizi oluşturuyor.</figcaption>
+<figcaption><b>Figure 8.</b> Sinüzoidal konum kodlaması. Dalga boyları 2&pi;'den 10000 &middot; 2&pi;'ye uzanan geometrik bir dizi oluşturuyor.</figcaption>
 
 </figure>
 
@@ -764,7 +788,13 @@ vurguladığı gibi, $\boldsymbol{R}^d_\Theta$ ortogonal — *"bu da konum bilgi
 kodlarken kararlılığı garantiliyor."* Toplamalı bir kodlama vektörün boyunu
 değiştirir; RoPE değiştirmez.
 
-<!-- FİGÜR: toplamak vs döndürmek — additive'de vektör ucu küreden kayıyor, RoPE'da küre üzerinde. -->
+<figure>
+
+<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-9-rotate-vs-add.svg" alt="İki daire. Solda gömmeye konum vektörü eklendiğinde toplamın ucu dairenin dışına çıkıyor. Sağda vektör aynı yarıçapta döndürülüyor ve uç daire üzerinde kalıyor. Her iki normun ölçülen değeri 7.315344.">
+
+<figcaption><b>Figure 9.</b> Toplamak vektörün boyunu değiştiriyor, döndürmek değiştirmiyor. RoPE'un rotasyon matrisi <b>ortogonal</b> olduğu için norm koruması bir gözlem değil, garanti.</figcaption>
+
+</figure>
 
 <aside class="sidenote">
 
@@ -956,7 +986,13 @@ Shazeer ve ark., *Outrageously Large Neural Networks*, [arXiv:1701.06538](https:
 
 </aside>
 
-<!-- FİGÜR: expert konfigürasyonları — toplam vs aktif, paylaşılan uzman farklı biçimle. -->
+<figure>
+
+<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-10-moe-configs.svg" alt="Dağılım grafiği: yatay eksende katman başına toplam uzman logaritmik, dikey eksende token başına aktif uzman. Switch 2048'den 1, gpt-oss-20b 32'den 4, gpt-oss-120b 128'den 4, Qwen3 128'den 8, DeepSeek-V3 257'den 9.">
+
+<figcaption><b>Figure 10.</b> Beş model, beş konfigürasyon; yatay eksen logaritmik. Noktalar dağınık: ne toplam uzman sayısında ne aktif sayıda ortak bir karar var. Switch'in tüm tezi top-1'di, bugün kimse orada değil — ama birbirlerinde de değiller.</figcaption>
+
+</figure>
 
 ### 6.3 İki tartışmalı nokta
 
@@ -1055,7 +1091,13 @@ Fark bu kadar, ve ikinci biçimin neden daha iyi davrandığı da burada: ilk
 katmandan sonuncuya kadar, hiçbir şeyin yeniden ölçeklemediği kesintisiz bir yol
 var.
 
-<!-- FİGÜR: Post-LN vs Pre-LN yan yana; residual yolu kalın, norm kutusunun yeri vurgulu. -->
+<figure>
+
+<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-11-postln-preln.svg" alt="İki blok şeması, her biri iki katman. Post-LN'de normalizasyon kutusu ana yolun üzerinde ve dikey artık çizgisini kesiyor. Pre-LN'de normalizasyon dalın içinde ve dikey çizgi baştan sona kesilmeden geçiyor.">
+
+<figcaption><b>Figure 11.</b> Tek fark normalizasyon kutusunun <b>yeri</b>. Post-LN'de ana yolun üstünde, Pre-LN'de dalın içinde — sağdaki şemada dikey çizgiyi hiçbir kutu kesmiyor. Kazanan biçim kaliteyle değil, ısınma aşamasını kaldırılabilir kıldığı için kazandı.</figcaption>
+
+</figure>
 
 Xiong ve ark. (2020) bunu teorik olarak gösteriyor:
 

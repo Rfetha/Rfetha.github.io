@@ -8,7 +8,7 @@
   <!-- ================= zaman ekseni ================= -->
   <line x1="190" y1="62" x2="970" y2="62" stroke="#dadada" stroke-width="1"/>
 
-  <g class="mon" font-size="10" fill="#6e6e6e" text-anchor="middle">
+  <g class="mon" font-size="12" fill="#6e6e6e" text-anchor="middle">
     <text x="214" y="50">2017</text>
     <text x="308" y="50">2018</text>
     <text x="403" y="50">2019</text>
@@ -33,27 +33,27 @@
 
   <!-- ================= 2017 çapası ================= -->
   <line x1="256" y1="66" x2="256" y2="418" stroke="#1a1a1a" stroke-width="1.2"/>
-  <text class="ser" x="262" y="82" font-size="11.5" fill="#1a1a1a">Transformer</text>
-  <text class="ser" x="262" y="96" font-size="10" font-style="italic" fill="#6e6e6e">2017 · bloğun tarifi</text>
+  <text class="ser" x="262" y="82" font-size="13.8" fill="#1a1a1a">Transformer</text>
+  <text class="ser" x="262" y="96" font-size="12" font-style="italic" fill="#6e6e6e">2017 · bloğun tarifi</text>
 
   <!-- ================= şerit etiketleri ================= -->
   <g text-anchor="end">
-    <text class="ser" x="172" y="126" font-size="11" fill="#1a1a1a">Decode belleği ve</text>
-    <text class="ser" x="172" y="140" font-size="11" fill="#1a1a1a">bant genişliği</text>
-    <text class="mon" x="172" y="155" font-size="9.5" fill="#6e6e6e">§3, §4</text>
+    <text class="ser" x="172" y="126" font-size="13.2" fill="#1a1a1a">Decode belleği ve</text>
+    <text class="ser" x="172" y="140" font-size="13.2" fill="#1a1a1a">bant genişliği</text>
+    <text class="mon" x="172" y="155" font-size="11.4" fill="#6e6e6e">§3, §4</text>
 
-    <text class="ser" x="172" y="202" font-size="11" fill="#1a1a1a">Parametre başına</text>
-    <text class="ser" x="172" y="216" font-size="11" fill="#1a1a1a">hesap</text>
-    <text class="mon" x="172" y="231" font-size="9.5" fill="#6e6e6e">§6</text>
+    <text class="ser" x="172" y="202" font-size="13.2" fill="#1a1a1a">Parametre başına</text>
+    <text class="ser" x="172" y="216" font-size="13.2" fill="#1a1a1a">hesap</text>
+    <text class="mon" x="172" y="231" font-size="11.4" fill="#6e6e6e">§6</text>
 
-    <text class="ser" x="172" y="278" font-size="11" fill="#1a1a1a">Eğitim kararlılığı</text>
-    <text class="mon" x="172" y="293" font-size="9.5" fill="#6e6e6e">§5, §7</text>
+    <text class="ser" x="172" y="278" font-size="13.2" fill="#1a1a1a">Eğitim kararlılığı</text>
+    <text class="mon" x="172" y="293" font-size="11.4" fill="#6e6e6e">§5, §7</text>
 
-    <text class="ser" x="172" y="346" font-size="11" fill="#1a1a1a">Bağlam uzunluğu</text>
-    <text class="mon" x="172" y="361" font-size="9.5" fill="#6e6e6e">§5</text>
+    <text class="ser" x="172" y="346" font-size="13.2" fill="#1a1a1a">Bağlam uzunluğu</text>
+    <text class="mon" x="172" y="361" font-size="11.4" fill="#6e6e6e">§5</text>
 
-    <text class="ser" x="172" y="408" font-size="11" font-style="italic" fill="#6e6e6e">Adı konmamış</text>
-    <text class="mon" x="172" y="423" font-size="9.5" fill="#6e6e6e">§8</text>
+    <text class="ser" x="172" y="408" font-size="13.2" font-style="italic" fill="#6e6e6e">Adı konmamış</text>
+    <text class="mon" x="172" y="423" font-size="11.4" fill="#6e6e6e">§8</text>
   </g>
 
   <!-- ================= şerit çizgileri ================= -->
@@ -73,12 +73,12 @@
     <circle cx="852" cy="136" r="3.4"/>
     <circle cx="909" cy="136" r="3.4"/>
   </g>
-  <g class="mon" font-size="10" fill="#454545" text-anchor="middle">
+  <g class="mon" font-size="12" fill="#454545" text-anchor="middle">
     <text x="483" y="124">MQA</text>
     <text x="818" y="124">GQA</text>
     <text x="909" y="124">MLA</text>
   </g>
-  <g class="mon" font-size="10" fill="#454545" text-anchor="middle">
+  <g class="mon" font-size="12" fill="#454545" text-anchor="middle">
     <text x="527" y="152">kayan pencere</text>
     <text x="856" y="168">PagedAttention</text>
   </g>
@@ -90,9 +90,9 @@
     <circle cx="595" cy="212" r="3.4"/>
     <circle cx="878" cy="212" r="3.4"/>
   </g>
-  <text class="mon" x="219" y="200" font-size="10" fill="#8c1515" text-anchor="middle">MoE</text>
-  <text class="ser" x="219" y="234" font-size="9.5" font-style="italic" fill="#8c1515" text-anchor="middle">beş ay önce</text>
-  <g class="mon" font-size="10" fill="#454545" text-anchor="middle">
+  <text class="mon" x="219" y="200" font-size="12" fill="#8c1515" text-anchor="middle">MoE</text>
+  <text class="ser" x="219" y="234" font-size="11.4" font-style="italic" fill="#8c1515" text-anchor="middle">beş ay önce</text>
+  <g class="mon" font-size="12" fill="#454545" text-anchor="middle">
     <text x="595" y="200">Switch</text>
     <text x="878" y="200">DeepSeekMoE</text>
   </g>
@@ -105,12 +105,12 @@
     <circle cx="791" cy="284" r="3.4"/>
     <circle cx="852" cy="284" r="3.4"/>
   </g>
-  <g class="mon" font-size="10" fill="#454545" text-anchor="middle">
+  <g class="mon" font-size="12" fill="#454545" text-anchor="middle">
     <text x="470" y="272">RMSNorm</text>
     <text x="570" y="272">QK-Norm</text>
     <text x="857" y="272">attention sink</text>
   </g>
-  <g class="mon" font-size="10" fill="#454545" text-anchor="middle">
+  <g class="mon" font-size="12" fill="#454545" text-anchor="middle">
     <text x="512" y="300">Pre-LN</text>
     <text x="791" y="300">ViT-22B</text>
   </g>
@@ -120,15 +120,15 @@
     <circle cx="620" cy="352" r="3.4"/>
     <circle cx="820" cy="352" r="3.4"/>
   </g>
-  <g class="mon" font-size="10" fill="#454545" text-anchor="middle">
+  <g class="mon" font-size="12" fill="#454545" text-anchor="middle">
     <text x="620" y="340">RoPE</text>
     <text x="820" y="340">NoPE</text>
   </g>
 
   <!-- ================= 5. adı konmamış ================= -->
   <circle cx="508" cy="404" r="3.4" fill="#1a1a1a"/>
-  <text class="mon" x="508" y="392" font-size="10" fill="#454545" text-anchor="middle">SwiGLU</text>
+  <text class="mon" x="508" y="392" font-size="12" fill="#454545" text-anchor="middle">SwiGLU</text>
 
   <!-- ================= alt not ================= -->
-  <text class="ser" x="190" y="444" font-size="10" font-style="italic" fill="#6e6e6e">Tarihler arXiv v1 gönderim tarihleri. Şerit, mekanizmanın cevap verdiği baskı; modeller değil mekanizmalar işaretli.</text>
+  <text class="ser" x="190" y="444" font-size="12" font-style="italic" fill="#6e6e6e">Tarihler arXiv v1 gönderim tarihleri. Şerit, mekanizmanın cevap verdiği baskı; modeller değil mekanizmalar işaretli.</text>
 </svg>
