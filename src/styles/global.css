@@ -529,10 +529,10 @@ blockquote p:last-child {
    cross-references them by number (“§8’de geleceğiz”), and a counter would also
    number the Abstract — shifting every reference by one. */
 
-/* Why: the child combinator matters. The byline and the placeholder callout
-   live in the article's <header>; without `>` they inherit the indent and the
-   justification, which indents a bordered callout and hyphenates it against
-   its own frame. Only the slotted body is set as a paper. */
+/* Why: the child combinator matters. The byline lives in the article's
+   <header>; without `>` it inherits the body indent, which is set for prose
+   and reads as a misalignment on a centred line. Only the slotted body is set
+   as a paper. */
 /* Why: every paragraph is indented, including the first one after a section
    head, and the space between them is kept as well. Typographic convention
    picks one mark or the other; the author asked for both and for the run to

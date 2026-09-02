@@ -12,10 +12,6 @@ const blog = defineCollection({
 		// Transform string to Date object
 		pubDate: z.coerce.date(),
 		updatedDate: z.coerce.date().optional(),
-		// Why: placeholder posts exist only to exercise the layout. This flag
-		// keeps them visibly marked so they can never be mistaken for published
-		// writing — remove the field from a post when it becomes real.
-		placeholder: z.boolean().default(false),
 	}),
 });
 

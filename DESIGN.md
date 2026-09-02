@@ -158,11 +158,6 @@ components:
     rounded: "{rounded.none}"
   rail-link-current:
     textColor: "{colors.ink}"
-  placeholder-callout:
-    backgroundColor: "{colors.paper}"
-    textColor: "{colors.sig}"
-    padding: "0.6rem 0.85rem"
-    rounded: "{rounded.none}"
   figure-caption:
     textColor: "{colors.muted}"
     typography: "{typography.meta}"
@@ -186,8 +181,8 @@ no gray metadata chip. Structure is carried entirely by rules, measure, and
 type.
 
 The material is white paper and black ink, with one chromatic mark in the
-prose: a deep Cornell red on links, the focus ring, text selection, and the
-placeholder frame. The one place color is allowed to multiply is inside a code
+prose: a deep Cornell red on links, the focus ring, and text selection. The
+one place color is allowed to multiply is inside a code
 listing. Listings were set near-monochrome in an earlier build and read as
 straw paper rather than as a notebook; they now carry a real six-color syntax
 palette on a cool near-white ground, deliberately cooler than the warm paper
@@ -221,7 +216,7 @@ grays for structure, one deep red used sparingly enough to stay a signal, and
 a self-contained syntax palette that lives only inside `pre`.
 
 ### Primary
-- **Cornell Red** (`{colors.sig}`): the only chromatic mark in the prose. It sets link text and the 38%-alpha underline beneath it, the 2px focus-visible outline, the placeholder callout's frame and text, the placeholder tag in the writing index, the repository links in the About page's work list, and the link token inside listings. It is not used on headings, rules, or hover backgrounds.
+- **Cornell Red** (`{colors.sig}`): the only chromatic mark in the prose. It sets link text and the 38%-alpha underline beneath it, the 2px focus-visible outline, the repository links in the About page's work list, and the link token inside listings. It is not used on headings, rules, or hover backgrounds.
 
 ### Neutral
 - **Ink** (`{colors.ink}`): body text, headings, active navigation, entry titles. The masthead's bottom border is drawn in ink at 1px — the only full-strength rule on the page.
@@ -241,7 +236,7 @@ a closed set: nothing outside `pre` and its Shiki tokens may use them.
 - **Listing Foreground** (`{colors.code-fg}`), **Keyword** (`{colors.code-keyword}`), **String** (`{colors.code-string}`), **Function** (`{colors.code-function}`), **Constant** (`{colors.code-constant}`), **Comment** (`{colors.code-comment}`, italic), **Punctuation** (`{colors.code-punctuation}`): bound through Shiki's `css-variables` theme via `--astro-code-token-*`. String-expression follows string; parameter follows foreground.
 
 ### Named Rules
-**The Single Signal Rule.** Cornell red is reserved for interaction and for the placeholder state: links, focus ring, selection, the placeholder frame and tag. If a new *prose* surface wants color for emphasis, it does not get color — it gets the caps face, a rule, or a shift down the gray ramp.
+**The Single Signal Rule.** Cornell red is reserved for interaction: links, focus ring, selection. If a new *prose* surface wants color for emphasis, it does not get color — it gets the caps face, a rule, or a shift down the gray ramp.
 
 **The Three-Ink Rule.** Text hierarchy is exactly three steps: ink, muted, faint. Do not introduce a fourth gray, and do not use a hairline gray (`--rule`, `--rule-soft`) as a text color; those two values are structure, never type.
 
@@ -264,7 +259,7 @@ a closed set: nothing outside `pre` and its Shiki tokens may use them.
 - **Secondary** (400, `0.9`–`0.92em` / 1.55–1.6, muted): abstract copy, definition-list bodies, closing notes.
 - **Meta** (400 italic, `0.76`–`0.84em`, tabular-nums, faint or muted): dates, bylines, affiliation, CV years, footer, captions. Dates always render long-form `en-GB` (`14 March 2026`) inside a `<time>` element.
 - **Sidenote** (400, `0.82em` / 1.55, muted, `hyphens: none`): notes in the flow behind a 2px rule — the default; `0.74em` / 1.5 when promoted into the margin at ≥1200px.
-- **Label** (Caps face, 400, `0.05em` letter-spacing): run-in heads (`Abstract.`, `Placeholder.`), figure-caption plate numbers, CV role names, the placeholder tag.
+- **Label** (Caps face, 400, `0.05em` letter-spacing): run-in heads (`Abstract.`, `Cite.`), figure-caption plate numbers, CV role names.
 - **Code, output** (mono, `0.73em` / 1.65, on `--wash`): the result a listing produced, carried under it with the panels touching and a mono `çıktı` run-in. Selected as `pre[data-language='python'] + pre[data-language='plaintext']`, so a standalone unhighlighted block — an ASCII schematic, say — is never mistaken for output.
 - **Code, block** (mono, `0.73em` / 1.65): listings. Set one step below inline code on purpose — a listing is a panel of many lines and reads best denser than the sentence around it.
 - **Code, inline** (mono, `0.86em`, inheriting the body's 1.66): a word inside a sentence, so it holds close to the prose size.
@@ -273,7 +268,7 @@ a closed set: nothing outside `pre` and its Shiki tokens may use them.
 ### Named Rules
 **The Drawn Caps Rule.** Small caps come from the `--caps` family. `font-variant: small-caps` is never used in this build and must not be introduced — synthetic caps scale capitals down and thin the stems, which reads as a defect beside a real serif.
 
-**The Turkish Lowercase Rule.** The caps face is barred from Turkish prose, not only from identifiers. It draws lowercase as small capitals and a small-cap I carries no dot, so `i` and `ı` leave it as the same shape — the face maps them to separate glyph entries (`i` and `dotlessi`) that are drawn identically. Measured by rendering both characters and differencing the bitmaps: zero differing pixels from the caps face, 34 from the roman. In English that is invisible; in Turkish it deletes a letter. It cost 24 of the 29 sub-heads across the two posts before it was caught. The caps face keeps the fixed English labels (`Abstract.`, `Placeholder.`, `Figure 1.`); everything that can hold a Turkish word takes bold italic roman instead.
+**The Turkish Lowercase Rule.** The caps face is barred from Turkish prose, not only from identifiers. It draws lowercase as small capitals and a small-cap I carries no dot, so `i` and `ı` leave it as the same shape — the face maps them to separate glyph entries (`i` and `dotlessi`) that are drawn identically. Measured by rendering both characters and differencing the bitmaps: zero differing pixels from the caps face, 34 from the roman. In English that is invisible; in Turkish it deletes a letter. It cost 24 of the 29 sub-heads across the two posts before it was caught. The caps face keeps the fixed English labels (`Abstract.`, `Cite.`, `Figure 1.`); everything that can hold a Turkish word takes bold italic roman instead.
 
 **The Identifier Exemption.** Identifiers are never set in the caps face. Repository names, file names, and code symbols keep the roman face at full size, because the caps face renders `ORKIKS` full-height and `fin-cli` half-height off the same baseline. Caps are for editorial labels only.
 
@@ -358,7 +353,7 @@ and the CV definition grid — and touches no type.
 
 **The Ragged-Right Rule.** Post bodies are set flush left and ragged right at every width, with `text-wrap: pretty`; consecutive paragraphs are indented 1.6em rather than separated by space. Justification was tried and removed: it is only legible when the renderer can hyphenate, and browsers do not reliably ship Turkish patterns — measured here, `hyphens: auto` broke zero words across 28 lines while the document was still declared `lang="en"`, and the word spaces stretched to 2.69× the narrowest to compensate. The article is now marked `lang="tr"`, but do not restore justification without first confirming that hyphens actually appear in Turkish prose. Sidenotes are never justified and never hyphenated.
 
-**The Child Combinator Rule.** Paper typesetting applies to `article.paper > p`, never to a descendant selector. The byline and the placeholder callout live inside the article's `<header>`; a descendant selector indents and hyphenates a bordered callout against its own frame.
+**The Child Combinator Rule.** Paper typesetting applies to `article.paper > p`, never to a descendant selector. The byline lives inside the article's `<header>`; a descendant selector gives it the body indent, which reads as a misalignment on a centred line.
 
 ## Elevation & Depth
 
@@ -390,8 +385,8 @@ make that explicit. This survived the listing recolor deliberately: the code
 block got real syntax color but no rounded corner, because a radius would make
 it a card. Form language is rectangular and rule-drawn — blocks are delimited
 by borders on one to four edges (the abstract by top and bottom, the blockquote
-and the demoted sidenote by left only, the code block and placeholder callout
-by all four), never by a filled rounded card.
+and the demoted sidenote by left only, the code block by all four), never by
+a filled rounded card.
 
 One ornament carries identity: the bracketed numeral `[7]` generated with a
 CSS counter before each writing-index row, counting *down* so the newest entry
@@ -477,12 +472,6 @@ transparent track.
 - **The title is double-braced.** BibTeX lowercases a title it is allowed to restyle; these titles carry proper nouns (Transformer, decoder-only) that have to survive.
 - **`Cite.` stays English**, like every other chrome label, which is also what keeps it clear of The Turkish Lowercase Rule.
 
-### Placeholder Marker
-- **Character:** an honest label on unwritten content, driven by a `placeholder: boolean` in the blog collection schema. It is a content-state device, not a decorative badge.
-- **On a post:** a four-sided 1px red frame, red text at `0.82em`, 0.6rem/0.85rem padding, with a caps-face run-in `Placeholder.` — an English label, so the caps face is safe here; it lives in the article `<header>` and is therefore outside the paper typesetting selector.
-- **In the index:** a caps-face red tag reading `placeholder` at the end of the meta line.
-- **Lifecycle:** both markers disappear when the flag flips. Nothing else in the system may borrow the red frame.
-
 ### Share Card (generated)
 - **Character:** the site's face when a link is pasted somewhere else. Generated at build time by `src/pages/og/[...slug].png.ts` — satori composes the SVG, sharp writes the PNG. Nothing is drawn by hand and no post ever needs cover art.
 - **Canvas:** 1200×630 on white, 72px/80px padding, content pushed to the top and bottom edges. A 10px solid ink rule runs across the top — the masthead at card scale.
@@ -517,7 +506,7 @@ transparent track.
 - **Don't** add a `box-shadow`, a `border-radius`, or a card — including around the code block, which earns its separation from the ground temperature and a 1px border.
 - **Don't** use `font-variant: small-caps`. Use the `--caps` face.
 - **Don't** set identifiers — repository names, file names, symbols — in the caps face.
-- **Don't** give Cornell red any job beyond links, focus, selection, and the placeholder state.
+- **Don't** give Cornell red any job beyond links, focus, and selection.
 - **Don't** let the listing palette leak out of `pre`, and don't import a foreign syntax theme; color comes from the `--astro-code-token-*` bindings.
 - **Don't** reintroduce a CSS section counter on `article.paper` — sections are numbered in the source, referenced by number in the prose, and reused verbatim in the section rail.
 - **Don't** give the rail a mobile form (drawer, toggle, sticky bar), and don't render it for a single-section post; below 1200px there is no strip to put it in.

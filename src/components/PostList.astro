@@ -26,7 +26,6 @@ const { posts, startAt = posts.length } = Astro.props;
 				<span class="desc">{post.data.description}</span>
 				<span class="meta">
 					<FormattedDate date={post.data.pubDate} />
-					{post.data.placeholder && <em class="ph">placeholder</em>}
 				</span>
 			</li>
 		))
@@ -90,13 +89,6 @@ const { posts, startAt = posts.length } = Astro.props;
 		font-style: italic;
 		font-variant-numeric: tabular-nums;
 		margin-top: 0.26rem;
-	}
-	.ph {
-		font-style: normal;
-		font-family: var(--caps);
-		letter-spacing: 0.05em;
-		color: var(--sig);
-		margin-left: 0.5rem;
 	}
 	@media (max-width: 640px) {
 		li {
