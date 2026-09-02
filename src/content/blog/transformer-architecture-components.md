@@ -1229,6 +1229,48 @@ konfigürasyonlardaki tuhaf sayıları açıklıyor (Shazeer 2020, §2):
 2017'nin $4 \times d_{\text{model}}$ oranının bugün neden $\approx 8/3$ gibi
 göründüğünün sebebi bu.
 
+Sevk edilmiş bir konfigürasyonda iki iddiayı birden kontrol edebiliriz: FFN
+gerçekten parametrelerin çoğunu mu tutuyor, ve $\frac{2}{3}$ düzeltmesi bütçeyi
+gerçekten sabit mi tutuyor. OLMo 2 7B'nin `config.json`'ı $d_{\text{model}} =
+4096$, $d_{ff} = 11008$ ve 32 katman veriyor — ayrıca `num_key_value_heads`'i
+kafa sayısına eşit, yani §2.2'de söylenen MHA burada da görünüyor.
+
+```python
+d, d_ff = 4096, 11008              # OLMo 2 7B, sevk edilen config.json
+
+attn = 4 * d * d                   # q, k, v, o — MHA, dördü de d × d
+ffn  = 3 * d * d_ff                # gate, up, down — SwiGLU üç matris
+eski = 2 * d * (4 * d)             # 2017: iki matris, d_ff = 4d
+
+print(f"attention   : {attn:>12,}   ({attn/(attn+ffn):.1%})")
+print(f"FFN         : {ffn:>12,}   ({ffn/(attn+ffn):.1%})")
+print(f"2017 tarifi : {eski:>12,}   SwiGLU'ya göre {ffn/eski-1:+.1%}")
+print(f"8/3 · d = {8/3*d:.1f}  ->  128'in katı: {d_ff}")
+```
+
+```
+attention   :   67,108,864   (33.2%)
+FFN         :  135,266,304   (66.8%)
+2017 tarifi :  134,217,728   SwiGLU'ya göre +0.8%
+8/3 · d = 10922.7  ->  128'in katı: 11008
+```
+
+İki sonuç çıkıyor. Birincisi bölümün açılış cümlesini hak ediyor: blok
+parametrelerinin **üçte ikisi** FFN'de. Attention çok konuşulan taraf, ama
+ağırlığı taşıyan taraf değil.
+
+İkincisi daha ilginç. 11008 keyfî bir sayı değil — $\frac{8}{3} \times 4096 =
+10922.7$'nin 128'in katına yükseltilmiş hâli. Sonuç, 2017'nin iki matrisli
+tarifinden yalnızca **%0.8** uzakta. Üçüncü matris bedava gelmiyor; yeri gizli
+birim sayısından kesiliyor. Shazeer'in düzeltmesi kâğıt üstünde kalmış bir
+tavsiye değil, sevk edilen dosyada görünen bir sayı.
+
+<aside class="sidenote">
+
+Konfigürasyon iki bağımsız yerden doğrulandı. OLMo ekibi 2025, Tablo 4 ve §2.2: *"karşılık gelen gizli boyutu yaklaşık $\frac{8}{3}d$ alıyoruz, ama verimi artırmak için 128'in en yakın katına yükselterek (7B modelimiz için 11.008)."* Ve modelin yayımlanmış [`config.json`](https://huggingface.co/allenai/OLMo-2-1124-7B/blob/main/config.json)'ı: `hidden_size` 4096, `intermediate_size` 11008, `num_hidden_layers` 32, `num_attention_heads` = `num_key_value_heads` = 32. Üç matrisin varlığı `transformers`'ın [`Olmo2MLP`](https://github.com/huggingface/transformers/blob/main/src/transformers/models/olmo2/modeling_olmo2.py) uygulamasında da açık: `gate_proj`, `up_proj`, `down_proj` — üçü de `bias=False`. Sayım yalnız matrisleri kapsıyor, gömme ve çıkış katmanını değil.
+
+</aside>
+
 Ölçülen fark, parametre ve hesap eşitlenmiş hâlde (Tablo 1, heldout
 log-perplexity):
 
