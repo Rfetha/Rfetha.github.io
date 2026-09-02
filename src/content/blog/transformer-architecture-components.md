@@ -2,17 +2,7 @@
 title: "Modern bir Transformer'ın parçaları"
 description: 'Bir LLM mimarisinin parçaları: attention türleri, positional encoding, KV-cache ve MoE — 2017 tasarımından bugüne ne eklendi, ne çıkarıldı.'
 pubDate: '2026-08-01'
-placeholder: true
 ---
-
-<!--
-Metin uçtan uca yazıldı. On bir figürün onu çizildi; §9.2'deki karşılaştırmalı
-blok şeması bilerek atlandı (ASCII şema onu zaten taşıyor).
-Kanıt: drafts/research-transformer-components-evidence.md (E§n)
-       drafts/research-decoder-only-math.md (M§n)
-Plan:  drafts/outline-transformer-components.md
-BİTİRİRKEN: figürler · placeholder: true sil · drafts kopyasını sil.
--->
 
 ## Abstract
 
@@ -1360,11 +1350,6 @@ x ──┬───────────────────────
 konum kodlaması gömmeden attention'ın içine taşınmış, feed-forward
 seyrekleşmiş. Değişmeyen şey iskeletin kendisi: iki alt katman, iki artık
 bağlantı, ve aynı bloğun üst üste yığılması.
-
-<!-- FİGÜR: iki blok yan yana, aynı ölçekte. Solda 2017 encoder bloğu, Post-LN
-     yerleşimi etiketli; sağda bugünün decoder bloğu (Pre-LN, RMSNorm, RoPE,
-     SwiGLU/MoE). Değişen kutular vurgulu, değişmeyen artık yolu iki tarafta da
-     aynı biçimde çizili. -->
 
 ### 9.3 Yakınsama yok
 
