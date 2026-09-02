@@ -37,8 +37,8 @@ literatürde yok.
 
 ## 1. 2017'de tek bir blok vardı
 
-Haziran 2017. *Attention Is All You Need* tek bir mimari yayımlıyor ve o
-mimarinin her ayrıntısı tek bir tarifle geliyor: altı katmanlı bir encoder, altı
+Haziran 2017. *Attention Is All You Need* tek bir mimariyi tek bir tarifle
+yayımlıyor: altı katmanlı bir encoder, altı
 katmanlı bir decoder, ikisinin arasında cross-attention. Blokların içi de sabit —
 sekiz başlı attention, baş başına $d_k = d_v = 64$; girdi gömmesine **eklenen**
 sinüzoidal konum kodlaması; içi 2048 genişliğinde, ReLU'lu bir feed-forward ağı.
@@ -70,7 +70,7 @@ Sekiz yıl sonra o tarifin maddeleri tek tek yerinden edilmiş durumda:
   vektöre indirgeniyorlar (DeepSeek-V3).
 
 Peki yerinde ne kaldı? İskelet: attention işleminin kendisi, artık bağlantılar,
-ve aynı bloğu üst üste yığma fikri. Sekiz yılda değişmeyen liste bu kadar kısa.
+ve aynı bloğu üst üste yığma fikri.
 
 ### 1.1 Bu yazının anlatmadığı şey
 
@@ -86,9 +86,8 @@ girenler neye cevap veriyor.
 
 ### 1.2 Dört baskı
 
-Bir envanterin liste olmaktan çıkması için bir düzen gerekiyor, ve kaynaklarda
-düzen var. Bloğa giren her parçanın arkasında adı konmuş bir baskı duruyor, ve
-bu baskılar dört tane.
+Bloğa giren her parçanın arkasında adı konmuş bir baskı duruyor, ve bu baskılar
+dört tane.
 
 **Decode belleği ve bant genişliği.** Model bir token üretirken, o ana kadarki
 her token'ın anahtar ve değerini bellekten okumak zorunda. Üretimin asıl
@@ -109,8 +108,7 @@ tartışması buradan çıkıyor (§5).
 
 Bu dördü ayrı tutulmalı, çünkü karıştırmak hem kolay hem yanlış: MoE'nin
 KV-cache ile hiçbir ilgisi yok, QK-Norm'un bağlam uzunluğuyla hiçbir ilgisi yok.
-Bir mimariyi tek bir sebeple açıklamak en sık yapılan hata, ve bu yazının
-kaçınmaya çalıştığı asıl şey o.
+Bir mimariyi tek bir sebeple açıklamak en sık yapılan hata.
 
 <figure>
 
@@ -129,12 +127,11 @@ Envantere değişmeyen parçadan başlayalım.
 ## 2. Attention: beş çeşit, tek işlem
 
 "Attention" tek bir işlemin adı. Bu bölümde sayacağım beş çeşidi ayrı
-mekanizmalar değil — aynı işlemin farklı argümanlarla çağrılmış hâlleri. Önce
-işlemin kendisini kuralım, sonra çeşitleri tek tek gezelim; aralarındaki fark
-yalnızca iki şeyde toplanıyor: **sorgunun bakabildiği pozisyonlar**, ve
-**anahtar ile değerin nereden geldiği**.
+mekanizmalar değil — aynı işlemin farklı argümanlarla çağrılmış hâlleri.
+Aralarındaki fark yalnızca iki şeyde toplanıyor: **sorgunun bakabildiği
+pozisyonlar**, ve **anahtar ile değerin nereden geldiği**.
 
-Burada olmayan bir şeyi de baştan söyleyeyim. MQA, GQA ve MLA da "attention
+MQA, GQA ve MLA da "attention
 çeşidi" diye anılır, ama farklı bir eksende dururlar: kimin kime bakabildiğini
 değiştirmezler, anahtar ve değerin **nasıl saklandığını** değiştirirler. O eksen
 2017'nin tasarım uzayında yok — sonradan, üretim maliyeti bir problem hâline
@@ -160,54 +157,12 @@ Her satır bir sorgu pozisyonu. O pozisyonun sorgusu bütün anahtarlarla çarp�
 dağılımla değerlerin ağırlıklı ortalaması alınıyor. Tek cümlede: **her pozisyon,
 diğer pozisyonlardan ne kadar bilgi alacağına kendisi karar veriyor.**
 
-#### $\sqrt{d_k}$ neden orada
-
-Paydadaki bölen keyfî bir sabit değil, ve makale gerekçesini bir dipnotta
-veriyor: $q$ ile $k$'nin bileşenleri bağımsız, ortalaması 0 ve varyansı 1 olan
-değişkenlerse, nokta çarpımları $q \cdot k = \sum_{i=1}^{d_k} q_i k_i$ ortalaması
-0, **varyansı $d_k$** olan bir değişken. Yani $d_k$ büyüdükçe logitler büyüyor.
-
-Bu neden bir sorun? Softmax'ın girdisi büyüdükçe çıktısı tek bir pozisyona
-yığılıyor; dağılım düzleşmek yerine sivrileşiyor ve gradyanlar kayboluyor.
-Bölen tam olarak bunu engelliyor. İki satır kodla görülüyor:
-
-```python
-import numpy as np
-rng = np.random.default_rng(0)
-
-for d_k in (8, 64, 512):
-    q = rng.normal(0, 1, (20000, d_k))
-    k = rng.normal(0, 1, (20000, d_k))
-    logit = (q * k).sum(-1)                    # tek bir q·k çarpımı
-    print(f"d_k={d_k:4d}   ham varyans={logit.var():8.1f}   "
-          f"√d_k'ye bölünce={(logit/np.sqrt(d_k)).var():5.2f}")
-```
-
-```
-d_k=   8   ham varyans=     8.2   √d_k'ye bölünce= 1.02
-d_k=  64   ham varyans=    64.4   √d_k'ye bölünce= 1.01
-d_k= 512   ham varyans=   509.4   √d_k'ye bölünce= 0.99
-```
-
-Ham varyans $d_k$'yi birebir takip ediyor; bölen onu boyuttan bağımsız olarak
-1'e sabitliyor. Ölçek, softmax'ı doyumdan kurtaran şey.
-
-#### Maliyet: diziye göre karesel
-
-Makalenin Tablo 1'i üç yapıyı üç eksende karşılaştırıyor. Konumuza giren iki
-satır:
-
-| | Katman başına karmaşıklık | Sıralı işlem | En uzun yol |
-|---|---|---|---|
-| Self-attention | $O(n^2 \cdot d)$ | $O(1)$ | $O(1)$ |
-| Tekrarlayan (RNN) | $O(n \cdot d^2)$ | $O(n)$ | $O(n)$ |
-
-Takas açık: attention diziye göre **karesel** ama tamamen paralel, ve herhangi
-iki pozisyon arasındaki yol sabit uzunlukta. RNN doğrusal ama diziyi sırayla
-gezmek zorunda. 2017'de kazanan taraf paralellikti — ve bu yazının geri
-kalanının konusu, o karesel terimin sekiz yıl sonra hangi biçimde geri döndüğü.
-Hesap olarak değil: §3'te göreceğimiz gibi, üretim sırasında bağlayıcı olan
-kısıt bellek trafiği.
+Maliyeti diziye göre karesel. Makalenin Tablo 1'i attention'ı katman başına
+$O(n^2 \cdot d)$ karmaşıklıkta gösteriyor: diziye göre **karesel**, ama tamamen
+paralel ve herhangi iki pozisyon arasındaki yol sabit uzunlukta. 2017'de kazanan
+taraf paralellikti — ve bu
+yazının geri kalanının konusu, o karesel terimin sekiz yıl sonra hangi biçimde
+geri döndüğü. Hesap olarak değil: üretimde bağlayıcı kısıt bellek trafiği (§3).
 
 Son bir şerh: "attention 2017'den beri değişmedi" cümlesi neredeyse doğru.
 2025'te gpt-oss softmax'ın **paydasına** öğrenilen bir terim ekliyor ve bununla
@@ -227,16 +182,8 @@ $512 = 8 \times 64$. Sekiz kafa, tek geniş bir kafayla aşağı yukarı aynı
 parametre ve aynı hesap maliyetinde çalışıyor; kazanılan şey kapasite değil,
 **çeşitlilik** — sekiz farklı alt uzayda sekiz farklı ilişki öğrenilebiliyor.
 
-<figure>
-
-<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-3-heads.svg" alt="Aynı toplam genişlikte iki kutu dizisi: solda 512 boyutunda tek bir attention kafası, sağda her biri 64 boyutunda sekiz kafa. Altta 512 eşittir 8 çarpı 64.">
-
-<figcaption><b>Figure 3.</b> Kafalar modeli genişletmiyor, <b>bölüyor</b>. Sekiz dar kafa tek geniş kafayla aşağı yukarı aynı parametre ve aynı hesap maliyetinde çalışıyor; kazanılan şey kapasite değil, sekiz ayrı alt uzayda sekiz ayrı ilişki. Bu kutuları daraltmak 2017'nin kendi ablasyonunda kaliteyi düşürmüş — §4'ün üç yöntemi de o yüzden başka bir çarpana basıyor.</figcaption>
-
-</figure>
-
-Buradaki takasın bir sınırı var ve onu da yine 2017 ölçmüş. Makalenin ablasyon
-tablosunda kafa sayısı ve kafa genişliği ayrı ayrı oynatılıyor, ve sonuç
+Buradaki takasın sınırını yine 2017 ölçmüş: ablasyon tablosunda kafa sayısı ve
+kafa genişliği ayrı ayrı oynatılıyor
 (a.g.e., §6.2): *"Tablo 3'ün (B) satırlarında, attention anahtar boyutu $d_k$'yi
 küçültmenin model kalitesini düşürdüğünü gözlemliyoruz."*
 
@@ -274,15 +221,14 @@ O sonucun adı **prefix-invariance**, ve yazının geri kalanının yarısı bur
 Gerekçe tümevarım: ilk katmanda pozisyon $j$'nin girdisi yalnızca $x_j$'nin
 gömmesi. Bir üst katmanda $j$. çıktı yalnızca $j' \le j$ pozisyonlarının bir
 önceki katman durumlarına bakıyor — çünkü maske öyle söylüyor — ve feed-forward
-pozisyon bazında çalışıyor. Yani hiçbir katmanda, hiçbir pozisyon kendinden
-sonrasını okumuyor.
+pozisyon bazında çalışıyor.
 
 Bunun tersi de doğru ve önemli: maske olmayan bir yığında ($M = \mathbf{0}$)
 pozisyon $j$'nin durumu **bütün** pozisyonlara bağlı. Diziye bir token eklemek,
 ikinci katmandan itibaren her pozisyonun anahtarını ve değerini değiştiriyor.
 Saklanacak kararlı bir şey yok.
 
-İddia sayısal olarak kontrol edilebilir. Üç katmanlı bir yığın, rastgele
+Üç katmanlı bir yığın, rastgele
 ağırlıklar, altı token: önce ilk beş token'la koştur, sonra altısını ekleyip
 tekrar koştur, ve ilk beş pozisyonun anahtar/değerlerini karşılaştır.
 
@@ -315,14 +261,13 @@ causal      sapma: 0.00e+00
 ```
 
 Sapmanın *yaklaşık* değil **tam** sıfır olması argümanın kendisi: causal yol yeni
-token'ı hiç okumuyor, dolayısıyla aritmetik bit düzeyinde aynı kalıyor. Kayan
-nokta hatası bile yok, çünkü hesaplanan ifade birebir aynı ifade.
+token'ı hiç okumuyor, dolayısıyla aritmetik bit düzeyinde aynı kalıyor.
 
 <figure>
 
-<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-4-prefix-invariance.svg" alt="İki panel, her biri üç katman ve altı pozisyonluk bir anahtar-değer ızgarası. Causal maskede ilk beş sütun değişmemiş, sapma sıfır; maske olmayanda bütün sütunlar değişmiş, sapma 1.38.">
+<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-3-prefix-invariance.svg" alt="İki panel, her biri üç katman ve altı pozisyonluk bir anahtar-değer ızgarası. Causal maskede ilk beş sütun değişmemiş, sapma sıfır; maske olmayanda bütün sütunlar değişmiş, sapma 1.38.">
 
-<figcaption><b>Figure 4.</b> Aynı yığın, altıncı token eklenmeden önce ve sonra. Causal maskede ilk beş pozisyonun anahtar ve değeri <b>bit düzeyinde</b> aynı kalıyor; maske kalkınca hepsi değişiyor. Soldaki sıfır, KV-cache'i mümkün kılan şeyin kendisi.</figcaption>
+<figcaption><b>Figure 3.</b> Aynı yığın, altıncı token eklenmeden önce ve sonra. Causal maskede ilk beş pozisyonun anahtar ve değeri <b>bit düzeyinde</b> aynı kalıyor; maske kalkınca hepsi değişiyor. Soldaki sıfır, KV-cache'i mümkün kılan şeyin kendisi.</figcaption>
 
 </figure>
 
@@ -344,13 +289,12 @@ Yani burada değişen şey maske değil, **anahtar kümesinin kendisi**. Çeviri
 doğal tasarım: kaynak cümleyi bir kez oku, hedef cümleyi yazarken her adımda o
 okumaya geri dön.
 
-Bu yazı açısından cross-attention'ın ilginç yanı maliyeti. Encoder'ın çıktısı
-bütün üretim boyunca sabit, dolayısıyla cross-attention'ın anahtar ve değerleri
-**bir kez** hesaplanıp bütün adımlar boyunca saklanabiliyor. Encoder her token
-için değil, her girdi için bir kez koşuyor.
+Cross-attention'ın ilginç yanı maliyeti: encoder'ın çıktısı üretim boyunca
+sabit, dolayısıyla anahtar ve değerleri **bir kez** hesaplanıp saklanabiliyor.
+Encoder her token için değil, her girdi için bir kez koşuyor.
 
-Bu da yaygın bir yanlışı düzeltmemizi gerektiriyor. *"KV-cache'i yalnızca
-decoder-only modeller kullanabilir"* cümlesi yanlış. Causal maskeli **her**
+*"KV-cache'i yalnızca decoder-only modeller kullanabilir"* cümlesi yanlış.
+Causal maskeli **her**
 decoder cache kullanır — encoder-decoder'ın decoder yarısı dahil; T5 de cache'le
 decode eder. Doğru ve dar ifade şu: **büyüyen bir dizi üzerinde çalışan çift
 yönlü bir encoder** cache kullanamaz, çünkü §2.3'ün lemması orada geçerli değil.
@@ -378,15 +322,13 @@ token ilerlemiş oluyor. Kendi konfigürasyonlarıyla — $W = 4096$, 32 katman 
 
 <figure>
 
-<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-5-sliding-window.svg" alt="Sağda sorgulayan token, soluna doğru uzanan altı çubuk. Bir katmanda 4096 token, iki katmanda 8192, dört katmanda 16.384, sekizde 32.768, on altıda 65.536, otuz ikide 131.072.">
+<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-4-sliding-window.svg" alt="Sağda sorgulayan token, soluna doğru uzanan altı çubuk. Bir katmanda 4096 token, iki katmanda 8192, dört katmanda 16.384, sekizde 32.768, on altıda 65.536, otuz ikide 131.072.">
 
-<figcaption><b>Figure 5.</b> Tek bir katmanda doğrudan bakış 4096 token, ama menzil katman sayısıyla çarpılıyor. Mistral'in 32 katmanının sonunda 131.072 token'lık teorik bir menzil kalıyor. Ölçek doğrusal — 24 piksel 4096 token.</figcaption>
+<figcaption><b>Figure 4.</b> Tek bir katmanda doğrudan bakış 4096 token, ama menzil katman sayısıyla çarpılıyor. Mistral'in 32 katmanının sonunda 131.072 token'lık teorik bir menzil kalıyor. Ölçek doğrusal — 24 piksel 4096 token.</figcaption>
 
 </figure>
 
-Yani "kayan pencere bağlamı kesiyor" sezgisi yanlış: pencere tek bir katmandaki
-doğrudan bakışı sınırlıyor, katman yığını ise dolaylı yolu açık tutuyor. Bunun
-karşılığında saklanması gereken anahtar/değer sayısı sabitleniyor — Mistral bunu
+Karşılığında saklanması gereken anahtar/değer sayısı sabitleniyor — Mistral bunu
 *rolling buffer cache* ile yapıyor: pozisyon $i$'nin anahtarı cache'te
 $i \bmod W$ konumuna yazılıyor, eskisinin üstüne.
 
@@ -405,9 +347,7 @@ Neden yapıldığı — yani cache maliyeti — sıradaki bölümün konusu.
 
 ## 3. KV-cache: hesabı belleğe çeviren takas
 
-§2.3'ün lemması bir imkân tanımlıyordu: causal bir yığında geçmiş anahtar ve
-değerler değişmiyor, dolayısıyla saklanabilirler. Bu bölüm o imkânın faturasını
-çıkarıyor.
+§2.3'ün lemması saklamayı mümkün kılmıştı; bu bölüm faturasını çıkarıyor.
 
 ### 3.1 Bellek faturası
 
@@ -424,7 +364,7 @@ $$
 \text{KV bayt} = 2 \times b \times s \times L \times h_{	ext{kv}} \times d_{	ext{head}} \times \text{bayt}_{\text{dtype}}
 $$
 
-<figcaption><b>Figure 6.</b> Baştaki 2 anahtar ve değer için; <i>b</i> yığın boyutu, <i>s</i> o ana kadarki token sayısı, <i>L</i> katman sayısı, <i>h<sub>kv</sub></i> <b>anahtar/değer</b> kafa sayısı, <i>d<sub>head</sub></i> kafa başına boyut.</figcaption>
+<figcaption><b>Figure 5.</b> Baştaki 2 anahtar ve değer için; <i>b</i> yığın boyutu, <i>s</i> o ana kadarki token sayısı, <i>L</i> katman sayısı, <i>h<sub>kv</sub></i> <b>anahtar/değer</b> kafa sayısı, <i>d<sub>head</sub></i> kafa başına boyut.</figcaption>
 
 </figure>
 
@@ -454,9 +394,8 @@ token başına : 819200 bayt = 800 KiB
 2048 token   : 1.678 GB
 ```
 
-Formül makalenin yayımladığı sayıyı birebir üretiyor. Tek bir isteğin,
-13 milyarlık bir model için 1.6 GB. Yüzlerce eşzamanlı istekle çalışan bir
-sunucuda bunun ne anlama geldiği açık.
+Formül makalenin yayımladığı sayıyı birebir üretiyor: tek bir isteğin,
+13 milyarlık bir model için 1.6 GB.
 
 ### 3.2 Asıl darboğaz hesap değil, bant genişliği
 
@@ -466,8 +405,8 @@ Shazeer, *Fast Transformer Decoding: One Write-Head is All You Need*, [arXiv:191
 
 </aside>
 
-Buraya kadar cache'i bir kapasite problemi gibi anlattım. Asıl mesele daha
-ince, ve bu yazının döndüğü mil o. Shazeer (2019, §2.4.1) artımlı üretimin
+Buraya kadar cache'i bir kapasite problemi gibi anlattım; asıl mesele daha
+ince. Shazeer (2019, §2.4.1) artımlı üretimin
 aritmetik ve bellek erişimi oranını çıkarıyor: bellek erişiminin işlem sayısına
 oranı $\Theta\!\left(\frac{n}{d}+\frac{1}{b}\right)$, ve
 
@@ -476,12 +415,12 @@ oranı $\Theta\!\left(\frac{n}{d}+\frac{1}{b}\right)$, ve
 > açıyor."
 
 Karşılaştırma için: aynı analiz **eğitim** için yapıldığında oran
-$O(1/k + 1/(bn))$ çıkıyor (a.g.e., §2.3.1) — yani çok küçük. Cümlenin tamamı şu: **artımlı
-decode, eğitimden temelden daha kötü bir donanım rejimi.** Eğitimde çip hesap
-yapıyor; decode'da çip çoğunlukla bekliyor.
+$O(1/k + 1/(bn))$ çıkıyor (a.g.e., §2.3.1) — yani çok küçük. **Artımlı decode,
+eğitimden temelden daha kötü bir donanım rejimi:** eğitimde çip hesap yapıyor,
+decode'da bekliyor.
 
-Oranı gerçek bir çipe oturtunca ne kadar kötü olduğu görünüyor. Bir H100 SXM
-yoğun bf16'da 989,5 TFLOPS yapıyor ve HBM'i 3,35 TB/s okuyor; bölünce çipin
+Bir H100 SXM yoğun bf16'da 989,5 TFLOPS yapıyor ve HBM'i 3,35 TB/s
+okuyor; bölünce çipin
 doyması için okunan her bayta 295 işlem düşmesi gerektiği çıkıyor. OLMo 2 7B ile:
 
 <aside class="sidenote">
@@ -518,8 +457,6 @@ kullanıyor. Geri kalan zaman bellek bekliyor. Ve ikinci sütun, akla ilk gelen
 ağırlıklar bir kez okunup bütün diziler arasında paylaşılırken cache
 paylaşılmıyor. b=64'te okunan her yüz baytın doksanı KV.
 
-Sıradaki bölümün üç yöntemi de bu son cümleye saldırıyor.
-
 Pope ve ark. bunu 500B+ ölçekte somutluyor (2022, §2): batch 512 ve 2048 token
 bağlamla KV-cache toplam **3TB**'a ulaşıyor — *"modelin parametrelerinin üç
 katı"* — ve *"çipin hesap çekirdeği esasen boşta beklerken"* bu cache üretilen
@@ -531,8 +468,7 @@ Pope ve ark., *Efficiently Scaling Transformer Inference*, [arXiv:2211.05102](ht
 
 </aside>
 
-Buradan iki yanlış çıkarım yapmamak lazım. Birincisi §2.4'te düzeltildi:
-cache decoder-only'ye özgü değil. İkincisi daha yaygın: **"KV-cache decode'u
+Buradan yaygın bir yanlış çıkarım yapmamak lazım: **"KV-cache decode'u
 ucuzlatır" cümlesi eksik.** Cache bir hesap problemini bir bellek problemine
 *çeviriyor*. Bütün MQA/GQA/MLA/PagedAttention literatürü, cache pahalı olduğu
 için var.
@@ -541,8 +477,7 @@ Sıradaki bölüm o literatür.
 
 ## 4. MQA, GQA, MLA: tek çarpana üç saldırı
 
-§3'ün problemi tek cümleyle şu: cache çok büyük ve her token için baştan
-okunuyor. Formüle bakınca kısılabilecek çarpanlar sınırlı — $L$ ve $d_{	ext{head}}$
+§3'ün formülüne bakınca kısılabilecek çarpanlar sınırlı — $L$ ve $d_{	ext{head}}$
 modelin kendisi, $s$ kullanıcının isteği, $b$ zaten geliri artıran şey. Geriye
 **$h_{	ext{kv}}$** kalıyor: anahtar/değer kafalarının sayısı. Bu bölüm o çarpana
 yapılmış üç saldırı, kronolojik sırayla.
@@ -576,9 +511,9 @@ ne kadar kaybettirdiği.** Shazeer'in kendi okuması (a.g.e., §4.2): multi-quer
 *"temel modelden biraz daha kötü görünüyor, ama $h$, $d_k$ ve $d_v$'yi düşüren
 alternatiflerin hepsinden çok daha yakın."*
 
-Burada §2.2'nin kapanışı devreye giriyor. Cache'i küçültmenin bariz yolları kafa
-sayısını ya da kafa genişliğini kısmak, ve 2017 zaten $d_k$'yi kısmanın kaliteyi
-düşürdüğünü ölçmüştü. MQA üçüncü bir düğme buluyor: kafa sayısını koru, yalnızca
+Cache'i küçültmenin bariz yolları kafa sayısını ya da kafa genişliğini kısmak;
+2017 $d_k$'yi kısmanın kaliteyi düşürdüğünü ölçmüştü (§2.2). MQA üçüncü bir
+düğme buluyor: kafa sayısını koru, yalnızca
 **anahtar/değer** kafalarını tekle. Kazanma sebebi bu.
 
 ### 4.2 GQA — ikisinin arası
@@ -597,9 +532,9 @@ multi-query hem bant genişliğinde hem kapasitede daha agresif bir kesme hâlin
 geliyor. GQA, model büyüdükçe bant genişliği ve kapasitedeki aynı oransal
 azalmayı korumamızı sağlıyor."*
 
-Makalenin ikinci katkısı pratik: mevcut bir MHA checkpoint'ini GQA'ya çevirmek
-için sıfırdan eğitmeye gerek yok. Anahtar ve değer projeksiyon matrislerini grup
-başına **ortalayıp** orijinal eğitim adımlarının %5'i kadar devam ediyorsunuz.
+Makalenin ikinci katkısı pratik: bir MHA checkpoint'i sıfırdan eğitilmeden
+GQA'ya çevrilebiliyor — anahtar ve değer projeksiyonlarını grup başına
+**ortalayıp** orijinal eğitim adımlarının %5'i kadar devam ederek.
 
 Bugün her yerde gördüğünüz "8 grup" sayısı da buradan geliyor — ve dayanağı
 sanıldığından zayıf (a.g.e., §3.3): *"grup sayısını MQA'dan itibaren artırmak başta
@@ -676,14 +611,13 @@ MLA (gerçek) : 35,136 eleman/token   -> 56.9x küçük
 128K bağlam, bf16, b=1 : MLA 8.6 GiB  vs  MHA 488 GiB
 ```
 
-Tek bir isteğin 128K bağlamdaki cache'i 488 GiB yerine 8.6 GiB. Bu, mimarinin
-tek bir bileşeninden gelen fark.
+Tek bir isteğin 128K bağlamdaki cache'i 488 GiB yerine 8.6 GiB.
 
 <figure>
 
-<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-7-kv-footprint.svg" alt="Dört yatay çubuk: MHA 1.998.848 eleman ve 488 GiB, GQA-8 124.928 eleman ve 30,5 GiB, MQA 15.616 eleman ve 3,8 GiB, MLA 35.136 eleman ve 8,6 GiB. MLA'nın çubuğu MHA'nınkinin elli yedide biri.">
+<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-6-kv-footprint.svg" alt="Dört yatay çubuk: MHA 1.998.848 eleman ve 488 GiB, GQA-8 124.928 eleman ve 30,5 GiB, MQA 15.616 eleman ve 3,8 GiB, MLA 35.136 eleman ve 8,6 GiB. MLA'nın çubuğu MHA'nınkinin elli yedide biri.">
 
-<figcaption><b>Figure 7.</b> Aynı model, dört mekanizmayla. Yalnız <b>MLA</b> sevk edildi; diğer üçü DeepSeek-V3'ün konfigürasyonuna uygulanmış hâlleri. Kapasite sütunu DeepSeek'in kendi etiketleri — bağımsız bir ölçüm değil.</figcaption>
+<figcaption><b>Figure 6.</b> Aynı model, dört mekanizmayla. Yalnız <b>MLA</b> sevk edildi; diğer üçü DeepSeek-V3'ün konfigürasyonuna uygulanmış hâlleri. Kapasite sütunu DeepSeek'in kendi etiketleri — bağımsız bir ölçüm değil.</figcaption>
 
 </figure>
 
@@ -721,7 +655,7 @@ konfigürasyon dosyasında görünür bir sayı olarak kalmış.
 Attention işleminde konum diye bir kavram yok. $\operatorname{softmax}(QK^\top)V$
 ifadesinde satırları karıştırırsanız çıktı da aynı şekilde karışıyor; işlemin
 kendisi diziyi bir küme gibi görüyor. Konum bilgisi dışarıdan enjekte edilmek
-zorunda, ve bu bölüm o enjeksiyonun sekiz yılda nasıl değiştiğini anlatıyor.
+zorunda.
 
 ### 5.1 Sinüzoidal kodlama, ve 2017'nin kendi ablasyonu
 
@@ -735,7 +669,7 @@ PE_{(pos,\,2i)} = \sin\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right), \q
 PE_{(pos,\,2i+1)} = \cos\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right)
 $$
 
-<figcaption><b>Figure 8.</b> Sinüzoidal konum kodlaması. Dalga boyları 2&pi;'den 10000 &middot; 2&pi;'ye uzanan geometrik bir dizi oluşturuyor.</figcaption>
+<figcaption><b>Figure 7.</b> Sinüzoidal konum kodlaması. Dalga boyları 2&pi;'den 10000 &middot; 2&pi;'ye uzanan geometrik bir dizi oluşturuyor.</figcaption>
 
 </figure>
 
@@ -811,6 +745,7 @@ def R(m, d, theta=10000.0):
         M[2*i:2*i+2, 2*i:2*i+2] = [[c, -s], [s, c]]
     return M
 
+rng = np.random.default_rng(0)
 d, m, n = 64, 7, 23
 q, k = rng.normal(0, 1, d), rng.normal(0, 1, d)
 
@@ -827,14 +762,13 @@ fark            = 1.78e-15
 
 Son satır ikinci özelliği gösteriyor: döndürme normu değiştirmiyor. Makalenin
 vurguladığı gibi, $\boldsymbol{R}^d_\Theta$ ortogonal — *"bu da konum bilgisini
-kodlarken kararlılığı garantiliyor."* Toplamalı bir kodlama vektörün boyunu
-değiştirir; RoPE değiştirmez.
+kodlarken kararlılığı garantiliyor."*
 
 <figure>
 
-<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-9-rotate-vs-add.svg" alt="İki daire. Solda gömmeye konum vektörü eklendiğinde toplamın ucu dairenin dışına çıkıyor. Sağda vektör aynı yarıçapta döndürülüyor ve uç daire üzerinde kalıyor. Her iki normun ölçülen değeri 7.315344.">
+<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-8-rotate-vs-add.svg" alt="İki daire. Solda gömmeye konum vektörü eklendiğinde toplamın ucu dairenin dışına çıkıyor. Sağda vektör aynı yarıçapta döndürülüyor ve uç daire üzerinde kalıyor. Her iki normun ölçülen değeri 7.315344.">
 
-<figcaption><b>Figure 9.</b> Toplamak vektörün boyunu değiştiriyor, döndürmek değiştirmiyor. RoPE'un rotasyon matrisi <b>ortogonal</b> olduğu için norm koruması bir gözlem değil, garanti.</figcaption>
+<figcaption><b>Figure 8.</b> Toplamak vektörün boyunu değiştiriyor, döndürmek değiştirmiyor. RoPE'un rotasyon matrisi <b>ortogonal</b> olduğu için norm koruması bir gözlem değil, garanti.</figcaption>
 
 </figure>
 
@@ -858,8 +792,8 @@ oynatılma sebebi tek bir şey: uzun bağlam.
 
 Son madde §2.5'e bağlanıyor ve tek başına ilginç: **tek model içinde iki farklı
 $\theta$.** Yerel katmanlar yalnızca 1024 token görüyor, o yüzden gerilmiş
-frekansa ihtiyaçları yok. Konum kodlaması modelin global bir özelliği olmaktan
-çıkıp katman tipine göre seçilen bir ayara dönüşmüş durumda.
+frekansa ihtiyaçları yok. Konum kodlaması artık global bir özellik değil, katman
+tipine göre seçilen bir ayar.
 
 Peki $\theta$'yı büyütmek tam olarak neyi satın alıyor? OLMo 2'nin gerekçesi
 *"çözünürlüğü artırıyor"* diyordu; frekansları yazınca bunun böyle olmadığı
@@ -938,8 +872,7 @@ eğitip karşılaştırıyor. Bulguları (a.g.e., §2.2):
 Sebebini de açıklıyorlar: normalizasyon, sorgu ile anahtarın nokta çarpımındaki
 büyüklük bilgisini törpülüyor; attention logitleri birbirine yaklaşıyor ve
 dağılım düzleşiyor. Ölçtükleri entropi QK-Norm varyantında belirgin biçimde
-yüksek — yani dikkat dağınık. Uzun bir bağlamda doğru cümleyi bulması gereken
-bir model için bu doğrudan bir kayıp.
+yüksek — yani dikkat dağınık.
 
 <aside class="sidenote">
 
@@ -947,9 +880,7 @@ Yang ve ark., *Rope to Nope and Back Again: A New Hybrid Attention Strategy*, [a
 
 </aside>
 
-Bu, yazının genel desenine iyi bir örnek: bileşenler bedava gelmiyor, ve
-gerekçeleri farklı eksenlerde. QK-Norm eğitimi kurtarıyor, uzun bağlamdan bir
-şey götürüyor.
+Desen tanıdık: QK-Norm eğitimi kurtarıyor, uzun bağlamdan bir şey götürüyor.
 
 ### 5.5 NoPE — hiç kodlamamak
 
@@ -986,8 +917,7 @@ attention çıktısı : [1.     0.5    0.3333 0.25   0.2    0.1667 0.1429 0.125 
 ```
 
 Tek bir attention katmanı, hiçbir konum sinyali verilmeden, her pozisyonun
-sırasını okunabilir biçimde taşıyor. Maskenin sayaç olması bir sezgi değil,
-kurulabilir bir yapı.
+sırasını okunabilir biçimde taşıyor.
 
 Kazemnejad ve ark. (2023) bunu sistematik olarak ölçüyor: sıfırdan eğitilmiş
 decoder-only modellerde APE, T5-bağıl, ALiBi, RoPE ve hiçbir kodlama olmayan
@@ -1015,8 +945,7 @@ Yine de aynı çalışma, iki yaklaşımı **katman katman karıştırmanın** i
 yaradığını gösteriyor. NoPE katmanları ile RoPE katmanlarının davranışları
 ölçüldüğünde net biçimde ayrışıyor (Yang ve ark. 2025, §3): NoPE katmanları bilgi getirmede güçlü —
 aradıkları token'a yüksek dikkat veriyorlar; RoPE katmanları ise güçlü bir
-yakınlık eğilimi gösteriyor, yani son token'lara yaslanıyorlar. Biri arıyor,
-öteki yakındakine bakıyor.
+yakınlık eğilimi gösteriyor, yani son token'lara yaslanıyorlar.
 
 Aynı yerde, §5.3'ün ayar düğmesinin bedeli de ölçülmüş: $\theta$ büyüdükçe RoPE
 katmanlarının yakınlık eğilimi azalıyor, ama bu kez alıcı alan genişlediği için
@@ -1028,15 +957,15 @@ değil.
 ## 6. Mixture-of-Experts: parametreyi hesaptan ayırmak
 
 Buradan itibaren baskı değişiyor. §3–§5 decode belleği ve bağlam uzunluğu
-hakkındaydı; MoE tamamen başka bir şeye cevap veriyor ve ikisini karıştırmamak
-gerekiyor. MoE'nin KV-cache ile ilgisi yok.
+hakkındaydı; MoE tamamen başka bir şeye cevap veriyor, KV-cache ile hiçbir
+ilgisi yok.
 
 Cevap verdiği soru şu: **bir modeli, her token için yapılan hesabı aynı oranda
 büyütmeden nasıl büyütürsünüz?**
 
-Fikir eski — bu yazıdaki bileşenlerin çoğundan eski. Sparsely-gated MoE Ocak
-2017'de yayımlanmış, yani Transformer'dan beş ay önce, ve o zamanki uygulaması
-LSTM katmanlarının arasıydı. Kendi özetleriyle (Shazeer ve ark. 2017):
+Fikir eski: sparsely-gated MoE Ocak 2017'de, Transformer'dan beş ay önce
+yayımlanmış; o zamanki uygulaması LSTM katmanlarının arasıydı. Kendi
+özetleriyle (Shazeer ve ark. 2017):
 
 > "Bir sinir ağının bilgi soğurma kapasitesi parametre sayısıyla sınırlıdır.
 > Ağın parçalarının örnek bazında etkin olduğu koşullu hesaplama, teoride model
@@ -1112,13 +1041,13 @@ Shazeer ve ark., *Outrageously Large Neural Networks*, [arXiv:1701.06538](https:
 
 <figure>
 
-<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-10-moe-configs.svg" alt="Dağılım grafiği: yatay eksende katman başına toplam uzman logaritmik, dikey eksende token başına aktif uzman. Switch 2048'den 1, gpt-oss-20b 32'den 4, gpt-oss-120b 128'den 4, Qwen3 128'den 8, DeepSeek-V3 257'den 9.">
+<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-9-moe-configs.svg" alt="Dağılım grafiği: yatay eksende katman başına toplam uzman logaritmik, dikey eksende token başına aktif uzman. Switch 2048'den 1, gpt-oss-20b 32'den 4, gpt-oss-120b 128'den 4, Qwen3 128'den 8, DeepSeek-V3 257'den 9.">
 
-<figcaption><b>Figure 10.</b> Beş model, beş konfigürasyon; yatay eksen logaritmik. Noktalar dağınık: ne toplam uzman sayısında ne aktif sayıda ortak bir karar var. Switch'in tüm tezi top-1'di, bugün kimse orada değil — ama birbirlerinde de değiller.</figcaption>
+<figcaption><b>Figure 9.</b> Beş model, beş konfigürasyon; yatay eksen logaritmik. Noktalar dağınık: ne toplam uzman sayısında ne aktif sayıda ortak bir karar var. Switch'in tüm tezi top-1'di, bugün kimse orada değil — ama birbirlerinde de değiller.</figcaption>
 
 </figure>
 
-### 6.3 İki tartışmalı nokta
+### 6.3 Tartışmalı nokta: paylaşılan uzman
 
 Tabloya bakınca "alan ince taneliliğe yakınsadı" demek cazip. Kaynaklar bunu
 desteklemiyor.
@@ -1159,8 +1088,7 @@ yönlendirilen uzmanlardan birini alıp paylaşılan yapmak *"olası kombinasyon
 neredeyse %90'ını ortadan kaldırıyor."*
 
 Desen şu: DeepSeekMoE ince taneliliği **savunmak** için hangi argümanı kurduysa,
-OLMoE aynı argümanı paylaşılan uzmana **karşı** kullanıyor. İkisi de kombinasyon
-sayısını büyütmek istiyor; paylaşılan uzman o sayıyı küçültüyor. Aynı çalışma
+OLMoE aynı argümanı paylaşılan uzmana **karşı** kullanıyor. Aynı çalışma
 ince tanelilik tarafını da ölçüp DeepSeekMoE'yi doğruluyor (a.g.e., §4.1.2):
 uzman boyutu dörde bölünüp sayı 8'den 32'ye çıkarıldığında — yine sabit aktif
 parametre ve sabit hesapla — HellaSwag'da *"yaklaşık %10"* iyileşme buluyorlar.
@@ -1177,10 +1105,6 @@ DeepSeek-V3'ün iki mertebe altında, ve yine tek bir labın kendi reçetesi
 üzerinde. Soruyu kapatmıyor — ama tarafların birinde artık ölçülmüş bir sayı
 var, ötekinde yok.
 
-**Uzman sayısının yönü de tek değil.** Switch'in tüm tezi top-1'di; gpt-oss 128
-uzmanla top-4 çalışıyor; DeepSeek 256'yla top-8. DeepSeek'in gerekçesi
-anlatılmaya değer, ama alanın verdiği ortak bir karar olarak sunulamaz.
-
 Son bir teknik not: yönlendirme dengelenmek zorunda, yoksa birkaç uzman bütün
 yükü alıyor. Standart yöntem bir yardımcı kayıp eklemek, ve bunun kaliteden
 götürdüğü biliniyor — DeepSeek-V3'ün katkılarından biri tam olarak bunu
@@ -1190,8 +1114,8 @@ indirmek."*
 
 ## 7. Normalizasyon: yeri de biçimi de değişti
 
-Normalizasyon 2017'de de vardı, hâlâ var — ama hem yeri hem biçimi değişti. Bu
-bölüm baştan sona kararlılık baskısının bölümü.
+Normalizasyon 2017'de de vardı, hâlâ var; değişen yeri ve biçimi. Bölümün
+tamamı kararlılık baskısı.
 
 ### 7.1 Post-LN ve Pre-LN
 
@@ -1211,15 +1135,13 @@ yolu baştan sona temiz bir kimlik olarak kalıyor.
 
 $$x_{l+1} = x_l + \mathrm{Sublayer}\big(\mathrm{LayerNorm}(x_l)\big)$$
 
-Fark bu kadar, ve ikinci biçimin neden daha iyi davrandığı da burada: ilk
-katmandan sonuncuya kadar, hiçbir şeyin yeniden ölçeklemediği kesintisiz bir yol
-var.
+Fark bu kadar.
 
 <figure>
 
-<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-11-postln-preln.svg" alt="İki blok şeması, her biri iki katman. Post-LN'de normalizasyon kutusu ana yolun üzerinde ve dikey artık çizgisini kesiyor. Pre-LN'de normalizasyon dalın içinde ve dikey çizgi baştan sona kesilmeden geçiyor.">
+<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-10-postln-preln.svg" alt="İki blok şeması, her biri iki katman. Post-LN'de normalizasyon kutusu ana yolun üzerinde ve dikey artık çizgisini kesiyor. Pre-LN'de normalizasyon dalın içinde ve dikey çizgi baştan sona kesilmeden geçiyor.">
 
-<figcaption><b>Figure 11.</b> Tek fark normalizasyon kutusunun <b>yeri</b>. Post-LN'de ana yolun üstünde, Pre-LN'de dalın içinde — sağdaki şemada dikey çizgiyi hiçbir kutu kesmiyor. Kazanan biçim kaliteyle değil, ısınma aşamasını kaldırılabilir kıldığı için kazandı.</figcaption>
+<figcaption><b>Figure 10.</b> Tek fark normalizasyon kutusunun <b>yeri</b>. Post-LN'de ana yolun üstünde, Pre-LN'de dalın içinde — sağdaki şemada dikey çizgiyi hiçbir kutu kesmiyor. Kazanan biçim kaliteyle değil, ısınma aşamasını kaldırılabilir kıldığı için kazandı.</figcaption>
 
 </figure>
 
@@ -1236,8 +1158,8 @@ Xiong ve ark. (2020) bunu teorik olarak gösteriyor (a.g.e., özet):
 
 Sonuç pratik: Pre-LN'de öğrenme oranı ısınma aşaması **kaldırılabiliyor**.
 
-Buradaki çerçeveye dikkat: Pre-LN kaliteyle kazanmadı. Model büyüdükçe ayarlama
-maliyeti artan bir hiperparametreyi ortadan kaldırdığı için kazandı. Bu yazıdaki
+Pre-LN kaliteyle kazanmadı; model büyüdükçe ayarlama maliyeti artan bir
+hiperparametreyi kaldırdığı için kazandı. Bu yazıdaki
 değişikliklerin çoğu böyle — mimari bir zafer değil, operasyonel bir kolaylık.
 
 Pre-LN'in görünür bir bedeli de var: artık akışı yol boyunca hiç normalize
@@ -1272,8 +1194,6 @@ bir üstünlüğe değil, bedava görünen bir hıza dayanıyor.
 
 ### 7.3 2024–25: yer yeniden tartışmaya açıldı
 
-Pre-LN yerleşik görünüyordu, ama son iki yıl konuyu yeniden açtı.
-
 **OLMo 2 geri dönüyor** (OLMo ekibi 2025, §2.2): *"Her transformer bloğunda attention ve
 feed-forward (MLP) katmanlarının girdilerini değil çıktılarını normalize
 ediyoruz."* Yani 2017'nin yerleşimine yakın bir noktaya — ama LayerNorm yerine
@@ -1287,8 +1207,6 @@ Yani "Pre-LN kazandı" cümlesi 2020 için doğruydu, bugün için fazla kesin.
 
 ### 7.4 Attention sink — §2.1'de bıraktığımız şerh
 
-Şimdi §2.1'in sonunda bıraktığım şerhe dönebiliriz.
-
 Xiao ve ark. (2023) tuhaf bir gözlemle başlıyor: eğitilmiş modellerde, dizinin
 **ilk** token'larına şaşırtıcı derecede yüksek dikkat gidiyor — anlamlı olup
 olmadıklarına bakılmaksızın. Bu token'lara *attention sink* diyorlar.
@@ -1301,8 +1219,7 @@ Açıklamaları, bu yazının en zarif parçası (Xiao ve ark. 2023, §3.1):
 > olmasa bile, modelin bu gereksiz dikkat değerlerini toplam bir olsun diye bir
 > yere yerleştirmesi gerekiyor."
 
-Softmax'ın satır toplamının 1 olması bir tercih değil, tanımın kendisi. Ve bu
-kısıt modeli, bakacak bir şey olmadığında bile bir yere bakmaya zorluyor.
+Softmax'ın satır toplamının 1 olması bir tercih değil, tanımın kendisi.
 Modeller çözümü kendileri buluyor: ilk token'ları çöp kutusu olarak kullanıyorlar.
 Öyle ki, kayan pencere kullanırken yalnızca **dört** başlangıç token'ının
 anahtar/değerini saklamak performansı geri getirmeye yetiyor.
@@ -1386,8 +1303,7 @@ ağırlığı taşıyan taraf değil.
 İkincisi daha ilginç. 11008 keyfî bir sayı değil — $\frac{8}{3} \times 4096 =
 10922.7$'nin 128'in katına yükseltilmiş hâli. Sonuç, 2017'nin iki matrisli
 tarifinden yalnızca **%0.8** uzakta. Üçüncü matris bedava gelmiyor; yeri gizli
-birim sayısından kesiliyor. Shazeer'in düzeltmesi kâğıt üstünde kalmış bir
-tavsiye değil, sevk edilen dosyada görünen bir sayı.
+birim sayısından kesiliyor.
 
 <aside class="sidenote">
 
@@ -1426,27 +1342,12 @@ Shazeer, *GLU Variants Improve Transformer*, [arXiv:2002.05202](https://arxiv.or
 
 ## 9. Blok bütün hâlde: beş model, beş cevap
 
-Bileşenleri tek tek gezdik. Şimdi ikisini yan yana koyalım: 2017'nin çizdiği
-blok, ve bugün sevk edilen blok. Aradaki sekiz yılın tamamı bu iki şemanın
-farkında duruyor.
+Sekiz yılın tamamı iki şeyde görünüyor: bugünkü bloğun şeması, ve onu sevk eden
+beş modelin birbirine ne kadar benzemediği.
 
-### 9.1 2017: encoder bloğu
+### 9.1 Bugün: decoder bloğu
 
-Orijinal tarif, makalenin kendi cümleleriyle (Vaswani ve ark. 2017, §3.1):
-
-> "Encoder, $N=6$ özdeş katmandan oluşan bir yığından meydana geliyor. Her
-> katmanın iki alt katmanı var. Birincisi çok başlı bir self-attention
-> mekanizması, ikincisi basit, pozisyon bazında tam bağlı bir feed-forward ağı.
-> İki alt katmanın her birinin etrafında bir artık bağlantı, ardından katman
-> normalizasyonu kullanıyoruz."
-
-İki alt katman, iki artık bağlantı, iki normalizasyon — ve normalizasyonlar
-**alt katmanların çıktısında**, yani Post-LN. Bugün sevk edilen hiçbir modelde
-bu yerleşim aynen yok; sebebi §7.1'de.
-
-### 9.2 Bugün: decoder bloğu
-
-Aynı iskelet, bu yazıda gezdiğimiz parçalarla doldurulmuş hâlde:
+2017'nin iskeleti, bu yazıda gezdiğimiz parçalarla doldurulmuş hâlde:
 
 ```
 x ──┬─────────────────────────────────────────┐
@@ -1466,10 +1367,10 @@ konum kodlaması gömmeden attention'ın içine taşınmış, feed-forward
 seyrekleşmiş. Değişmeyen şey iskeletin kendisi: iki alt katman, iki artık
 bağlantı, ve aynı bloğun üst üste yığılması.
 
-### 9.3 Yakınsama yok
+### 9.2 Yakınsama yok
 
-Şimdi asıl gözleme gelelim. "Modern transformer" diye tek bir tarif olsaydı, beş
-açık ağırlıklı modelin konfigürasyonu birbirine benzerdi. Benzemiyor:
+"Modern transformer" diye tek bir tarif olsaydı, beş açık ağırlıklı modelin
+konfigürasyonu birbirine benzerdi. Benzemiyor:
 
 | | DeepSeek-V3 | Qwen3-235B | Gemma 3 | gpt-oss-120b | OLMo 2 13B |
 |---|---|---|---|---|---|
@@ -1490,10 +1391,10 @@ Yakınsanan şey bileşen listesi değil. Yakınsanan şey **problem listesi**: 
 de aynı dört baskıyla boğuşuyor, ve birbirinden farklı yerlerde farklı takaslar
 yapıyor.
 
-### 9.4 Bu yazının nerede zayıf olduğu
+### 9.3 Bu yazının nerede zayıf olduğu
 
-Kapanışta bir şeyi açıkça söylemek gerekiyor. Yukarıdaki tablonun ve bu yazıdaki
-2024–25 sayılarının neredeyse tamamı **teknik raporlardan** geliyor, kontrollü
+Yukarıdaki tablonun ve bu yazıdaki 2024–25 sayılarının neredeyse tamamı
+**teknik raporlardan** geliyor, kontrollü
 deneylerden değil. Model kartları neyin sevk edildiğini söylüyor, neyin izole
 edildiğini değil.
 
