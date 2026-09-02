@@ -1,5 +1,5 @@
 ---
-title: 'The Components of a Modern Transformer'
+title: "Modern bir Transformer'ın parçaları"
 description: 'Bir LLM mimarisinin parçaları: attention türleri, positional encoding, KV-cache ve MoE — 2017 tasarımından bugüne ne eklendi, ne çıkarıldı.'
 pubDate: '2026-08-01'
 placeholder: true
@@ -63,7 +63,7 @@ Sekiz yıl sonra o tarifin maddeleri tek tek yerinden edilmiş durumda:
   RoPE kullanıyor.
 - **ReLU gitti.** Yerine SwiGLU geldi (Qwen3, gpt-oss, OLMo 2).
 - **LayerNorm gitti.** Yerine, ortalamayı hiç hesaplamayan RMSNorm geldi —
-  aynı dört modelde.
+  Qwen3, Gemma 3, OLMo 2 ve gpt-oss'un dördünde de.
 - **Normalizasyonun yeri değişti.** 2017'de alt katmanın çıktısına
   uygulanıyordu; bugün girdisine uygulanıyor. Gemma 3 ikisini birden yapıyor,
   OLMo 2 ise 2017'nin yerine geri dönmüş durumda.
@@ -76,7 +76,7 @@ Sekiz yıl sonra o tarifin maddeleri tek tek yerinden edilmiş durumda:
 Peki yerinde ne kaldı? İskelet: attention işleminin kendisi, artık bağlantılar,
 ve aynı bloğu üst üste yığma fikri. Sekiz yılda değişmeyen liste bu kadar kısa.
 
-### Bu yazının anlatmadığı şey
+### 1.1 Bu yazının anlatmadığı şey
 
 2017'nin tek tasarımı kısa sürede üç aileye ayrıldı — encoder-only,
 decoder-only, encoder-decoder — ve
@@ -88,7 +88,7 @@ Burada o tartışma yok. Bu yazı ayrışmadan sonrasını anlatıyor: kazanan b
 içini, parça parça. Hangi parça 2017'den kalma, hangisi sonradan girdi, ve
 girenler neye cevap veriyor.
 
-### Dört baskı
+### 1.2 Dört baskı
 
 Bir envanterin liste olmaktan çıkması için bir düzen gerekiyor, ve kaynaklarda
 düzen var. Bloğa giren her parçanın arkasında adı konmuş bir baskı duruyor, ve
@@ -118,7 +118,7 @@ kaçınmaya çalıştığı asıl şey o.
 
 <figure>
 
-<img src="/figures/transformer-architecture-components/fig-1-timeline.svg" alt="2016'dan 2025'e uzanan zaman çizelgesi. Bileşenler yayımlanma tarihlerine göre yerleştirilmiş ve dört baskıya göre gruplanmış: decode belleği, parametre başına hesap, eğitim kararlılığı, bağlam uzunluğu. Sparsely-gated MoE, Transformer'ın beş ay solunda duruyor.">
+<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-1-timeline.svg" alt="2016'dan 2025'e uzanan zaman çizelgesi. Bileşenler yayımlanma tarihlerine göre yerleştirilmiş ve dört baskıya göre gruplanmış: decode belleği, parametre başına hesap, eğitim kararlılığı, bağlam uzunluğu. Sparsely-gated MoE, Transformer'ın beş ay solunda duruyor.">
 
 <figcaption><b>Figure 1.</b> Bloğun parçaları ve giriş tarihleri (arXiv v1 gönderim tarihleri). Şeritler, her parçanın cevap verdiği baskıyı gösteriyor. Soldaki kırmızı işaret: sparsely-gated <b>MoE</b>, Transformer'dan beş ay önce yayımlandı — içinde yaşadığı bloktan eski.</figcaption>
 
@@ -209,8 +209,9 @@ satır:
 Takas açık: attention diziye göre **karesel** ama tamamen paralel, ve herhangi
 iki pozisyon arasındaki yol sabit uzunlukta. RNN doğrusal ama diziyi sırayla
 gezmek zorunda. 2017'de kazanan taraf paralellikti — ve bu yazının geri
-kalanının konusu, o karesel terimin sekiz yıl boyunca nasıl bir maliyet olarak
-geri döndüğü.
+kalanının konusu, o karesel terimin sekiz yıl sonra hangi biçimde geri döndüğü.
+Hesap olarak değil: §3'te göreceğimiz gibi, üretim sırasında bağlayıcı olan
+kısıt bellek trafiği.
 
 Son bir şerh: "attention 2017'den beri değişmedi" cümlesi neredeyse doğru.
 2025'te gpt-oss softmax'ın **paydasına** öğrenilen bir terim ekliyor ve bununla
@@ -357,12 +358,12 @@ takılabilen"* bir bileşen.
 
 <aside class="sidenote">
 
-Beltagy, Peters ve Cohan, *Longformer: The Long-Document Transformer*, [arXiv:2004.05150](https://arxiv.org/abs/2004.05150) · Jiang ve ark., *Mistral 7B*, [arXiv:2310.06825](https://arxiv.org/abs/2310.06825) · Gemma Ekibi, *Gemma 3 Technical Report*, [arXiv:2503.19786](https://arxiv.org/abs/2503.19786).
+Beltagy, Peters ve Cohan, *Longformer: The Long-Document Transformer*, [arXiv:2004.05150](https://arxiv.org/abs/2004.05150) · Jiang ve ark., *Mistral 7B*, [arXiv:2310.06825](https://arxiv.org/abs/2310.06825) · Gemma ekibi, *Gemma 3 Technical Report*, [arXiv:2503.19786](https://arxiv.org/abs/2503.19786) · Brown ve ark., *Language Models are Few-Shot Learners* (GPT-3), [arXiv:2005.14165](https://arxiv.org/abs/2005.14165).
 
 </aside>
 
 Sezgiye ters gelen kısım şu: pencere dar olduğu hâlde modelin görebildiği
-menzil dar kalmıyor. Mistral 7B bunu açıkça hesaplıyor (§2): bir attention
+menzil dar kalmıyor. Mistral 7B bunu açıkça hesaplıyor (Jiang ve ark. 2023, §2): bir attention
 katmanında bilgi $W$ token ilerleyebiliyorsa, $k$ katman sonra $k \times W$
 token ilerlemiş oluyor. Kendi konfigürasyonlarıyla — $W = 4096$, 32 katman —
 *"son katmanda yaklaşık 131K token'lık teorik bir attention menzilimiz oluyor."*
@@ -381,7 +382,10 @@ Bugün bu, tek başına değil **karışım hâlinde** kullanılıyor:
   token. Ve §5.3'e bağlanan bir ayrıntı — yerel katmanlarla global katmanlar
   farklı RoPE taban frekansı kullanıyor.
 - **gpt-oss**: bantlı pencere ile tam yoğun attention dönüşümlü, bant genişliği
-  128 token. Tasarımı GPT-3'ten devralıyorlar.
+  128 token. Desen GPT-3'ten devralınmış — o da mimarisini GPT-2'den aldığını
+  söyleyip tek bir istisna sayıyor (Brown ve ark. 2020, §2.1):
+  *"transformer'ın katmanlarında dönüşümlü yoğun ve yerel olarak bantlı seyrek
+  attention desenleri kullanmamız."* Beş yıl sonra aynı desen geri geliyor.
 
 Neden yapıldığı — yani cache maliyeti — sıradaki bölümün konusu.
 
@@ -390,6 +394,8 @@ Neden yapıldığı — yani cache maliyeti — sıradaki bölümün konusu.
 §2.3'ün lemması bir imkân tanımlıyordu: causal bir yığında geçmiş anahtar ve
 değerler değişmiyor, dolayısıyla saklanabilirler. Bu bölüm o imkânın faturasını
 çıkarıyor.
+
+### 3.1 Bellek faturası
 
 Saklamazsanız ne olur? Her yeni token için bütün diziyi baştan işlemeniz
 gerekir; $n$ token üretmek $O(n^3 d)$ mertebesinde attention işi demek.
@@ -438,7 +444,7 @@ Formül makalenin yayımladığı sayıyı birebir üretiyor. Tek bir isteğin,
 13 milyarlık bir model için 1.6 GB. Yüzlerce eşzamanlı istekle çalışan bir
 sunucuda bunun ne anlama geldiği açık.
 
-### Asıl darboğaz hesap değil, bant genişliği
+### 3.2 Asıl darboğaz hesap değil, bant genişliği
 
 Buraya kadar cache'i bir kapasite problemi gibi anlattım. Asıl mesele daha
 ince, ve bu yazının döndüğü mil o. Shazeer 2019 §2.3'te artımlı üretimin
@@ -483,7 +489,7 @@ yapılmış üç saldırı, kronolojik sırayla.
 
 ### 4.1 MQA — bütün kafalar tek bir anahtar kümesini paylaşsın
 
-Shazeer'in 2019'daki önerisi olabilecek en basit hamle (§3): *"Multi-query
+Shazeer'in 2019'daki önerisi olabilecek en basit hamle (Shazeer 2019, §3): *"Multi-query
 attention, multi-head ile birebir aynı; tek fark, farklı kafaların tek bir
 anahtar ve değer kümesini paylaşması."*
 
@@ -506,7 +512,7 @@ Peki kalite? Bedeli var, ve makale saklamıyor (Tablo 1):
 | multi-head | 8 | 16 | 1.513 | 25.8 | — |
 
 Tablonun asıl söylediği, MQA'nın ne kadar kaybettirdiği değil — **alternatiflerin
-ne kadar kaybettirdiği.** Shazeer'in kendi okuması (§4.2): multi-query modeli
+ne kadar kaybettirdiği.** Shazeer'in kendi okuması (a.g.e., §4.2): multi-query modeli
 *"temel modelden biraz daha kötü görünüyor, ama $h$, $d_k$ ve $d_v$'yi düşüren
 alternatiflerin hepsinden çok daha yakın."*
 
@@ -536,7 +542,7 @@ için sıfırdan eğitmeye gerek yok. Anahtar ve değer projeksiyon matrislerini
 başına **ortalayıp** orijinal eğitim adımlarının %5'i kadar devam ediyorsunuz.
 
 Bugün her yerde gördüğünüz "8 grup" sayısı da buradan geliyor — ve dayanağı
-sanıldığından zayıf (§3.3): *"grup sayısını MQA'dan itibaren artırmak başta
+sanıldığından zayıf (a.g.e., §3.3): *"grup sayısını MQA'dan itibaren artırmak başta
 yalnızca mütevazı yavaşlamalara yol açıyor, MHA'ya yaklaştıkça maliyet
 artıyor. Uygun bir orta yol olarak 8 grup seçtik."* Tek bir labın kendi eğrisi
 üzerinde seçtiği bir orta nokta; türetilmiş bir optimum değil.
@@ -609,7 +615,7 @@ tek bir bileşeninden gelen fark.
 
 <!-- FİGÜR: MHA / GQA / MQA / MLA'nın KV ayak izi, token başına eleman formülleriyle. -->
 
-### RoPE ile çarpışma
+### 4.4 RoPE ile çarpışma
 
 MLA'nın hikâyesinde, bu yazıdaki en güzel ayrıntı duruyor: yöntem, bağımsız bir
 gerekçeyle seçilmiş başka bir bileşenle **matematiksel olarak uyuşmuyor.**
@@ -692,7 +698,7 @@ $$
 $$
 
 İki boyutta çözüm bir faz çarpanı, yani gerçel biçimde düpedüz bir **döndürme**
-(§3.2.1):
+(a.g.e., §3.2.1):
 
 $$
 f_{\{q,k\}}(\boldsymbol{x}_m, m) =
@@ -712,7 +718,7 @@ frekanslar $\Theta = \{\theta_i = 10000^{-2(i-1)/d}\}$.
 değiştirmedi — onların hesaba *giriş biçimini* değiştirdi. Toplama yerine
 çarpma, gömmeye değil sorgu ve anahtara.
 
-Kazanılan şey, §5.1'deki umudun özdeşliğe dönüşmesi (§3.2.2):
+Kazanılan şey, §5.1'deki umudun özdeşliğe dönüşmesi (a.g.e., §3.2.2):
 
 $$
 \boldsymbol{q}_m^{\top}\boldsymbol{k}_n =
@@ -802,7 +808,7 @@ yerini alıyor.
 
 **Ama bedava değil**, ve bunu gösteren kontrollü bir çalışma var. Yang ve ark.
 (2025) 8 milyar parametrede RoPE, NoPE ve QK-Norm varyantlarını aynı reçeteyle
-eğitip karşılaştırıyor. Bulguları (§2.2):
+eğitip karşılaştırıyor. Bulguları (a.g.e., §2.2):
 
 > "RoPE ve QK-Norm varyantları standart kıyaslamalarda karşılaştırılabilir
 > performans gösteriyor... Uzun bağlam değerlendirmelerinde ise QK-Norm, diğer
@@ -847,7 +853,7 @@ RoPE'un gerisinde kalıyor.
 
 Yine de aynı çalışma, iki yaklaşımı **katman katman karıştırmanın** işe
 yaradığını gösteriyor. NoPE katmanları ile RoPE katmanlarının davranışları
-ölçüldüğünde net biçimde ayrışıyor (§3): NoPE katmanları bilgi getirmede güçlü —
+ölçüldüğünde net biçimde ayrışıyor (Yang ve ark. 2025, §3): NoPE katmanları bilgi getirmede güçlü —
 aradıkları token'a yüksek dikkat veriyorlar; RoPE katmanları ise güçlü bir
 yakınlık eğilimi gösteriyor, yani son token'lara yaslanıyorlar. Biri arıyor,
 öteki yakındakine bakıyor.
@@ -884,17 +890,17 @@ küçük bir yönlendirici ağ her token için hangi uzmanların çalışacağı
 veriyor, ve yalnızca seçilenler hesaplanıyor. Parametreler $N$ katına çıkıyor,
 token başına hesap sabit kalıyor.
 
-### Kaç uzman, kaçı açık?
+### 6.1 Kaç uzman, kaçı açık?
 
 Switch Transformer (Fedus ve ark. 2021) en radikal sadeleştirmeyi yapıyor
-(§2.1): *"Bu fikirlerin aksine, biz yalnızca tek bir uzmana yönlendiren
+(a.g.e., §2.1): *"Bu fikirlerin aksine, biz yalnızca tek bir uzmana yönlendiren
 sadeleştirilmiş bir strateji kullanıyoruz. Bu sadeleştirmenin model kalitesini
 koruduğunu, yönlendirme hesabını azalttığını ve daha iyi performans gösterdiğini
 ortaya koyuyoruz."* Aynı hesap bütçesinde T5'e karşı 7 kattan fazla ön eğitim
 hızlanması bildiriyorlar.
 
 DeepSeekMoE (Dai ve ark. 2024) ters yöne gidiyor — daha çok, daha küçük uzman —
-ve iki fikir öneriyor (§1): *"(1) uzmanları $mN$ tanesine ince taneli biçimde
+ve iki fikir öneriyor (a.g.e., §1): *"(1) uzmanları $mN$ tanesine ince taneli biçimde
 bölümlemek ve bunlardan $mK$ tanesini aktive etmek, böylece aktive edilen
 uzmanların daha esnek biçimde birleşmesine imkân vermek; (2) $K_s$ uzmanı
 paylaşılan uzmanlar olarak yalıtmak, böylece ortak bilgiyi yakalamak ve
@@ -917,7 +923,7 @@ C(64,8)  = 4,426,165,368
 Makalenin yayımladığı rakamla birebir aynı. Aynı parametre bütçesi, aynı hesap,
 36 milyon kat daha fazla kombinasyon.
 
-### Ne sevk edildi
+### 6.2 Ne sevk edildi
 
 Gerçek konfigürasyonlar şöyle:
 
@@ -930,7 +936,7 @@ Gerçek konfigürasyonlar şöyle:
 | gpt-oss-20b (2025) | 32 | **4** |
 
 DeepSeek-V3'ün sayısını doğru ifade etmek gerekiyor, çünkü genelde yanlış
-aktarılıyor. Rapor şöyle diyor (§4.2): *"Her MoE katmanı 1 paylaşılan uzman ve
+aktarılıyor. Rapor şöyle diyor (DeepSeek-AI 2024, §4.2): *"Her MoE katmanı 1 paylaşılan uzman ve
 256 yönlendirilen uzmandan oluşuyor... Yönlendirilen uzmanlar arasından her
 token için 8 uzman aktive ediliyor."* Paylaşılan uzman her zaman açık olduğu
 için toplam dokuz uzman çalışıyor (a.g.e., §5.2). Yani "256 uzman, 9 aktif"
@@ -940,22 +946,70 @@ yani **%5.5**'i.
 
 <aside class="sidenote">
 
-Shazeer ve ark., *Outrageously Large Neural Networks*, [arXiv:1701.06538](https://arxiv.org/abs/1701.06538) · Fedus ve ark., *Switch Transformers*, [arXiv:2101.03961](https://arxiv.org/abs/2101.03961) · Dai ve ark., *DeepSeekMoE*, [arXiv:2401.06066](https://arxiv.org/abs/2401.06066) · DeepSeek-AI, *DeepSeek-V3 Technical Report*, [arXiv:2412.19437](https://arxiv.org/abs/2412.19437) · Qwen Ekibi, *Qwen3 Technical Report*, [arXiv:2505.09388](https://arxiv.org/abs/2505.09388) · OpenAI, *gpt-oss-120b & gpt-oss-20b Model Card*, [arXiv:2508.10925](https://arxiv.org/abs/2508.10925).
+Shazeer ve ark., *Outrageously Large Neural Networks*, [arXiv:1701.06538](https://arxiv.org/abs/1701.06538) · Fedus ve ark., *Switch Transformers*, [arXiv:2101.03961](https://arxiv.org/abs/2101.03961) · Dai ve ark., *DeepSeekMoE*, [arXiv:2401.06066](https://arxiv.org/abs/2401.06066) · DeepSeek-AI, *DeepSeek-V3 Technical Report*, [arXiv:2412.19437](https://arxiv.org/abs/2412.19437) · Qwen ekibi, *Qwen3 Technical Report*, [arXiv:2505.09388](https://arxiv.org/abs/2505.09388) · OpenAI, *gpt-oss-120b & gpt-oss-20b Model Card*, [arXiv:2508.10925](https://arxiv.org/abs/2508.10925).
 
 </aside>
 
 <!-- FİGÜR: expert konfigürasyonları — toplam vs aktif, paylaşılan uzman farklı biçimle. -->
 
-### İki tartışmalı nokta
+### 6.3 İki tartışmalı nokta
 
 Tabloya bakınca "alan ince taneliliğe yakınsadı" demek cazip. Kaynaklar bunu
 desteklemiyor.
 
 **Paylaşılan uzman konusunda iki güçlü lab birbirine zıt karar vermiş.**
 DeepSeekMoE bunu iki ana fikrinden biri yapıyor. Qwen3 ise tek cümleyle
-çıkarıyor (§2): *"Qwen2.5-MoE'nin aksine, Qwen3-MoE tasarımı paylaşılan
-uzmanları dışarıda bırakıyor."* Kaldırma kararı için hiçbir ablasyon
-yayımlanmamış. İki taraf da kesin diye sunulamaz.
+çıkarıyor (Qwen ekibi 2025, §2): *"Qwen2.5-MoE'nin aksine, Qwen3-MoE tasarımı
+paylaşılan uzmanları dışarıda bırakıyor."* Kendi kaldırma kararı için hiçbir
+ablasyon yayımlamıyorlar.
+
+Ama üçüncü bir lab yayımlıyor, ve bu yazının MoE kanıtları içinde eşit bütçede
+yapılmış tek karşılaştırma o. OLMoE iki modeli yan yana eğitiyor: aktif
+parametre, toplam parametre ve FLOP aynı; tek fark, birinde 32 yönlendirilen
+uzmandan 4'ü açık, ötekinde 1 hep açık paylaşılan uzman artı 31
+yönlendirilenden 3'ü. Sonuç (Muennighoff ve ark. 2024, §4.1.3):
+
+> "Her iki ayar da benzer performansa yol açsa da, bir uzmanı paylaşmak biraz
+> daha kötü sonuç veriyor."
+
+Asıl ilginç olan gerekçeleri, çünkü §6.1'deki kombinasyon argümanının ta
+kendisi — bu kez ters yöne çalışıyor:
+
+```python
+from math import comb
+print(f"32 uzmandan 4 aktif      : {comb(32,4):>7,}")
+print(f"1 paylaşılan + 31'den 3  : {comb(31,3):>7,}")
+print(f"kaybedilen kombinasyon   : {1 - comb(31,3)/comb(32,4):>7.1%}")
+```
+
+```
+32 uzmandan 4 aktif      :  35,960
+1 paylaşılan + 31'den 3  :   4,495
+kaybedilen kombinasyon   :   87.5%
+```
+
+İki sayı da makalenin yayımladıklarıyla birebir aynı; kendi ifadeleriyle,
+yönlendirilen uzmanlardan birini alıp paylaşılan yapmak *"olası kombinasyonların
+neredeyse %90'ını ortadan kaldırıyor."*
+
+Desen şu: DeepSeekMoE ince taneliliği **savunmak** için hangi argümanı kurduysa,
+OLMoE aynı argümanı paylaşılan uzmana **karşı** kullanıyor. İkisi de kombinasyon
+sayısını büyütmek istiyor; paylaşılan uzman o sayıyı küçültüyor. Aynı çalışma
+ince tanelilik tarafını da ölçüp DeepSeekMoE'yi doğruluyor (a.g.e., §4.1.2):
+uzman boyutu dörde bölünüp sayı 8'den 32'ye çıkarıldığında — yine sabit aktif
+parametre ve sabit hesapla — HellaSwag'da *"yaklaşık %10"* iyileşme buluyorlar.
+§6.1'deki kombinasyon patlaması bir iddia değil, ölçülmüş bir etki.
+
+<aside class="sidenote">
+
+Muennighoff ve ark., *OLMoE: Open Mixture-of-Experts Language Models*, [arXiv:2409.02060](https://arxiv.org/abs/2409.02060). Paylaşılan uzman ablasyonu §4.1.3'te (Şekil 6), ince tanelilik §4.1.2'de (Şekil 5). Her iki deneyde de aktif ve toplam parametre ile FLOP sabit tutulmuş.
+
+</aside>
+
+Sınırını da söylemek gerekiyor: OLMoE 1B aktif / 7B toplam ölçeğinde, yani
+DeepSeek-V3'ün iki mertebe altında, ve yine tek bir labın kendi reçetesi
+üzerinde. Soruyu kapatmıyor — ama tarafların birinde artık ölçülmüş bir sayı
+var, ötekinde yok.
 
 **Uzman sayısının yönü de tek değil.** Switch'in tüm tezi top-1'di; gpt-oss 128
 uzmanla top-4 çalışıyor; DeepSeek 256'yla top-8. DeepSeek'in gerekçesi
@@ -1042,12 +1096,12 @@ tamamen hız. Qwen3, Gemma 3, OLMo 2 ve gpt-oss'un dördü de RMSNorm kullanıyo
 
 Pre-LN yerleşik görünüyordu, ama son iki yıl konuyu yeniden açtı.
 
-**OLMo 2 geri dönüyor** (§2.2): *"Her transformer bloğunda attention ve
+**OLMo 2 geri dönüyor** (OLMo ekibi 2025, §2.2): *"Her transformer bloğunda attention ve
 feed-forward (MLP) katmanlarının girdilerini değil çıktılarını normalize
 ediyoruz."* Yani 2017'nin yerleşimine yakın bir noktaya — ama LayerNorm yerine
 RMSNorm'la, ve gerekçe yine kararlılık.
 
-**Gemma 3 ikisini birden yapıyor** (§2.1): *"RMSNorm ile hem post-norm hem
+**Gemma 3 ikisini birden yapıyor** (Gemma ekibi 2025, §2.1): *"RMSNorm ile hem post-norm hem
 pre-norm kullanan bir Grouped-Query Attention (GQA) kullanıyoruz."* Aynı blokta
 iki normalizasyon.
 
@@ -1061,7 +1115,7 @@ Xiao ve ark. (2023) tuhaf bir gözlemle başlıyor: eğitilmiş modellerde, dizi
 **ilk** token'larına şaşırtıcı derecede yüksek dikkat gidiyor — anlamlı olup
 olmadıklarına bakılmaksızın. Bu token'lara *attention sink* diyorlar.
 
-Açıklamaları, bu yazının en zarif parçası (§3.1):
+Açıklamaları, bu yazının en zarif parçası (Xiao ve ark. 2023, §3.1):
 
 > "Bunun sebebini Softmax işlemine bağlıyoruz; Softmax, attention skorlarının
 > bütün bağlam token'ları üzerinde toplamının bire eşit olmasını gerektiriyor.
@@ -1075,7 +1129,7 @@ Modeller çözümü kendileri buluyor: ilk token'ları çöp kutusu olarak kulla
 Öyle ki, kayan pencere kullanırken yalnızca **dört** başlangıç token'ının
 anahtar/değerini saklamak performansı geri getirmeye yetiyor.
 
-Ve 2025'te gpt-oss bu kısıttan doğrudan çıkıyor (§2):
+Ve 2025'te gpt-oss bu kısıttan doğrudan çıkıyor (OpenAI 2025, §2):
 
 > "Her attention kafasının softmax'ın paydasında öğrenilen bir bias'ı var;
 > off-by-one attention ve attention sink'lerine benzer şekilde, bu, attention
@@ -1097,7 +1151,7 @@ Xiao ve ark., *Efficient Streaming Language Models with Attention Sinks*, [arXiv
 ## 8. FFN ve aktivasyon
 
 Bloğun daha az konuşulan yarısı, ama parametrelerin çoğunu tutan taraf burası.
-2017'nin tarifi sade (§3.3): iki doğrusal katman, aralarında bir ReLU, her
+2017'nin tarifi sade (Vaswani ve ark. 2017, §3.3): iki doğrusal katman, aralarında bir ReLU, her
 pozisyona ayrı ayrı uygulanıyor. Boyutlar $d_{\text{model}} = 512$,
 $d_{ff} = 2048$.
 
@@ -1111,7 +1165,7 @@ $$
 
 Üçüncü bir ağırlık matrisi geliyor — girdi hem $W$ hem $V$ ile çarpılıp
 sonuçlar eleman bazında çarpılıyor. Ve buradan bir ayrıntı çıkıyor ki, modern
-konfigürasyonlardaki tuhaf sayıları açıklıyor (§2):
+konfigürasyonlardaki tuhaf sayıları açıklıyor (Shazeer 2020, §2):
 
 > "Bu katmanların hepsinde, orijinal FFN'deki ikiye karşılık **üç** ağırlık
 > matrisi var. Parametre sayısını ve hesap miktarını sabit tutmak için, bu
@@ -1150,10 +1204,15 @@ Shazeer, *GLU Variants Improve Transformer*, [arXiv:2002.05202](https://arxiv.or
 
 </aside>
 
-## 9. Encoder bloğu
+## 9. Blok, bütün hâlde
 
-Bileşenleri tek tek gezdik; şimdi bloğu bütün olarak görelim. Önce 2017'nin
-hâli, çünkü sonraki her şey bunun bir varyantı (Vaswani ve ark. 2017, §3.1):
+Bileşenleri tek tek gezdik. Şimdi ikisini yan yana koyalım: 2017'nin çizdiği
+blok, ve bugün sevk edilen blok. Aradaki sekiz yılın tamamı bu iki şemanın
+farkında duruyor.
+
+### 9.1 2017: encoder bloğu
+
+Orijinal tarif, makalenin kendi cümleleriyle (Vaswani ve ark. 2017, §3.1):
 
 > "Encoder, $N=6$ özdeş katmandan oluşan bir yığından meydana geliyor. Her
 > katmanın iki alt katmanı var. Birincisi çok başlı bir self-attention
@@ -1161,20 +1220,13 @@ hâli, çünkü sonraki her şey bunun bir varyantı (Vaswani ve ark. 2017, §3.
 > İki alt katmanın her birinin etrafında bir artık bağlantı, ardından katman
 > normalizasyonu kullanıyoruz."
 
-<!-- FİGÜR: 2017 encoder bloğu, Post-LN yerleşimi açıkça etiketli. -->
-
 İki alt katman, iki artık bağlantı, iki normalizasyon — ve normalizasyonlar
 **alt katmanların çıktısında**, yani Post-LN. Bugün sevk edilen hiçbir modelde
 bu yerleşim aynen yok; sebebi §7.1'de.
 
-Encoder bu yazının konusu değil, çünkü §1'de anlattığım ayrışmadan sonra
-üretimdeki büyük dil modelleri decoder tarafında toplandı. Ama iskeleti bilmek
-gerekiyor, çünkü decoder bloğu bunun üstüne kuruluyor.
+### 9.2 Bugün: decoder bloğu
 
-## 10. Decoder bloğu
-
-Şimdi hepsini bir araya koyalım. Bugünün bir decoder bloğu, bu yazıda gezdiğimiz
-parçalarla:
+Aynı iskelet, bu yazıda gezdiğimiz parçalarla doldurulmuş hâlde:
 
 ```
 x ──┬─────────────────────────────────────────┐
@@ -1188,14 +1240,18 @@ x ──┬───────────────────────
                                               × L katman
 ```
 
-<!-- FİGÜR: aynı blok, Figure'daki encoder bloğuyla aynı ölçekte çizilmiş hâlde. -->
-
 2017'nin decoder'ıyla karşılaştırınca: cross-attention alt katmanı gitmiş
 (bakacak bir encoder yok), normalizasyon yer değiştirmiş ve biçim değiştirmiş,
 konum kodlaması gömmeden attention'ın içine taşınmış, feed-forward
-seyrekleşmiş.
+seyrekleşmiş. Değişmeyen şey iskeletin kendisi: iki alt katman, iki artık
+bağlantı, ve aynı bloğun üst üste yığılması.
 
-### Yakınsama yok
+<!-- FİGÜR: iki blok yan yana, aynı ölçekte. Solda 2017 encoder bloğu, Post-LN
+     yerleşimi etiketli; sağda bugünün decoder bloğu (Pre-LN, RMSNorm, RoPE,
+     SwiGLU/MoE). Değişen kutular vurgulu, değişmeyen artık yolu iki tarafta da
+     aynı biçimde çizili. -->
+
+### 9.3 Yakınsama yok
 
 Şimdi asıl gözleme gelelim. "Modern transformer" diye tek bir tarif olsaydı, beş
 açık ağırlıklı modelin konfigürasyonu birbirine benzerdi. Benzemiyor:
@@ -1208,18 +1264,18 @@ açık ağırlıklı modelin konfigürasyonu birbirine benzerdi. Benzemiyor:
 | Normalizasyon | RMSNorm | RMSNorm, pre | RMSNorm, pre **ve** post | RMSNorm, pre | RMSNorm, **çıktıda** |
 | FFN | SwiGLU + MoE | SwiGLU + MoE | yoğun | SwiGLU + MoE | SwiGLU, yoğun |
 | MoE | 1+256, 9 aktif | 128, 8 aktif, paylaşılan yok | yok | 128, top-4 | yok |
-| Katman | 61 | 94 | — | 36 | 40 |
 
-Her hücre modelin kendi raporundan. Beş model, beş farklı cevap — ve
-çeliştikleri noktalar rastgele değil: biri MHA'yı koruyor, biri MoE
-kullanmıyor, biri paylaşılan uzmanı çıkarıyor, biri normalizasyonu iki yere
-birden koyuyor, biri 2017'nin yerleşimine dönüyor.
+Her hücre modelin kendi raporundan. Gemma 3 sütunu tek bir boyutu değil aileyi
+anlatıyor; rapor bu seçimleri bütün boyutlar için ortak veriyor. Beş model, beş
+farklı cevap — ve çeliştikleri noktalar rastgele değil: biri MHA'yı koruyor,
+ikisi MoE kullanmıyor, biri paylaşılan uzmanı çıkarıyor, biri normalizasyonu
+iki yere birden koyuyor, biri 2017'nin yerleşimine dönüyor.
 
 Yakınsanan şey bileşen listesi değil. Yakınsanan şey **problem listesi**: beşi
 de aynı dört baskıyla boğuşuyor, ve birbirinden farklı yerlerde farklı takaslar
 yapıyor.
 
-### Bu yazının nerede zayıf olduğu
+### 9.4 Bu yazının nerede zayıf olduğu
 
 Kapanışta bir şeyi açıkça söylemek gerekiyor. Yukarıdaki tablonun ve bu yazıdaki
 2024–25 sayılarının neredeyse tamamı **teknik raporlardan** geliyor, kontrollü
