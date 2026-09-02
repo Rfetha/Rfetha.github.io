@@ -44,19 +44,94 @@ baskılar kümesinde olduğu.
 
 ## 1. 2017'de tek bir blok vardı
 
-<!--
-NE: 2017'de tek blok. Üç aileye ayrıldı, decoder-only baskın hale geldi —
-ama bu yazının konusu ayrışma değil, kazanan bloğun İÇİ. Ardından dört baskı
-isimlendirilir; yazının haritası bu.
+Haziran 2017. *Attention Is All You Need* tek bir mimari yayımlıyor ve o
+mimarinin her ayrıntısı tek bir tarifle geliyor: altı katmanlı bir encoder, altı
+katmanlı bir decoder, ikisinin arasında cross-attention. Blokların içi de sabit —
+sekiz başlı attention, baş başına $d_k = d_v = 64$; girdi gömmesine **eklenen**
+sinüzoidal konum kodlaması; içi 2048 genişliğinde, ReLU'lu bir feed-forward ağı.
+Ve her alt katmanın etrafında bir artık bağlantı, ardından normalizasyon.
+Makale bunu tek satırda yazıyor (Vaswani ve ark. 2017, §3.1): her alt katmanın
+çıktısı $\mathrm{LayerNorm}(x + \mathrm{Sublayer}(x))$.
 
-ZORUNLU: "zamanla decoder-only baskın paradigma haline geldi" cümlesi METİN İÇİ
-link taşıyacak → /blog/why-decoder-only/. Kenar notu değil. İki yazının tek
-temas noktası.
+<aside class="sidenote">
 
-KANIT: E§1 zaman çizelgesi (25 satır, arXiv v1) · E§0 V7 · Vaswani §3.1.
-~600 kelime · Figür 1: zaman çizelgesi (MoE'nin Transformer'dan 5 ay önce
-durması görünmeli) · kod yok.
--->
+Vaswani ve ark., *Attention Is All You Need*, [arXiv:1706.03762](https://arxiv.org/abs/1706.03762). Blok tarifi §3.1'de, attention §3.2'de, feed-forward §3.3'te, konum kodlaması §3.5'te. Bu yazıda 2017 dendiğinde kastedilen hep bu makale.
+
+</aside>
+
+Sekiz yıl sonra o tarifin maddeleri tek tek yerinden edilmiş durumda:
+
+- **Sinüzoidal kodlama gitti.** Yerine RoPE geldi — konumu toplayarak değil
+  döndürerek kodluyor. Qwen3, Gemma 3, OLMo 2, gpt-oss ve DeepSeek'in hepsi
+  RoPE kullanıyor.
+- **ReLU gitti.** Yerine SwiGLU geldi (Qwen3, gpt-oss, OLMo 2).
+- **LayerNorm gitti.** Yerine, ortalamayı hiç hesaplamayan RMSNorm geldi —
+  aynı dört modelde.
+- **Normalizasyonun yeri değişti.** 2017'de alt katmanın çıktısına
+  uygulanıyordu; bugün girdisine uygulanıyor. Gemma 3 ikisini birden yapıyor,
+  OLMo 2 ise 2017'nin yerine geri dönmüş durumda.
+- **Feed-forward ağı çoğu modelde tek bir ağ değil.** DeepSeek-V3'te her
+  katmanda 256 uzman var ve token başına sekizi çalışıyor.
+- **Attention'ın kafaları kendi anahtar ve değer matrislerine sahip değil.**
+  Ya paylaşıyorlar (Qwen3, Gemma 3, gpt-oss), ya da sıkıştırılmış tek bir
+  vektöre indirgeniyorlar (DeepSeek-V3).
+
+Peki yerinde ne kaldı? İskelet: attention işleminin kendisi, artık bağlantılar,
+ve aynı bloğu üst üste yığma fikri. Sekiz yılda değişmeyen liste bu kadar kısa.
+
+### Bu yazının anlatmadığı şey
+
+2017'nin tek tasarımı kısa sürede üç aileye ayrıldı — encoder-only,
+decoder-only, encoder-decoder — ve
+[zamanla decoder-only baskın paradigma haline geldi](/blog/why-decoder-only/).
+O ayrışmanın *neden* böyle sonuçlandığı ayrı bir yazının konusu; orada beş aday
+cevap birincil kaynaklara karşı tek tek test ediliyor ve çoğu ayakta kalmıyor.
+
+Burada o tartışma yok. Bu yazı ayrışmadan sonrasını anlatıyor: kazanan bloğun
+içini, parça parça. Hangi parça 2017'den kalma, hangisi sonradan girdi, ve
+girenler neye cevap veriyor.
+
+### Dört baskı
+
+Bir envanterin liste olmaktan çıkması için bir düzen gerekiyor, ve kaynaklarda
+düzen var. Bloğa giren her parçanın arkasında adı konmuş bir baskı duruyor, ve
+bu baskılar dört tane.
+
+**Decode belleği ve bant genişliği.** Model bir token üretirken, o ana kadarki
+her token'ın anahtar ve değerini bellekten okumak zorunda. Üretimin asıl
+maliyeti bu okuma — hesap değil. MQA, GQA, MLA ve kayan pencere attention'ın
+hepsi bu okumayı küçültme girişimi (§6, §7).
+
+**Parametre başına hesap.** Bir modeli büyütmenin maliyeti toplam parametre
+sayısıyla değil, token başına *çalışan* parametre sayısıyla ölçülüyor.
+Mixture-of-Experts bu ikisini birbirinden ayırıyor (§9).
+
+**Ölçekte eğitim kararlılığı.** Belli bir boyutun üstünde eğitim kaybı görünür
+bir sebep olmadan ıraksıyor. Pre-LN, RMSNorm, QK-Norm ve attention sink'lerinin
+hepsi bu ıraksamaya karşı alınmış önlemler (§8, §10).
+
+**Bağlam uzunluğu.** 512 token için tasarlanmış bir konum kodlaması 128.000
+token'da çalışmıyor. RoPE'un taban frekansının yeniden ölçeklenmesi ve NoPE
+tartışması buradan çıkıyor (§8).
+
+Bu dördü ayrı tutulmalı, çünkü karıştırmak hem kolay hem yanlış: MoE'nin
+KV-cache ile hiçbir ilgisi yok, QK-Norm'un bağlam uzunluğuyla hiçbir ilgisi yok.
+Bir mimariyi tek bir sebeple açıklamak en sık yapılan hata, ve bu yazının
+kaçınmaya çalıştığı asıl şey o.
+
+<figure>
+
+<img src="/figures/transformer-architecture-components/fig-1-timeline.svg" alt="2016'dan 2025'e uzanan zaman çizelgesi. Bileşenler yayımlanma tarihlerine göre yerleştirilmiş ve dört baskıya göre gruplanmış: decode belleği, parametre başına hesap, eğitim kararlılığı, bağlam uzunluğu. Sparsely-gated MoE, Transformer'ın beş ay solunda duruyor.">
+
+<figcaption><b>Figure 1.</b> Bloğun parçaları ve giriş tarihleri (arXiv v1 gönderim tarihleri). Şeritler, her parçanın cevap verdiği baskıyı gösteriyor. Soldaki kırmızı işaret: sparsely-gated <b>MoE</b>, Transformer'dan beş ay önce yayımlandı — içinde yaşadığı bloktan eski.</figcaption>
+
+</figure>
+
+Figürdeki o tarih tesadüf değil, bir uyarı: bu yazıdaki parçaların hepsi 2017'nin
+çocuğu değil. Bazıları daha eski fikirlerin, doğru donanım ve doğru ölçek
+geldiğinde geri çağrılmış hâlleri.
+
+Envantere değişmeyen parçadan başlayalım.
 
 ## 2. Self-attention
 

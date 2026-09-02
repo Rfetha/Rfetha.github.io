@@ -1,0 +1,134 @@
+<svg viewBox="0 0 1000 452" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t1">
+  <title id="t1">Zaman çizelgesi, 2017'den 2025'e. Transformer bloğuna sonradan giren mekanizmalar arXiv yayım tarihlerine göre yerleştirilmiş ve cevap verdikleri baskıya göre beş şeride ayrılmış: decode belleği ve bant genişliği (MQA, kayan pencere, GQA, PagedAttention, MLA), parametre başına hesap (sparsely-gated MoE, Switch, DeepSeekMoE), eğitim kararlılığı (RMSNorm, Pre-LN, QK-Norm, ViT-22B, attention sink), bağlam uzunluğu (RoPE, NoPE) ve adı konmamış (SwiGLU). Dikey çizgi 2017 Transformer makalesini işaretliyor; sparsely-gated MoE o çizginin beş ay solunda duruyor.</title>
+  <style>
+    .ser { font-family: Georgia, 'Times New Roman', serif; }
+    .mon { font-family: Consolas, Menlo, monospace; }
+  </style>
+
+  <!-- ================= zaman ekseni ================= -->
+  <line x1="190" y1="62" x2="970" y2="62" stroke="#dadada" stroke-width="1"/>
+
+  <g class="mon" font-size="10" fill="#6e6e6e" text-anchor="middle">
+    <text x="214" y="50">2017</text>
+    <text x="308" y="50">2018</text>
+    <text x="403" y="50">2019</text>
+    <text x="497" y="50">2020</text>
+    <text x="592" y="50">2021</text>
+    <text x="686" y="50">2022</text>
+    <text x="781" y="50">2023</text>
+    <text x="876" y="50">2024</text>
+    <text x="970" y="50">2025</text>
+  </g>
+  <g stroke="#dadada" stroke-width="1">
+    <line x1="214" y1="58" x2="214" y2="66"/>
+    <line x1="308" y1="58" x2="308" y2="66"/>
+    <line x1="403" y1="58" x2="403" y2="66"/>
+    <line x1="497" y1="58" x2="497" y2="66"/>
+    <line x1="592" y1="58" x2="592" y2="66"/>
+    <line x1="686" y1="58" x2="686" y2="66"/>
+    <line x1="781" y1="58" x2="781" y2="66"/>
+    <line x1="876" y1="58" x2="876" y2="66"/>
+    <line x1="970" y1="58" x2="970" y2="66"/>
+  </g>
+
+  <!-- ================= 2017 çapası ================= -->
+  <line x1="256" y1="66" x2="256" y2="418" stroke="#1a1a1a" stroke-width="1.2"/>
+  <text class="ser" x="262" y="82" font-size="11.5" fill="#1a1a1a">Transformer</text>
+  <text class="ser" x="262" y="96" font-size="10" font-style="italic" fill="#6e6e6e">2017 · bloğun tarifi</text>
+
+  <!-- ================= şerit etiketleri ================= -->
+  <g text-anchor="end">
+    <text class="ser" x="172" y="126" font-size="11" fill="#1a1a1a">Decode belleği ve</text>
+    <text class="ser" x="172" y="140" font-size="11" fill="#1a1a1a">bant genişliği</text>
+    <text class="mon" x="172" y="155" font-size="9.5" fill="#6e6e6e">§6, §7</text>
+
+    <text class="ser" x="172" y="202" font-size="11" fill="#1a1a1a">Parametre başına</text>
+    <text class="ser" x="172" y="216" font-size="11" fill="#1a1a1a">hesap</text>
+    <text class="mon" x="172" y="231" font-size="9.5" fill="#6e6e6e">§9</text>
+
+    <text class="ser" x="172" y="278" font-size="11" fill="#1a1a1a">Eğitim kararlılığı</text>
+    <text class="mon" x="172" y="293" font-size="9.5" fill="#6e6e6e">§8, §10</text>
+
+    <text class="ser" x="172" y="346" font-size="11" fill="#1a1a1a">Bağlam uzunluğu</text>
+    <text class="mon" x="172" y="361" font-size="9.5" fill="#6e6e6e">§8</text>
+
+    <text class="ser" x="172" y="408" font-size="11" font-style="italic" fill="#6e6e6e">Adı konmamış</text>
+    <text class="mon" x="172" y="423" font-size="9.5" fill="#6e6e6e">§11</text>
+  </g>
+
+  <!-- ================= şerit çizgileri ================= -->
+  <g stroke="#dadada" stroke-width="1">
+    <line x1="190" y1="136" x2="970" y2="136"/>
+    <line x1="190" y1="212" x2="970" y2="212"/>
+    <line x1="190" y1="284" x2="970" y2="284"/>
+    <line x1="190" y1="352" x2="970" y2="352"/>
+    <line x1="190" y1="404" x2="970" y2="404"/>
+  </g>
+
+  <!-- ================= 1. decode belleği ================= -->
+  <g fill="#1a1a1a">
+    <circle cx="483" cy="136" r="3.4"/>
+    <circle cx="523" cy="136" r="3.4"/>
+    <circle cx="818" cy="136" r="3.4"/>
+    <circle cx="852" cy="136" r="3.4"/>
+    <circle cx="909" cy="136" r="3.4"/>
+  </g>
+  <g class="mon" font-size="10" fill="#454545" text-anchor="middle">
+    <text x="483" y="124">MQA</text>
+    <text x="818" y="124">GQA</text>
+    <text x="909" y="124">MLA</text>
+  </g>
+  <g class="mon" font-size="10" fill="#454545" text-anchor="middle">
+    <text x="527" y="152">kayan pencere</text>
+    <text x="856" y="168">PagedAttention</text>
+  </g>
+  <line x1="852" y1="140" x2="852" y2="158" stroke="#dadada" stroke-width="1"/>
+
+  <!-- ================= 2. parametre başına hesap ================= -->
+  <circle cx="219" cy="212" r="4.2" fill="#8c1515"/>
+  <g fill="#1a1a1a">
+    <circle cx="595" cy="212" r="3.4"/>
+    <circle cx="878" cy="212" r="3.4"/>
+  </g>
+  <text class="mon" x="219" y="200" font-size="10" fill="#8c1515" text-anchor="middle">MoE</text>
+  <text class="ser" x="219" y="234" font-size="9.5" font-style="italic" fill="#8c1515" text-anchor="middle">beş ay önce</text>
+  <g class="mon" font-size="10" fill="#454545" text-anchor="middle">
+    <text x="595" y="200">Switch</text>
+    <text x="878" y="200">DeepSeekMoE</text>
+  </g>
+
+  <!-- ================= 3. eğitim kararlılığı ================= -->
+  <g fill="#1a1a1a">
+    <circle cx="477" cy="284" r="3.4"/>
+    <circle cx="508" cy="284" r="3.4"/>
+    <circle cx="570" cy="284" r="3.4"/>
+    <circle cx="791" cy="284" r="3.4"/>
+    <circle cx="852" cy="284" r="3.4"/>
+  </g>
+  <g class="mon" font-size="10" fill="#454545" text-anchor="middle">
+    <text x="470" y="272">RMSNorm</text>
+    <text x="570" y="272">QK-Norm</text>
+    <text x="857" y="272">attention sink</text>
+  </g>
+  <g class="mon" font-size="10" fill="#454545" text-anchor="middle">
+    <text x="512" y="300">Pre-LN</text>
+    <text x="791" y="300">ViT-22B</text>
+  </g>
+
+  <!-- ================= 4. bağlam uzunluğu ================= -->
+  <g fill="#1a1a1a">
+    <circle cx="620" cy="352" r="3.4"/>
+    <circle cx="820" cy="352" r="3.4"/>
+  </g>
+  <g class="mon" font-size="10" fill="#454545" text-anchor="middle">
+    <text x="620" y="340">RoPE</text>
+    <text x="820" y="340">NoPE</text>
+  </g>
+
+  <!-- ================= 5. adı konmamış ================= -->
+  <circle cx="508" cy="404" r="3.4" fill="#1a1a1a"/>
+  <text class="mon" x="508" y="392" font-size="10" fill="#454545" text-anchor="middle">SwiGLU</text>
+
+  <!-- ================= alt not ================= -->
+  <text class="ser" x="190" y="444" font-size="10" font-style="italic" fill="#6e6e6e">Tarihler arXiv v1 gönderim tarihleri. Şerit, mekanizmanın cevap verdiği baskı; modeller değil mekanizmalar işaretli.</text>
+</svg>
