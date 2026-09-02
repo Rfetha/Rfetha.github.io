@@ -23,31 +23,33 @@ colors:
 typography:
   display:
     fontFamily: "Latin Modern Roman, Georgia, serif"
-    fontSize: "1.55em"
+    fontSize: "1.9em"
     fontWeight: 400
     lineHeight: 1.24
     letterSpacing: "normal"
   headline:
     fontFamily: "Latin Modern Roman, Georgia, serif"
-    fontSize: "1.45em"
-    fontWeight: 400
+    fontSize: "1.35em"
+    fontWeight: 700
     lineHeight: 1.24
     letterSpacing: "normal"
   title:
-    fontFamily: "Latin Modern Roman Caps, Georgia, serif"
-    fontSize: "1.03em"
-    fontWeight: 400
+    fontFamily: "Latin Modern Roman, Georgia, serif"
+    fontSize: "1.15em"
+    fontWeight: 700
     lineHeight: 1.24
-    letterSpacing: "0.045em"
+    letterSpacing: "normal"
+    fontStyle: "italic"
   subtitle:
-    fontFamily: "Latin Modern Roman Caps, Georgia, serif"
-    fontSize: "0.95em"
-    fontWeight: 400
+    fontFamily: "Latin Modern Roman, Georgia, serif"
+    fontSize: "1em"
+    fontWeight: 700
     lineHeight: 1.24
-    letterSpacing: "0.045em"
+    letterSpacing: "normal"
+    fontStyle: "italic"
   body:
     fontFamily: "Latin Modern Roman, Georgia, serif"
-    fontSize: "17px"
+    fontSize: "18px"
     fontWeight: 400
     lineHeight: 1.66
     letterSpacing: "normal"
@@ -191,10 +193,13 @@ straw paper rather than as a notebook; they now carry a real six-color syntax
 palette on a cool near-white ground, deliberately cooler than the warm paper
 around them so a listing reads as a pane of machine output set into the page.
 
-Density is high and confident. The text column is wide — 952px, set by
-explicit decision rather than by a character count — and the prose earns it
-with justification and hyphenation above 900px, paragraphs indented rather
-than spaced, and — on a screen wide enough to spare it — a 15rem note hanging
+Density is high and confident. The text column is wide — 992px, holding ~107
+characters of 18px Latin Modern. The measure is the author's decision, taken
+against 656px and 784px columns set side by side with it and rejected as too
+narrow; the larger body step
+is what keeps a line this long readable. Paragraphs carry both marks of a
+break — a 0.5rem space and a 1.6em first-line indent, every paragraph indented
+including the first of a section, and — on a screen wide enough to spare it — a 15rem note hanging
 in the right-hand whitespace rather than interrupting the run, mirrored by a
 15rem section rail in the left-hand strip. Type is
 Latin Modern Roman throughout, self-hosted, so prose and KaTeX formulas share one drawing. Reading is the
@@ -204,8 +209,8 @@ only affordance the design optimizes for.
 - White paper, near-black ink, one accent color in the prose; syntax color only inside listings
 - Rules and measure instead of cards, shadows, and radii
 - Latin Modern Roman plus a drawn small-caps companion, no third face
-- A wide, page-centered text column (59.5rem) with sidenotes hanging into the right-hand whitespace and a section rail in the left one, both only above 1520px
-- Justified, indented post bodies with hand-numbered sections
+- A page-centered text column with sidenotes hanging into the right-hand whitespace and a section rail in the left one, both above 1200px; the column itself steps down from 62rem to 50rem below 1520px so the strips still fit
+- Ragged-right post bodies, every paragraph indented and spaced, with hand-numbered sections
 - Math is first-class: display equations get plate treatment and their own overflow rules
 - One body step, no responsive type ramp; the page adapts by narrowing the gutter, not by resizing prose
 
@@ -244,22 +249,23 @@ a closed set: nothing outside `pre` and its Shiki tokens may use them.
 
 ## Typography
 
-**Display / Body Font:** Latin Modern Roman (fallback Georgia, serif) — self-hosted under the GUST Font License in four variants: regular, italic, bold, bold-italic.
+**Display / Body Font:** Latin Modern Roman (fallback Georgia, serif) — self-hosted under the GUST Font License in four variants: regular, italic, bold, bold-italic. The served files are subset from the GUST OpenType originals over Latin-1 **plus Latin Extended-A**: an earlier Latin-1-only subset was missing `ğ Ğ ı İ ş Ş`, so every Turkish word carrying one fell back to Georgia mid-word. Any regenerated subset must keep U+0100–U+017F.
 **Label Font:** Latin Modern Roman Caps (fallback Georgia, serif) — a *drawn* small-caps face, regular only.
 **Mono Font:** the system UI-monospace stack (`ui-monospace`, SFMono-Regular, Cascadia Mono, Menlo).
 
 **Character:** Latin Modern Roman is the Unicode successor to Computer Modern — the voice of a typeset paper. It was chosen over KaTeX_Main specifically because KaTeX_Main drops accented Latin (10 missing glyphs, among them `À É Î Õ Ü ç ñ`), which would break author names mid-word; here prose and rendered formulas share one drawing. Its x-height is small, so the face reads smaller than its nominal size — body sizes compensate upward, not downward.
 
 ### Hierarchy
-- **Display** (400, `1.55em`, line-height 1.24): the site name in the home title block and the About page's heading, centered above an italic affiliation.
-- **Headline** (400, `1.45em`, 1.24): a post's title, centered above its byline.
-- **Title** (Caps face, 400, `1.03em`, letter-spacing 0.045em): `<h2>` section heads, 1.85rem above / 0.5rem below. Section *numbers* are typed in the markdown, not generated.
-- **Subtitle** (Caps face, 400, `0.95em`, 0.045em): `<h3>`. `<h4>` is the same treatment at `0.9em` in muted.
-- **Body** (400, 17px / 1.66): all prose, in a 59.5rem column. One step, at every width — there is no narrow variant.
+- **Display** (400, `1.9em`, line-height 1.24): the site name in the home title block and the About page's heading, centered above an italic affiliation.
+- **Headline** (700, upright, `1.35em`, 1.24): a post's title, centered above its byline, and `<h2>` section heads. Never italic — a whole head in Latin Modern's italic reads as a long quotation.
+- **Title** (700 italic, `1.15em`): `<h3>` sub-heads, 1.85rem above / 0.5rem below. Section *numbers* are typed in the markdown, not generated. Italic, not the caps face — see The Turkish Lowercase Rule.
+- **Subtitle** (700 italic, `1em`): `<h4>`, in muted.
+- **Body** (400, 18px / 1.66): all prose. One *size* step at every width — the column width is tiered, the type is not.
 - **Secondary** (400, `0.9`–`0.92em` / 1.55–1.6, muted): abstract copy, definition-list bodies, closing notes.
 - **Meta** (400 italic, `0.76`–`0.84em`, tabular-nums, faint or muted): dates, bylines, affiliation, CV years, footer, captions. Dates always render long-form `en-GB` (`14 March 2026`) inside a `<time>` element.
-- **Sidenote** (400, `0.82em` / 1.55, muted, `hyphens: none`): notes in the flow behind a 2px rule — the default; `0.74em` / 1.5 when promoted into the margin at ≥1520px.
+- **Sidenote** (400, `0.82em` / 1.55, muted, `hyphens: none`): notes in the flow behind a 2px rule — the default; `0.74em` / 1.5 when promoted into the margin at ≥1200px.
 - **Label** (Caps face, 400, `0.05em` letter-spacing): run-in heads (`Abstract.`, `Placeholder.`), figure-caption plate numbers, CV role names, the placeholder tag.
+- **Code, output** (mono, `0.73em` / 1.65, on `--wash`): the result a listing produced, carried under it with the panels touching and a mono `çıktı` run-in. Selected as `pre[data-language='python'] + pre[data-language='plaintext']`, so a standalone unhighlighted block — an ASCII schematic, say — is never mistaken for output.
 - **Code, block** (mono, `0.73em` / 1.65): listings. Set one step below inline code on purpose — a listing is a panel of many lines and reads best denser than the sentence around it.
 - **Code, inline** (mono, `0.86em`, inheriting the body's 1.66): a word inside a sentence, so it holds close to the prose size.
 - **Rail** (400, `0.72em` / 1.42, faint): the section rail's entries — the smallest type in the system, and the only step that never appears inside the column.
@@ -267,9 +273,11 @@ a closed set: nothing outside `pre` and its Shiki tokens may use them.
 ### Named Rules
 **The Drawn Caps Rule.** Small caps come from the `--caps` family. `font-variant: small-caps` is never used in this build and must not be introduced — synthetic caps scale capitals down and thin the stems, which reads as a defect beside a real serif.
 
+**The Turkish Lowercase Rule.** The caps face is barred from Turkish prose, not only from identifiers. It draws lowercase as small capitals and a small-cap I carries no dot, so `i` and `ı` leave it as the same glyph — measured by rendering both characters and differencing the bitmaps: zero differing pixels from the caps face, 34 from the roman. In English that is invisible; in Turkish it deletes a letter. It cost 24 of the 29 sub-heads across the two posts before it was caught. The caps face keeps the fixed English labels (`Abstract.`, `Placeholder.`, `Figure 1.`); everything that can hold a Turkish word takes bold italic roman instead.
+
 **The Identifier Exemption.** Identifiers are never set in the caps face. Repository names, file names, and code symbols keep the roman face at full size, because the caps face renders `ORKIKS` full-height and `fin-cli` half-height off the same baseline. Caps are for editorial labels only.
 
-**The Single Body Step Rule.** Body type is 17px at every width; no media query changes it. An earlier 18px step at ≤640px existed only to relieve a 19px body and became inert once the body came down, so it was deleted rather than left as a no-op. When space runs out the *gutter* narrows to 1.1rem below 400px; the prose size does not move.
+**The Single Body Step Rule.** Body type is 18px at every width; no media query changes it. Latin Modern's x-height is small for its nominal size, so 17px read a step under what it was; the value moved once, globally. When space runs out the *gutter* narrows to 1.1rem below 400px; the prose size does not move.
 
 **The Two-Step Code Rule.** Block and inline code are deliberately different steps: `0.73em` in a listing, `0.86em` in a sentence. Do not collapse them back to one value — the listing is a panel measured against its own line count, the inline span is measured against the words on either side of it.
 
@@ -278,7 +286,7 @@ a closed set: nothing outside `pre` and its Shiki tokens may use them.
 ## Layout
 
 **One centered text column; the margin is borrowed, not reserved.** `<main>`
-is capped at `--measure` (59.5rem) and centered on the page, so the reading
+is capped at `--measure` (62rem, stepping to 50rem below 1520px) and centered on the page, so the reading
 column is the page's center line. No wrapper is widened to hold a second
 column — an earlier build sized `<main>` to hold measure plus margin, which
 centered the *box* and pushed the *text* into its left half. Chrome — masthead
@@ -287,30 +295,40 @@ narrowing to 1.1rem below 400px. `<main>` pads 1.75rem above and 3.5rem below;
 the top pad is deliberately shallow so the title block sits close under the
 masthead rule.
 
-**Sidenotes.** In the flow by default. Only at `min-width: 1520px` is a note
+**Sidenotes.** In the flow by default. From `min-width: 1200px` a note is
 promoted out of the column: it floats right, clears right, takes
 `--sidenote-w`, and is pulled past the column edge by a negative right margin
 of `-(--sidenote-w + --sidenote-gap)` into the page's own right-hand
-whitespace. The threshold is arithmetic, not taste: a centered 59.5rem column
-leaves a full margin strip on *both* sides only from
-`--measure + 2 × (--sidenote-w + --sidenote-gap)` ≈ 1512px, rounded up to 1520
-to clear a scrollbar — so a promoted note can never cause horizontal scroll.
+whitespace. The threshold is arithmetic, not taste — a full strip on *both*
+sides needs `--measure + 2 × (--sidenote-w + --sidenote-gap)`, and that sum is
+what the tier is built to satisfy:
+
+| | measure | strip + gap | pair needs |
+|---|---|---|---|
+| ≥1520px | 62rem / 992px | 15rem + 2.5rem = 280px | 1504px |
+| 1200–1520px | 50rem / 800px | 10rem + 1.75rem = 188px | 1176px |
+
+So a promoted note can never cause horizontal scroll. The gap is the tighter
+constraint of the two, not the width: `--fig` is pinned to `--measure`, so a
+plate overhangs the column by one gutter on each side, and a strip whose inner
+edge sits inside that overhang gets a code block laid on top of it. At 1.25rem
+that overlap measured 4px on every listing beside a citation.
 Authoring is a bare `<aside class="sidenote">` in the markdown, documented in
 `drafts/README.md`.
 
 **The section rail.** The left-hand strip is the sidenote strip's mirror. A
 post's `<h2>` sections are listed in a fixed rail pinned at `top: 5.5rem`, at
-`--sidenote-w` (15rem) wide, positioned at `50% - --measure/2 + --gutter -
+`--sidenote-w` wide, positioned at `50% - --measure/2 + --gutter -
 --sidenote-gap - --sidenote-w` — the same width and the same gap as a promoted
 note, measured from the other edge. It is `fixed` rather than floated because
 it has to survive scrolling. It appears at exactly the sidenote threshold
-(`min-width: 1520px`) and is `display: none` below it, because it depends on
+(`min-width: 1200px`) and is `display: none` below it, because it depends on
 the same strip existing; it caps at `100vh - 9rem` and scrolls internally.
 
 **Break-wide.** Figures, blockquotes, code blocks, display math, and the About
 page's `.cv` and `.work` definition lists are centered on the text column with
 `width: min(var(--fig), 100vw - 3rem); margin-left: 50%; transform:
-translateX(-50%)`. `--fig` is 59.5rem — the same value as `--measure` — so
+translateX(-50%)`. `--fig` tracks `--measure` at every tier — so
 these elements now sit flush with the text column rather than breaking past
 it. That is intentional: at this measure, an element wider than the prose
 would run into the whitespace a sidenote hangs in.
@@ -320,20 +338,25 @@ would run into the whitespace a sidenote hangs in.
 section head 1.85rem above / 0.5rem below, horizontal rule 2.25rem, footer
 2.5rem off the content.
 
-**Breakpoints.** Four. One is a `min-width`: at 1520px sidenotes are promoted
-into the right margin and the section rail appears in the left one — a single
-threshold governing both strips. The other three are `max-width`: 900px
-collapses every break-wide element to 100% and turns off body justification and
-hyphenation; 640px narrows the writing-index numeral column from 2.1rem to
-1.8rem and collapses the CV definition grid to one column — it no longer
-touches type at all; 400px narrows the gutter to 1.1rem.
+**Breakpoints.** Five in the global sheet, one component-scoped. The only
+`min-width` is 1200px: sidenotes are promoted into the right margin and the
+section rail appears in the left one — a single threshold governing both
+strips. The `max-width` set: **1519.98px** steps `--measure` and `--fig` down
+to 50rem and the strips to 10rem / 1.75rem, and it deliberately has no lower
+bound — with one, the scale stopped being monotonic and a 900px window drew a
+*longer* line (850px) than a 1200px one (784px) with a 24px page margin left
+over; **48rem** turns a table into the scrolling box instead of the page, since
+the five-model comparison will not compress below ~643px of content; **900px**
+collapses every break-wide element to 100%; **400px** narrows the gutter to
+1.1rem. **640px** lives in the components — the writing-index numeral column
+and the CV definition grid — and touches no type.
 
 ### Named Rules
 **The Margin Column Rule.** The text column is centered on the page and nothing is widened to make room beside it. The whitespace to its right belongs to sidenotes, which hang out of the column rather than being given a column of their own; no content element may exceed `--measure` to borrow that strip — that is why `--fig` is pinned to `--measure`.
 
-**The Sidenote Promotion Rule.** In the flow, behind a 2px `--rule` stroke, is a sidenote's *default* state; the margin is the exception, granted only at ≥1520px where a full strip exists on both sides. A note is never hidden and never becomes a tooltip, so margin content must always read in sequence — the main argument never lives in the margin.
+**The Sidenote Promotion Rule.** In the flow, behind a 2px `--rule` stroke, is a sidenote's *default* state; the margin is the exception, granted only at ≥1200px where a full strip exists on both sides. A note is never hidden and never becomes a tooltip, so margin content must always read in sequence — the main argument never lives in the margin.
 
-**The Justified Body Rule.** Post bodies are justified with `hyphens: auto` above 900px only, and consecutive paragraphs are indented 1.6em rather than separated by space. Below 900px, justification is off. Sidenotes are never justified and never hyphenated; a 15rem justified column rivers.
+**The Ragged-Right Rule.** Post bodies are set flush left and ragged right at every width, with `text-wrap: pretty`; consecutive paragraphs are indented 1.6em rather than separated by space. Justification was tried and removed: it is only legible when the renderer can hyphenate, and browsers do not reliably ship Turkish patterns — measured here, `hyphens: auto` broke zero words across 28 lines while the document was still declared `lang="en"`, and the word spaces stretched to 2.69× the narrowest to compensate. The article is now marked `lang="tr"`, but do not restore justification without first confirming that hyphens actually appear in Turkish prose. Sidenotes are never justified and never hyphenated.
 
 **The Child Combinator Rule.** Paper typesetting applies to `article.paper > p`, never to a descendant selector. The byline and the placeholder callout live inside the article's `<header>`; a descendant selector indents and hyphenates a bordered callout against its own frame.
 
@@ -404,14 +427,14 @@ transparent track.
 - **Abstract:** left-aligned inside the centered block, `0.9em`/1.6 in muted, bounded by hairlines top and bottom with 0.75rem of padding. It opens with an italic ink run-in head (`Abstract.`) at regular weight, not bold.
 
 ### Post Body (`article.paper`)
-- **Character:** typeset, not laid out. Consecutive paragraphs indent 1.6em rather than separating; text justifies with hyphenation above 900px; paragraph gap is 0.3rem.
+- **Character:** typeset, not laid out. Every paragraph indents 1.6em, the first of a section included, and the gap between them is 0.5rem — both marks, by the author's decision. Text is ragged right at every width.
 - **Section numbers:** typed in the markdown. A CSS counter was removed because the prose cross-references sections by number and the counter also numbered the Abstract, shifting every reference by one. Those same `<h2>` strings now also feed the section rail, so a hand-typed numeral appears twice — once in the text, once in the rail — and the two agree because they are literally the same string.
 - **Byline:** centered italic at `0.82em` muted — site title, middle dot, long-form date; a revision line, when present, one step smaller in faint.
 
 ### Sidenote (signature component)
 - **Character:** a note in the margin, at the height of the paragraph that provoked it. It carries source citations, measurement conditions, original-language quotations, and asides — never a step of the main argument.
 - **Default (any width):** in the flow, full column width, `0.82em`/1.55 in muted, 1rem/1.2rem margins, 0.9rem left padding, and a 2px `--rule` stroke on the left. Left-aligned, hyphenation off. Inline `code` inside it steps down to `0.94em`.
-- **Promoted (≥1520px):** floats right at 15rem, pulled past the column edge by a negative right margin of 17.5rem, `0.74em`/1.5, stroke and left padding removed, 0.35rem above and 1.1rem below.
+- **Promoted (≥1200px):** floats right at `--sidenote-w`, pulled past the column edge by a negative right margin of `--sidenote-w + --sidenote-gap` — 15rem / 17.5rem at full width, 10rem / 11.75rem in the narrow tier — `0.74em`/1.5, stroke and left padding removed, 0.35rem above and 1.1rem below.
 - **Authoring:** `<aside class="sidenote">` with blank lines inside it so markdown still processes; documented in `drafts/README.md`.
 
 ### Section Rail (signature component)
@@ -421,11 +444,15 @@ transparent track.
 - **Style:** `0.72em`/1.42, links in faint with no underline (the global red link border is removed), each entry a block with a 2px transparent left border and 0.6rem of left padding. Hover takes a link to ink.
 - **Current section:** the entry takes ink text and a 2px `--sig` left border, filling the transparent stroke it already reserved so nothing shifts.
 - **Behavior:** a small inline script listens to `scroll` (passive) and marks the last `<h2>` whose top is above 140px. It is the **only client-side JavaScript on the site** — KaTeX still renders at build time and ships no math runtime. The script is strictly additive: without it the rail is a working list of anchor links, which is the state it must always degrade to.
-- **Responsive:** hidden below 1520px, full stop. There is no mobile variant, no drawer, no toggle.
+- **Responsive:** hidden below 1200px, full stop. There is no mobile variant, no drawer, no toggle. The threshold moved down from 1520px because a 1080p screen at 150% OS scaling reports 1280 CSS pixels — the author could not see the rail on the machine the site is made on.
 
 ### Figures
-- **Character:** plates. Full text-column width (59.5rem, capped at `100vw - 3rem`), 1.6rem of air above and below.
+- **Character:** plates. Full text-column width (`--fig`, capped at `100vw - 3rem`), 1.6rem of air above and below.
 - **Caption:** centered, `0.79em`/1.48 in muted, capped at 32rem so it stays narrower than its figure. A bold run-in inside the caption renders in the caps face at regular weight in ink — that is the plate number.
+
+### Tables
+- **Character:** ruled, never filled. A caps-free bold roman header row over a 1px `--rule`, body rows on 1px `--rule-soft`, no zebra, no header ground, `tabular-nums` throughout. The header is bold roman rather than the caps face per The Turkish Lowercase Rule.
+- **Responsive:** below 48rem the table itself becomes the scrolling box (`display: block; width: max-content; max-width: 100%; overflow-x: auto`). The page must never scroll sideways to reveal a table — that drags the prose off screen with it.
 
 ### Code Blocks
 - **Character:** a pane of machine output set into the paper, not a quotation of it. This is a corrected decision: the earlier near-monochrome listing read as straw paper and was rejected.
@@ -445,7 +472,7 @@ transparent track.
 
 ### Placeholder Marker
 - **Character:** an honest label on unwritten content, driven by a `placeholder: boolean` in the blog collection schema. It is a content-state device, not a decorative badge.
-- **On a post:** a four-sided 1px red frame, red text at `0.82em`, 0.6rem/0.85rem padding, with a caps-face run-in `Placeholder.`; it lives in the article `<header>` and is therefore excluded from justification.
+- **On a post:** a four-sided 1px red frame, red text at `0.82em`, 0.6rem/0.85rem padding, with a caps-face run-in `Placeholder.` — an English label, so the caps face is safe here; it lives in the article `<header>` and is therefore outside the paper typesetting selector.
 - **In the index:** a caps-face red tag reading `placeholder` at the end of the meta line.
 - **Lifecycle:** both markers disappear when the flag flips. Nothing else in the system may borrow the red frame.
 
@@ -474,7 +501,7 @@ transparent track.
 - **Do** use the drawn `--caps` family for editorial labels, section heads, and run-in heads, at 0.045–0.05em letter-spacing and weight 400.
 - **Do** set every date, numeral column, and counted list with `font-variant-numeric: tabular-nums`.
 - **Do** keep display math's `em`-based vertical padding and KaTeX's `content-box` override; both were measured and both prevent visible clipping.
-- **Do** keep body type at a single 17px step at every width; narrow the gutter instead when space runs out.
+- **Do** keep body type at a single 18px step at every width; narrow the gutter instead when space runs out.
 - **Do** keep listings at `0.73em` and inline code at `0.86em` — two steps, on purpose.
 - **Do** build the section rail from the rendered `headings` array filtered to `depth === 2`, never from a hand-written list, and keep it working as plain anchors with JavaScript off.
 - **Do** number sections by hand in the markdown, so in-text cross-references stay correct.
@@ -486,7 +513,7 @@ transparent track.
 - **Don't** give Cornell red any job beyond links, focus, selection, and the placeholder state.
 - **Don't** let the listing palette leak out of `pre`, and don't import a foreign syntax theme; color comes from the `--astro-code-token-*` bindings.
 - **Don't** reintroduce a CSS section counter on `article.paper` — sections are numbered in the source, referenced by number in the prose, and reused verbatim in the section rail.
-- **Don't** give the rail a mobile form (drawer, toggle, sticky bar), and don't render it for a single-section post; below 1520px there is no strip to put it in.
+- **Don't** give the rail a mobile form (drawer, toggle, sticky bar), and don't render it for a single-section post; below 1200px there is no strip to put it in.
 - **Don't** add a second client-side script without a hard reason. The rail's scroll listener is the only one, and the page must keep working with it off.
 - **Don't** widen `<main>` to hold the margin column — that centers the box and pushes the text left, which is the defect the current centering fixed.
 - **Don't** justify or hyphenate below 900px, don't justify a sidenote at any width, and don't apply paper typesetting with a descendant selector — `article.paper > p` is deliberate.
