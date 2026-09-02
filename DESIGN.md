@@ -447,7 +447,7 @@ transparent track.
 - **Responsive:** hidden below 1200px, full stop. There is no mobile variant, no drawer, no toggle. The threshold moved down from 1520px because a 1080p screen at 150% OS scaling reports 1280 CSS pixels — the author could not see the rail on the machine the site is made on.
 
 ### Figures
-- **Character:** plates. Full text-column width (`--fig`, capped at `100vw - 3rem`), 1.6rem of air above and below.
+- **Character:** plates, closed top and bottom by a 1px `--rule` hairline — the same stroke as `hr`, no new device. Full text-column width (`--fig`, capped at `100vw - 3rem`), 1.6rem of air outside the rules and 1.4rem/1.15rem inside them. The rules are load-bearing: a plate is only one gutter wider than the prose, which is not enough on its own to mark where it begins and ends, and without them the caption floated between the figure and the next paragraph instead of belonging to the plate.
 - **Caption:** centered, `0.79em`/1.48 in muted, capped at 32rem so it stays narrower than its figure. A bold run-in inside the caption renders in the caps face at regular weight in ink — that is the plate number.
 
 ### Tables

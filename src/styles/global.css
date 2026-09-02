@@ -470,9 +470,20 @@ pre,
 	transform: translateX(-50%);
 }
 
+/* Why: a plate is only one gutter wider than the prose on each side, which is
+   not enough on its own to say where it starts and stops — a figure read as a
+   paragraph that happened to contain a picture. Two hairlines close the block
+   and take the caption inside it, so the caption belongs to the plate rather
+   than floating between it and the next paragraph. Same stroke as `hr`, so no
+   new device enters the Rule Ladder; the asymmetric padding is optical, the
+   caption's own line-height already carrying air under it. */
 figure {
 	margin-top: 1.6rem;
 	margin-bottom: 1.6rem;
+	padding-top: 1.4rem;
+	padding-bottom: 1.15rem;
+	border-top: 1px solid var(--rule);
+	border-bottom: 1px solid var(--rule);
 }
 
 /* Why: the affordance for the full-screen viewer in BlogPost.astro. Only
