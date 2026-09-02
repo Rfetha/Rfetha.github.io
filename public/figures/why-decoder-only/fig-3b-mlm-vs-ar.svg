@@ -1,0 +1,92 @@
+<svg viewBox="0 0 1000 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t3b">
+  <title id="t3b">Two training objectives on the same sentence. Masked language modelling hides about fifteen percent of tokens and predicts them from context on both sides, so only the masked positions carry loss. Autoregressive training predicts every token from the tokens before it, so every position carries loss.</title>
+  <defs>
+    <marker id="a3b" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0.6 L7.4,4 L0,7.4 Z" fill="#8a8a8a"/>
+    </marker>
+  </defs>
+  <style>
+    .ser { font-family: Georgia, 'Times New Roman', serif; }
+    .mon { font-family: Consolas, Menlo, monospace; font-size: 12.5px; }
+    .tok { fill: #f7f7f5; stroke: #dadada; stroke-width: 1; }
+    .msk { fill: #ffffff; stroke: #8c1515; stroke-width: 1.4; }
+    .tag { font-family: Georgia, serif; font-size: 11.5px; fill: #6e6e6e; }
+    .ctx { stroke: #8a8a8a; stroke-width: 1.1; fill: none; }
+  </style>
+
+  <!-- ══════ MLM ══════ -->
+  <text class="ser" x="40" y="34" font-size="14" fill="#1a1a1a">Masked language modelling &#8212; BERT</text>
+  <text class="tag" x="40" y="52">tokenlar&#305;n ~%15'i gizlenir, iki yandan tahmin edilir</text>
+
+  <!-- loss marker on masked position only -->
+  <rect x="382" y="72" width="86" height="22" fill="#f0dcdc" stroke="#8c1515" stroke-width="1"/>
+  <text class="ser" x="425" y="88" font-size="11" fill="#8c1515" text-anchor="middle">kay&#305;p burada</text>
+  <line x1="425" y1="94" x2="425" y2="112" stroke="#8c1515" stroke-width="1.2"/>
+
+  <!-- tokens -->
+  <g class="mon" fill="#454545" text-anchor="middle">
+    <rect class="tok" x="140" y="118" width="86" height="30" rx="3"/><text x="183" y="138">Bug&#252;n</text>
+    <rect class="tok" x="238" y="118" width="86" height="30" rx="3"/><text x="281" y="138">hava</text>
+    <rect class="msk" x="336" y="118" width="86" height="30" rx="3"/><text x="379" y="138" fill="#8c1515">[MASK]</text>
+    <rect class="tok" x="434" y="118" width="86" height="30" rx="3"/><text x="477" y="138">g&#252;zeldi</text>
+    <rect class="tok" x="532" y="118" width="86" height="30" rx="3"/><text x="575" y="138">.</text>
+  </g>
+
+  <!-- context arrows from both sides into the mask -->
+  <path class="ctx" d="M183,152 C183,186 340,186 372,156" marker-end="url(#a3b)"/>
+  <path class="ctx" d="M281,152 C281,176 350,178 374,156" marker-end="url(#a3b)"/>
+  <path class="ctx" d="M477,152 C477,176 408,178 384,156" marker-end="url(#a3b)"/>
+  <path class="ctx" d="M575,152 C575,186 418,186 386,156" marker-end="url(#a3b)"/>
+  <text class="tag" x="379" y="204" text-anchor="middle">ba&#287;lam iki y&#246;nden gelir</text>
+
+  <!-- note -->
+  <text class="tag" x="680" y="130">Kay&#305;p yaln&#305;zca maskeli pozisyonlarda.</text>
+  <text class="tag" x="680" y="148">E&#287;itimde g&#246;r&#252;len <tspan font-family="Consolas, Menlo, monospace" fill="#8c1515">[MASK]</tspan> sembol&#252;</text>
+  <text class="tag" x="680" y="166">ger&#231;ek metinde hi&#231; yok.</text>
+
+  <!-- divider -->
+  <line x1="40" y1="234" x2="960" y2="234" stroke="#ececec" stroke-width="1"/>
+
+  <!-- ══════ AR ══════ -->
+  <text class="ser" x="40" y="268" font-size="14" fill="#1a1a1a">Otoregresif e&#287;itim &#8212; GPT</text>
+  <text class="tag" x="40" y="286">her token, kendinden &#246;ncekilerden tahmin edilir</text>
+
+  <!-- tokens -->
+  <g class="mon" fill="#454545" text-anchor="middle">
+    <rect class="tok" x="140" y="336" width="86" height="30" rx="3"/><text x="183" y="356">Bug&#252;n</text>
+    <rect class="tok" x="238" y="336" width="86" height="30" rx="3"/><text x="281" y="356">hava</text>
+    <rect class="tok" x="336" y="336" width="86" height="30" rx="3"/><text x="379" y="356">&#231;ok</text>
+    <rect class="tok" x="434" y="336" width="86" height="30" rx="3"/><text x="477" y="356">g&#252;zeldi</text>
+    <rect class="tok" x="532" y="336" width="86" height="30" rx="3"/><text x="575" y="356">.</text>
+  </g>
+
+  <!-- loss markers on every position -->
+  <g>
+    <rect x="248" y="300" width="66" height="20" fill="#f0dcdc" stroke="#8c1515" stroke-width="1"/>
+    <text class="ser" x="281" y="315" font-size="10" fill="#8c1515" text-anchor="middle">kay&#305;p</text>
+    <rect x="346" y="300" width="66" height="20" fill="#f0dcdc" stroke="#8c1515" stroke-width="1"/>
+    <text class="ser" x="379" y="315" font-size="10" fill="#8c1515" text-anchor="middle">kay&#305;p</text>
+    <rect x="444" y="300" width="66" height="20" fill="#f0dcdc" stroke="#8c1515" stroke-width="1"/>
+    <text class="ser" x="477" y="315" font-size="10" fill="#8c1515" text-anchor="middle">kay&#305;p</text>
+    <rect x="542" y="300" width="66" height="20" fill="#f0dcdc" stroke="#8c1515" stroke-width="1"/>
+    <text class="ser" x="575" y="315" font-size="10" fill="#8c1515" text-anchor="middle">kay&#305;p</text>
+  </g>
+  <g stroke="#8c1515" stroke-width="1.1">
+    <line x1="281" y1="320" x2="281" y2="332"/>
+    <line x1="379" y1="320" x2="379" y2="332"/>
+    <line x1="477" y1="320" x2="477" y2="332"/>
+    <line x1="575" y1="320" x2="575" y2="332"/>
+  </g>
+
+  <!-- causal context arrows (left only) -->
+  <path class="ctx" d="M183,370 C183,396 250,398 276,372" marker-end="url(#a3b)"/>
+  <path class="ctx" d="M281,370 C281,396 348,398 374,372" marker-end="url(#a3b)"/>
+  <path class="ctx" d="M379,370 C379,396 446,398 472,372" marker-end="url(#a3b)"/>
+  <path class="ctx" d="M477,370 C477,396 544,398 570,372" marker-end="url(#a3b)"/>
+  <text class="tag" x="379" y="418" text-anchor="middle">ba&#287;lam yaln&#305;zca soldan gelir</text>
+
+  <!-- note -->
+  <text class="tag" x="680" y="336">Kay&#305;p her pozisyonda &#8212; dizinin tamam&#305; sinyal.</text>
+  <text class="tag" x="680" y="354">E&#287;itimdeki i&#351;lem ile &#252;retimdeki i&#351;lem</text>
+  <text class="tag" x="680" y="372">birebir ayn&#305;: sonraki token'&#305; tahmin et.</text>
+</svg>

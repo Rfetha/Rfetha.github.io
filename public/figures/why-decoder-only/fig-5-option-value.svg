@@ -1,0 +1,51 @@
+<svg viewBox="0 0 660 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t5">
+  <title id="t5">Conversion asymmetry: a causal decoder converts cheaply into a non-causal decoder and onward into an encoder-decoder; the reverse direction performs worse than training from scratch.</title>
+  <defs>
+    <marker id="ok" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0.6 L7.4,4 L0,7.4 Z" fill="#1a1a1a"/>
+    </marker>
+    <marker id="no" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0.6 L7.4,4 L0,7.4 Z" fill="#8c1515"/>
+    </marker>
+  </defs>
+  <style>
+    .ser { font-family: Georgia, 'Times New Roman', serif; }
+    .mon { font-family: Consolas, Menlo, monospace; }
+  </style>
+
+  <!-- node 1 -->
+  <rect x="34" y="86" width="152" height="58" rx="4" fill="#ffffff" stroke="#1a1a1a" stroke-width="1.6"/>
+  <text class="ser" x="110" y="110" font-size="13.5" fill="#1a1a1a" text-anchor="middle">causal decoder</text>
+  <text class="ser" x="110" y="128" font-size="10.5" fill="#6e6e6e" text-anchor="middle">the pretraining run</text>
+
+  <!-- node 2 -->
+  <rect x="254" y="86" width="152" height="58" rx="4" fill="#f7f7f5" stroke="#dadada"/>
+  <text class="ser" x="330" y="110" font-size="13.5" fill="#454545" text-anchor="middle">non-causal decoder</text>
+  <text class="ser" x="330" y="128" font-size="10.5" fill="#6e6e6e" text-anchor="middle">encoder-like</text>
+
+  <!-- node 3 -->
+  <rect x="474" y="86" width="152" height="58" rx="4" fill="#f7f7f5" stroke="#dadada"/>
+  <text class="ser" x="550" y="110" font-size="13.5" fill="#454545" text-anchor="middle">encoder-decoder</text>
+  <text class="ser" x="550" y="128" font-size="10.5" fill="#6e6e6e" text-anchor="middle">two stacks</text>
+
+  <!-- forward arrows -->
+  <line x1="190" y1="108" x2="248" y2="108" stroke="#1a1a1a" stroke-width="1.8" marker-end="url(#ok)"/>
+  <text class="ser" x="219" y="98" font-size="10.5" fill="#1a1a1a" text-anchor="middle">cheap</text>
+  <text class="mon" x="219" y="126" font-size="9.5" fill="#6e6e6e" text-anchor="middle">1.6&#215;</text>
+
+  <line x1="410" y1="108" x2="468" y2="108" stroke="#1a1a1a" stroke-width="1.8" marker-end="url(#ok)"/>
+  <text class="ser" x="439" y="98" font-size="10.5" fill="#1a1a1a" text-anchor="middle">cheap</text>
+
+  <!-- reverse arrow, blocked -->
+  <path d="M540,152 C446,200 232,200 130,158" fill="none" stroke="#8c1515" stroke-width="1.5" stroke-dasharray="6 5" marker-end="url(#no)"/>
+  <!-- strike through, centred on the curve's apex -->
+  <g stroke="#8c1515" stroke-width="1.6">
+    <line x1="326" y1="181" x2="344" y2="199"/>
+    <line x1="344" y1="181" x2="326" y2="199"/>
+  </g>
+  <text class="ser" x="335" y="224" font-size="11.5" fill="#8c1515" text-anchor="middle">worse than training from scratch</text>
+
+  <!-- caption strip -->
+  <text class="ser" x="110" y="262" font-size="11" font-style="italic" fill="#6e6e6e" text-anchor="middle">an option on everything</text>
+  <text class="ser" x="550" y="262" font-size="11" font-style="italic" fill="#6e6e6e" text-anchor="middle">a terminal commitment</text>
+</svg>

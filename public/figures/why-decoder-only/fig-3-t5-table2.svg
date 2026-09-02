@@ -1,0 +1,61 @@
+<svg viewBox="0 0 660 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t3">
+  <title id="t3">T5 Table 2 at matched compute: on GLUE, encoder-decoder scores 83.28, prefix-LM 81.82, decoder-only 74.70. On SQuAD, encoder-decoder 80.88, prefix-LM 78.94, decoder-only 61.14.</title>
+  <style>
+    .ser { font-family: Georgia, 'Times New Roman', serif; }
+    .mon { font-family: Consolas, Menlo, monospace; }
+    .lbl { font-size: 12px; fill: #454545; }
+    .val { font-size: 12.5px; fill: #1a1a1a; }
+  </style>
+
+  <!-- GLUE group -->
+  <text class="ser" x="150" y="26" font-size="13.5" fill="#1a1a1a" text-anchor="middle">GLUE</text>
+  <text class="ser" x="150" y="42" font-size="10.5" fill="#6e6e6e" text-anchor="middle">higher is better</text>
+
+  <!-- baseline -->
+  <line x1="150" y1="270" x2="150" y2="60" stroke="#dadada" stroke-width="1"/>
+
+  <!-- bars: scale 55..85 -> x 150..430 is too wide for two groups; use per-group panels -->
+  <!-- GLUE bars (y positions) -->
+  <g>
+    <!-- enc-dec 83.28 -->
+    <rect x="150" y="66" width="196" height="26" fill="#454545"/>
+    <text class="ser lbl" x="142" y="84" text-anchor="end">encoder-decoder</text>
+    <text class="mon val" x="356" y="84">83.28</text>
+    <!-- prefix-LM 81.82 -->
+    <rect x="150" y="98" width="182" height="26" fill="#8a8a8a"/>
+    <text class="ser lbl" x="142" y="116" text-anchor="end">prefix-LM</text>
+    <text class="mon val" x="342" y="116">81.82</text>
+    <!-- decoder-only 74.70 -->
+    <rect x="150" y="130" width="113" height="26" fill="#8c1515"/>
+    <text class="ser lbl" x="142" y="148" text-anchor="end">decoder-only</text>
+    <text class="mon val" x="273" y="148">74.70</text>
+  </g>
+
+  <!-- SQuAD group -->
+  <text class="ser" x="150" y="192" font-size="13.5" fill="#1a1a1a" text-anchor="middle">SQuAD</text>
+
+  <g>
+    <!-- enc-dec 80.88 -->
+    <rect x="150" y="204" width="188" height="26" fill="#454545"/>
+    <text class="ser lbl" x="142" y="222" text-anchor="end">encoder-decoder</text>
+    <text class="mon val" x="348" y="222">80.88</text>
+    <!-- prefix-LM 78.94 -->
+    <rect x="150" y="236" width="179" height="26" fill="#8a8a8a"/>
+    <text class="ser lbl" x="142" y="254" text-anchor="end">prefix-LM</text>
+    <text class="mon val" x="339" y="254">78.94</text>
+    <!-- decoder-only 61.14 -->
+    <rect x="150" y="268" width="97" height="26" fill="#8c1515"/>
+    <text class="ser lbl" x="142" y="286" text-anchor="end">decoder-only</text>
+    <text class="mon val" x="257" y="286">61.14</text>
+  </g>
+
+  <!-- gap annotation on SQuAD -->
+  <path d="M420,217 V281" stroke="#8c1515" stroke-width="1.1"/>
+  <path d="M416,217 H424 M416,281 H424" stroke="#8c1515" stroke-width="1.1"/>
+  <text class="ser" x="432" y="243" font-size="11.5" fill="#8c1515">19.7 points</text>
+  <text class="ser" x="432" y="259" font-size="11.5" fill="#8c1515">at equal FLOPs</text>
+
+  <!-- prefix-LM recovery annotation -->
+  <path d="M348,249 C392,249 400,300 356,300" fill="none" stroke="#6e6e6e" stroke-width="1" stroke-dasharray="4 3"/>
+  <text class="ser" x="352" y="316" font-size="11" font-style="italic" fill="#6e6e6e">one mask change recovers almost all of it</text>
+</svg>

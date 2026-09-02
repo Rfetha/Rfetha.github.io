@@ -1,0 +1,96 @@
+<svg viewBox="0 0 1000 620" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t1e">
+  <title id="t1e">A decoder-only block in full: token embedding plus positional encoding, then N repetitions of masked self-attention, add and norm, feed-forward, add and norm, ending in a linear projection and softmax over the vocabulary. The cross-attention sub-layer of the 2017 decoder is absent.</title>
+  <defs>
+    <marker id="a1e" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0.6 L7.4,4 L0,7.4 Z" fill="#454545"/>
+    </marker>
+    <marker id="a1er" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0.6 L7.4,4 L0,7.4 Z" fill="#9a9a9a"/>
+    </marker>
+  </defs>
+  <style>
+    .ser { font-family: Georgia, 'Times New Roman', serif; }
+    .mon { font-family: Consolas, Menlo, monospace; }
+    .sub { fill: #ffffff; stroke: #1a1a1a; stroke-width: 1.4; }
+    .nrm { fill: #ececec; stroke: #c9c9c9; stroke-width: 1; }
+    .emb { fill: #f7f7f5; stroke: #dadada; stroke-width: 1; }
+    .lb  { font-family: Georgia, serif; font-size: 13.5px; fill: #1a1a1a; }
+    .lbs { font-family: Georgia, serif; font-size: 12px; fill: #454545; }
+    .tag { font-family: Georgia, serif; font-size: 11.5px; fill: #6e6e6e; }
+    .flow { stroke: #454545; stroke-width: 1.4; fill: none; }
+    .res  { stroke: #9a9a9a; stroke-width: 1; fill: none; }
+  </style>
+
+  <!-- column -->
+  <rect x="288" y="196" width="304" height="222" fill="none" stroke="#dadada" stroke-width="1" stroke-dasharray="5 4"/>
+  <text class="tag" x="280" y="312" text-anchor="end">N &#215;</text>
+
+  <!-- sublayers -->
+  <rect class="sub" x="318" y="356" width="244" height="38"/>
+  <text class="lb" x="440" y="380" text-anchor="middle">Masked Self-Attention</text>
+  <rect class="nrm" x="318" y="318" width="244" height="26"/>
+  <text class="lbs" x="440" y="336" text-anchor="middle">Add &amp; Norm</text>
+
+  <rect class="sub" x="318" y="254" width="244" height="38"/>
+  <text class="lb" x="440" y="278" text-anchor="middle">Feed Forward</text>
+  <rect class="nrm" x="318" y="216" width="244" height="26"/>
+  <text class="lbs" x="440" y="234" text-anchor="middle">Add &amp; Norm</text>
+
+  <!-- flow -->
+  <line class="flow" x1="440" y1="356" x2="440" y2="348" marker-end="url(#a1e)"/>
+  <line class="flow" x1="440" y1="318" x2="440" y2="298" marker-end="url(#a1e)"/>
+  <line class="flow" x1="440" y1="254" x2="440" y2="246" marker-end="url(#a1e)"/>
+  <line class="flow" x1="440" y1="216" x2="440" y2="168" marker-end="url(#a1e)"/>
+
+  <!-- residuals -->
+  <path class="res" d="M310,400 C278,400 278,332 312,332" marker-end="url(#a1er)"/>
+  <path class="res" d="M310,298 C278,298 278,230 312,230" marker-end="url(#a1er)"/>
+
+  <!-- input -->
+  <circle cx="440" cy="442" r="11" fill="#ffffff" stroke="#454545" stroke-width="1.2"/>
+  <line x1="433" y1="442" x2="447" y2="442" stroke="#454545" stroke-width="1.2"/>
+  <line x1="440" y1="435" x2="440" y2="449" stroke="#454545" stroke-width="1.2"/>
+  <line class="flow" x1="440" y1="431" x2="440" y2="402" marker-end="url(#a1e)"/>
+  <text class="lbs" x="310" y="446" text-anchor="end">Positional Encoding</text>
+  <line class="flow" x1="316" y1="442" x2="425" y2="442" marker-end="url(#a1e)"/>
+
+  <rect class="emb" x="318" y="472" width="244" height="34"/>
+  <text class="lbs" x="440" y="494" text-anchor="middle">Token Embedding</text>
+  <line class="flow" x1="440" y1="472" x2="440" y2="456" marker-end="url(#a1e)"/>
+  <line class="flow" x1="440" y1="540" x2="440" y2="510" marker-end="url(#a1e)"/>
+
+  <!-- input tokens -->
+  <g class="mon" font-size="12.5" fill="#454545" text-anchor="middle">
+    <rect x="330" y="542" width="40" height="26" rx="3" fill="#f7f7f5" stroke="#dadada"/>
+    <rect x="378" y="542" width="40" height="26" rx="3" fill="#f7f7f5" stroke="#dadada"/>
+    <rect x="426" y="542" width="40" height="26" rx="3" fill="#f7f7f5" stroke="#dadada"/>
+    <rect x="474" y="542" width="40" height="26" rx="3" fill="#f7f7f5" stroke="#dadada"/>
+    <rect x="522" y="542" width="40" height="26" rx="3" fill="#ffffff" stroke="#8c1515" stroke-dasharray="4 3"/>
+    <text x="350" y="560">x&#8321;</text><text x="398" y="560">x&#8322;</text>
+    <text x="446" y="560">x&#8323;</text><text x="494" y="560">x&#8324;</text>
+    <text x="542" y="560" fill="#8c1515">x&#8325;</text>
+  </g>
+  <text class="tag" x="440" y="590" text-anchor="middle">&#252;retilen token diziye eklenir, ayn&#305; yol tekrar ko&#351;ar</text>
+
+  <!-- head -->
+  <rect class="emb" x="340" y="124" width="200" height="32"/>
+  <text class="lbs" x="440" y="145" text-anchor="middle">Linear</text>
+  <line class="flow" x1="440" y1="124" x2="440" y2="110" marker-end="url(#a1e)"/>
+  <rect class="emb" x="340" y="76" width="200" height="32"/>
+  <text class="lbs" x="440" y="97" text-anchor="middle">Softmax</text>
+  <line class="flow" x1="440" y1="76" x2="440" y2="60" marker-end="url(#a1e)"/>
+  <text class="ser" x="440" y="50" font-size="12.5" fill="#1a1a1a" text-anchor="middle">p(sonraki token)</text>
+
+  <!-- annotation: missing sub-layer -->
+  <rect x="640" y="286" width="268" height="70" fill="none" stroke="#8c1515" stroke-width="1.2" stroke-dasharray="5 4"/>
+  <text class="ser" x="656" y="308" font-size="12" fill="#8c1515">Cross-Attention burada yok.</text>
+  <text class="tag" x="656" y="326" fill="#8c1515">2017 decoder'&#305;n&#305;n orta alt katman&#305;</text>
+  <text class="tag" x="656" y="343" fill="#8c1515">&#231;&#305;kar&#305;lm&#305;&#351; &#8212; bakacak bir encoder yok.</text>
+  <line x1="592" y1="320" x2="634" y2="320" stroke="#8c1515" stroke-width="1.2" stroke-dasharray="4 3"/>
+
+  <!-- annotation: training signal -->
+  <rect x="640" y="400" width="268" height="70" fill="none" stroke="#dadada" stroke-width="1"/>
+  <text class="ser" x="656" y="422" font-size="12" fill="#454545">Her pozisyon bir e&#287;itim hedefi.</text>
+  <text class="tag" x="656" y="440">Dizinin tamam&#305; sinyal &#252;retir; bir token</text>
+  <text class="tag" x="656" y="457">hem ba&#287;lam hem hedeftir.</text>
+</svg>

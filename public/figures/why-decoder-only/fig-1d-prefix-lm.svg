@@ -1,0 +1,55 @@
+<svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t1d">
+  <title id="t1d">Prefix-LM architecture: a single stack with a mixed mask — fully-visible over the prefix tokens, causal over the continuation.</title>
+  <defs>
+    <marker id="arrD" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0.6 L7.4,4 L0,7.4 Z" fill="#454545"/>
+    </marker>
+  </defs>
+  <style>
+    .ser { font-family: Georgia, 'Times New Roman', serif; }
+    .mon { font-family: Consolas, Menlo, monospace; }
+  </style>
+
+  <!-- tokens: prefix shaded, continuation plain -->
+  <g class="mon" font-size="13" fill="#454545" text-anchor="middle">
+    <rect x="98" y="222" width="44" height="28" rx="4" fill="#ececec" stroke="#c9c9c9"/>
+    <rect x="158" y="222" width="44" height="28" rx="4" fill="#ececec" stroke="#c9c9c9"/>
+    <rect x="228" y="222" width="44" height="28" rx="4" fill="#f7f7f5" stroke="#dadada"/>
+    <rect x="288" y="222" width="44" height="28" rx="4" fill="#f7f7f5" stroke="#dadada"/>
+    <rect x="348" y="222" width="44" height="28" rx="4" fill="#f7f7f5" stroke="#dadada"/>
+    <text x="120" y="241">x&#8321;</text><text x="180" y="241">x&#8322;</text>
+    <text x="250" y="241">x&#8323;</text><text x="310" y="241">x&#8324;</text><text x="370" y="241">x&#8325;</text>
+  </g>
+
+  <!-- group brackets -->
+  <path d="M98,260 H202" stroke="#6e6e6e" stroke-width="1.2"/>
+  <path d="M98,260 v-4 M202,260 v-4" stroke="#6e6e6e" stroke-width="1.2"/>
+  <text class="ser" x="150" y="277" font-size="11" fill="#454545" text-anchor="middle">prefix &#8212; fully-visible</text>
+
+  <path d="M228,260 H392" stroke="#8c1515" stroke-width="1.2"/>
+  <path d="M228,260 v-4 M392,260 v-4" stroke="#8c1515" stroke-width="1.2"/>
+  <text class="ser" x="310" y="277" font-size="11" fill="#8c1515" text-anchor="middle">continuation &#8212; causal</text>
+
+  <!-- arrows tokens -> stack -->
+  <g stroke="#454545" stroke-width="1.4" marker-end="url(#arrD)">
+    <line x1="120" y1="220" x2="120" y2="192"/>
+    <line x1="180" y1="220" x2="180" y2="192"/>
+    <line x1="250" y1="220" x2="250" y2="192"/>
+    <line x1="310" y1="220" x2="310" y2="192"/>
+    <line x1="370" y1="220" x2="370" y2="192"/>
+  </g>
+
+  <!-- single stack -->
+  <rect x="78" y="124" width="334" height="64" rx="8" fill="#ffffff" stroke="#1a1a1a" stroke-width="1.5"/>
+  <text class="ser" x="245" y="150" font-size="15" fill="#1a1a1a" text-anchor="middle">Single stack</text>
+  <text class="ser" x="245" y="170" font-size="11" fill="#6e6e6e" text-anchor="middle">mixed mask: fully-visible over the prefix, causal after it</text>
+
+  <!-- stack -> next token -->
+  <line x1="370" y1="122" x2="370" y2="94" stroke="#454545" stroke-width="1.4" marker-end="url(#arrD)"/>
+  <rect x="308" y="56" width="124" height="34" rx="6" fill="#f7f7f5" stroke="#dadada"/>
+  <text class="mon" x="370" y="78" font-size="12.5" fill="#454545" text-anchor="middle">p(next token)</text>
+
+  <!-- annotation -->
+  <text class="ser" x="530" y="160" font-size="11" font-style="italic" fill="#6e6e6e" text-anchor="middle">one stack, one parameter:</text>
+  <text class="mon" x="530" y="177" font-size="11" fill="#8c1515" text-anchor="middle">prefix_len</text>
+</svg>

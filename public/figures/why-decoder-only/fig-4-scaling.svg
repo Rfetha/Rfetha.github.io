@@ -1,0 +1,52 @@
+<svg viewBox="0 0 660 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t4">
+  <title id="t4">Schematic log-log scaling curve: loss falls as a straight line against compute for decoder-only models. Only one architecture family was ever plotted; the comparison curve does not exist.</title>
+  <style>
+    .ser { font-family: Georgia, 'Times New Roman', serif; }
+    .mon { font-family: Consolas, Menlo, monospace; }
+  </style>
+
+  <!-- axes -->
+  <line x1="90" y1="250" x2="560" y2="250" stroke="#454545" stroke-width="1.2"/>
+  <line x1="90" y1="250" x2="90" y2="48" stroke="#454545" stroke-width="1.2"/>
+
+  <!-- gridlines -->
+  <g stroke="#ececec" stroke-width="1">
+    <line x1="90" y1="200" x2="560" y2="200"/>
+    <line x1="90" y1="150" x2="560" y2="150"/>
+    <line x1="90" y1="100" x2="560" y2="100"/>
+    <line x1="208" y1="250" x2="208" y2="48"/>
+    <line x1="326" y1="250" x2="326" y2="48"/>
+    <line x1="444" y1="250" x2="444" y2="48"/>
+  </g>
+
+  <!-- axis labels -->
+  <text class="ser" x="325" y="284" font-size="12" fill="#454545" text-anchor="middle">compute (log)</text>
+  <text class="ser" x="50" y="149" font-size="12" fill="#454545" text-anchor="middle" transform="rotate(-90 50 149)">loss (log)</text>
+
+  <!-- the measured decoder-only line -->
+  <line x1="106" y1="80" x2="546" y2="222" stroke="#454545" stroke-width="2"/>
+  <!-- data points -->
+  <g fill="#454545">
+    <circle cx="120" cy="84" r="4.5"/>
+    <circle cx="200" cy="110" r="4.5"/>
+    <circle cx="285" cy="137" r="4.5"/>
+    <circle cx="370" cy="164" r="4.5"/>
+    <circle cx="455" cy="192" r="4.5"/>
+    <circle cx="530" cy="216" r="4.5"/>
+  </g>
+  <text class="ser" x="560" y="212" font-size="12" fill="#454545">decoder-only</text>
+  <text class="ser" x="560" y="228" font-size="10.5" fill="#6e6e6e">(Kaplan, Chinchilla)</text>
+
+  <!-- the absent comparison -->
+  <line x1="106" y1="112" x2="546" y2="252" stroke="#8c1515" stroke-width="1.6" stroke-dasharray="6 6" opacity="0.5"/>
+  <text class="ser" x="300" y="228" font-size="12" font-style="italic" fill="#8c1515">encoder-decoder &#8212; never plotted</text>
+  <text class="ser" x="300" y="244" font-size="10.5" font-style="italic" fill="#8c1515">position unknown: this line is a placeholder, not a measurement</text>
+
+  <!-- callout -->
+  <rect x="330" y="60" width="222" height="52" fill="#f7f7f5" stroke="#dadada"/>
+  <text class="ser" x="342" y="80" font-size="11.5" fill="#454545">Both scaling-law papers trained</text>
+  <text class="ser" x="342" y="96" font-size="11.5" fill="#454545">only decoder-only models.</text>
+
+  <!-- schematic warning -->
+  <text class="ser" x="90" y="306" font-size="10.5" font-style="italic" fill="#6e6e6e">Schematic. Axis values are illustrative, not extracted data points.</text>
+</svg>

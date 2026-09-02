@@ -1,0 +1,120 @@
+<svg viewBox="0 0 1000 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t1f">
+  <title id="t1f">The three families as cuts of one design: encoder-only keeps the encoder block, decoder-only keeps the decoder block with its cross-attention sub-layer removed, encoder-decoder keeps both stacks with cross-attention intact.</title>
+  <defs>
+    <marker id="a1f" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0.6 L7.4,4 L0,7.4 Z" fill="#454545"/>
+    </marker>
+    <marker id="a1fx" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0.6 L7.4,4 L0,7.4 Z" fill="#8c1515"/>
+    </marker>
+  </defs>
+  <style>
+    .ser { font-family: Georgia, 'Times New Roman', serif; }
+    .sub { fill: #ffffff; stroke: #1a1a1a; stroke-width: 1.3; }
+    .nrm { fill: #ececec; stroke: #c9c9c9; stroke-width: 1; }
+    .gone { fill: #ffffff; stroke: #cfcfcf; stroke-width: 1.1; stroke-dasharray: 5 4; }
+    .lb  { font-family: Georgia, serif; font-size: 11.5px; fill: #1a1a1a; }
+    .lbg { font-family: Georgia, serif; font-size: 11.5px; fill: #b0b0b0; }
+    .lbs { font-family: Georgia, serif; font-size: 10px; fill: #454545; }
+    .tag { font-family: Georgia, serif; font-size: 11px; fill: #6e6e6e; }
+    .flow { stroke: #454545; stroke-width: 1.2; fill: none; }
+  </style>
+
+  <!-- ─────────── col 1: encoder-only ─────────── -->
+  <g transform="translate(30,0)">
+    <text class="ser" x="130" y="30" font-size="14" fill="#1a1a1a" text-anchor="middle">encoder-only</text>
+    <text class="tag" x="130" y="48" text-anchor="middle">BERT</text>
+
+    <rect class="sub" x="30" y="286" width="200" height="34"/>
+    <text class="lb" x="130" y="307" text-anchor="middle">Self-Attention</text>
+    <text class="lbs" x="130" y="336" text-anchor="middle" fill="#6e6e6e">fully-visible</text>
+    <rect class="nrm" x="30" y="252" width="200" height="22"/>
+    <text class="lbs" x="130" y="267" text-anchor="middle">Add &amp; Norm</text>
+
+    <!-- empty slot: nothing to remove, the block simply has no third sub-layer -->
+    <rect class="sub" x="30" y="182" width="200" height="34"/>
+    <text class="lb" x="130" y="203" text-anchor="middle">Feed Forward</text>
+    <rect class="nrm" x="30" y="148" width="200" height="22"/>
+    <text class="lbs" x="130" y="163" text-anchor="middle">Add &amp; Norm</text>
+
+    <line class="flow" x1="130" y1="286" x2="130" y2="278" marker-end="url(#a1f)"/>
+    <line class="flow" x1="130" y1="252" x2="130" y2="224" marker-end="url(#a1f)"/>
+    <line class="flow" x1="130" y1="182" x2="130" y2="174" marker-end="url(#a1f)"/>
+    <line class="flow" x1="130" y1="148" x2="130" y2="120" marker-end="url(#a1f)"/>
+
+    <text class="ser" x="130" y="110" font-size="12" fill="#454545" text-anchor="middle">temsiller</text>
+    <text class="tag" x="130" y="400" text-anchor="middle">2017 encoder blo&#287;u,</text>
+    <text class="tag" x="130" y="416" text-anchor="middle">oldu&#287;u gibi</text>
+  </g>
+
+  <!-- ─────────── col 2: decoder-only ─────────── -->
+  <g transform="translate(370,0)">
+    <text class="ser" x="130" y="30" font-size="14" fill="#1a1a1a" text-anchor="middle">decoder-only</text>
+    <text class="tag" x="130" y="48" text-anchor="middle">GPT</text>
+
+    <rect class="sub" x="30" y="286" width="200" height="34"/>
+    <text class="lb" x="130" y="307" text-anchor="middle">Masked Self-Attention</text>
+    <text class="lbs" x="130" y="336" text-anchor="middle" fill="#6e6e6e">causal</text>
+    <rect class="nrm" x="30" y="252" width="200" height="22"/>
+    <text class="lbs" x="130" y="267" text-anchor="middle">Add &amp; Norm</text>
+
+    <!-- removed cross-attention -->
+    <rect class="gone" x="30" y="212" width="200" height="30"/>
+    <text class="lbg" x="130" y="231" text-anchor="middle">Cross-Attention</text>
+    <line x1="34" y1="240" x2="226" y2="214" stroke="#8c1515" stroke-width="1.4"/>
+
+    <rect class="sub" x="30" y="152" width="200" height="34"/>
+    <text class="lb" x="130" y="173" text-anchor="middle">Feed Forward</text>
+    <rect class="nrm" x="30" y="118" width="200" height="22"/>
+    <text class="lbs" x="130" y="133" text-anchor="middle">Add &amp; Norm</text>
+
+    <line class="flow" x1="130" y1="286" x2="130" y2="278" marker-end="url(#a1f)"/>
+    <line class="flow" x1="130" y1="252" x2="130" y2="190" marker-end="url(#a1f)"/>
+    <line class="flow" x1="130" y1="152" x2="130" y2="144" marker-end="url(#a1f)"/>
+    <line class="flow" x1="130" y1="118" x2="130" y2="96" marker-end="url(#a1f)"/>
+
+    <text class="ser" x="130" y="86" font-size="12" fill="#454545" text-anchor="middle">p(sonraki token)</text>
+    <text class="tag" x="130" y="400" text-anchor="middle" fill="#8c1515">2017 decoder blo&#287;u,</text>
+    <text class="tag" x="130" y="416" text-anchor="middle" fill="#8c1515">eksi bir alt katman</text>
+  </g>
+
+  <!-- ─────────── col 3: encoder-decoder ─────────── -->
+  <g transform="translate(710,0)">
+    <text class="ser" x="130" y="30" font-size="14" fill="#1a1a1a" text-anchor="middle">encoder-decoder</text>
+    <text class="tag" x="130" y="48" text-anchor="middle">T5</text>
+
+    <!-- mini encoder -->
+    <rect x="0" y="216" width="76" height="104" fill="#f7f7f5" stroke="#dadada"/>
+    <text class="lbs" x="38" y="262" text-anchor="middle">encoder</text>
+    <text class="lbs" x="38" y="278" text-anchor="middle" fill="#6e6e6e">yı&#287;&#305;n&#305;</text>
+
+    <rect class="sub" x="96" y="286" width="164" height="34"/>
+    <text class="lb" x="178" y="307" text-anchor="middle">Masked Self-Attn</text>
+    <rect class="nrm" x="96" y="252" width="164" height="22"/>
+    <text class="lbs" x="178" y="267" text-anchor="middle">Add &amp; Norm</text>
+
+    <rect class="sub" x="96" y="212" width="164" height="30" stroke="#8c1515"/>
+    <text class="lb" x="178" y="231" text-anchor="middle" fill="#8c1515">Cross-Attention</text>
+
+    <rect class="sub" x="96" y="152" width="164" height="34"/>
+    <text class="lb" x="178" y="173" text-anchor="middle">Feed Forward</text>
+    <rect class="nrm" x="96" y="118" width="164" height="22"/>
+    <text class="lbs" x="178" y="133" text-anchor="middle">Add &amp; Norm</text>
+
+    <line class="flow" x1="178" y1="286" x2="178" y2="278" marker-end="url(#a1f)"/>
+    <line class="flow" x1="178" y1="252" x2="178" y2="248" marker-end="url(#a1f)"/>
+    <line class="flow" x1="178" y1="212" x2="178" y2="190" marker-end="url(#a1f)"/>
+    <line class="flow" x1="178" y1="152" x2="178" y2="144" marker-end="url(#a1f)"/>
+    <line class="flow" x1="178" y1="118" x2="178" y2="96" marker-end="url(#a1f)"/>
+    <!-- encoder feeds cross-attention -->
+    <path d="M76,240 L88,232" stroke="#8c1515" stroke-width="1.4" marker-end="url(#a1fx)"/>
+
+    <text class="ser" x="178" y="86" font-size="12" fill="#454545" text-anchor="middle">p(sonraki token)</text>
+    <text class="tag" x="130" y="400" text-anchor="middle">iki y&#305;&#287;&#305;n,</text>
+    <text class="tag" x="130" y="416" text-anchor="middle">alt katman tam</text>
+  </g>
+
+  <!-- bottom rule + summary -->
+  <line x1="30" y1="440" x2="970" y2="440" stroke="#dadada" stroke-width="1"/>
+  <text class="ser" x="500" y="464" font-size="12.5" fill="#454545" text-anchor="middle">&#220;&#231; aile de 2017'deki tek tasar&#305;mdan al&#305;nm&#305;&#351; kesitler &#8212; yeni bir mekanizma eklenmiyor, var olan &#231;&#305;kar&#305;l&#305;yor.</text>
+</svg>
