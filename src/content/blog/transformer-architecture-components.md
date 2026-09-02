@@ -16,19 +16,26 @@ BİTİRİRKEN: figürler · placeholder: true sil · drafts kopyasını sil.
 
 ## Abstract
 
-2017'de tek bir Transformer vardı: bir encoder-decoder, sinüzoidal konum
-kodlaması, alt katmanın ardından normalizasyon, ReLU'lu bir feed-forward ağı.
-Bugün açık ağırlıklı bir modelin konfigürasyonunda o tarifin neredeyse hiçbir
-maddesi yerinde değil. Bu yazı bloğun içini parça parça geziyor ve her
-değişikliği adı konmuş bir baskıya bağlıyor: decode belleği ve bant genişliği,
-parametre başına hesap, ölçekte eğitim kararlılığı, bağlam uzunluğu. Attention'ın
-kendisi, causal maskenin mümkün kıldığı KV-cache, cache'i küçültmek için üretilen
-MQA/GQA/MLA, sinüzoidal kodlamadan RoPE'a geçiş, MoE yönlendirmesi, normalizasyonun
-yer değiştirmesi ve SwiGLU sırayla ele alınıyor. Sayılar ve konfigürasyonlar
-mimarisi kamuya açık modellerden geliyor — DeepSeek-V3, Qwen3, Gemma 3, gpt-oss,
-OLMo 2 — ve türetilen her rakam kaynağın kendi yayımladığı sayıyı yeniden üretiyor.
-Çıkan sonuç bir "modern transformer tarifi" değil: bileşen listesinde yakınsama
-yok, aynı dört baskıya verilmiş birbirinden farklı cevaplar var.
+Bir dil modelinin mimarisi anlatılırken hâlâ 2017'nin Transformer'ı çiziliyor.
+Oysa bugün sevk edilen bir modelin konfigürasyon dosyasını açtığınızda o tarifin
+neredeyse hiçbir maddesi yerinde değil: sinüzoidal konum kodlaması, ReLU'lu
+feed-forward ağı, alt katmanın çıktısına uygulanan normalizasyon, kendi anahtar
+ve değerine sahip attention kafaları — hepsi değişti. Yerinde kalan liste kısa:
+attention işleminin kendisi, artık bağlantılar, ve aynı bloğu üst üste yığma
+fikri. Bu yazı aradaki sekiz yılı parça parça geziyor ve her değişikliği adı
+konmuş bir baskıya bağlıyor — decode belleği, parametre başına hesap, eğitim
+kararlılığı, bağlam uzunluğu — çünkü bunları tek bir sebebe indirmek bu konuda
+yapılan en yaygın hata. Yakından bakınca bazı gerekçeler ününden zayıf çıkıyor:
+GQA'nın kaynak makalesi yöntemi yalnızca encoder-decoder modellerde ölçtüğünü
+kendi sınırlar bölümünde yazıyor, 2017'nin kendi ablasyonu öğrenilen konum
+gömmelerini sinüzoidalle farksız buluyor, SwiGLU'nun makalesi neden işe
+yaradığına dair hiçbir açıklama sunmadığını açıkça söylüyor. Sayılar mimarisi
+kamuya açık modellerden geliyor ve türetilen her rakam kaynağın kendi yayımladığı
+sayıyı yeniden üretiyor — DeepSeek-V3'te tek bir isteğin 128K bağlamdaki
+KV-cache'i 8.6 GiB; aynı model 2017'nin attention'ıyla kurulsaydı 488 GiB
+olacaktı. Ortaya bir "modern transformer tarifi" çıkmıyor: beş açık ağırlıklı
+model aynı dört baskıya beş farklı cevap veriyor, ve hangisinin doğru olduğunu
+söyleyecek eşit bütçeli bir karşılaştırma kamuya açık literatürde yok.
 
 ---
 
