@@ -17,22 +17,27 @@
 	--sig-wash: #f0dcdc;
 
 	/* measures */
-	--measure: 43rem; /* prose — holds ~67 characters */
-	--wide: 62rem; /* masthead, footer */
-	--fig: 52rem; /* figures, code, pull quotes */
+	--measure: 59.5rem; /* prose — 952px */
+	--wide: 78rem; /* masthead, footer */
+	--fig: 59.5rem; /* figures, code, pull quotes — capped at the measure so they
+	                   never reach into the margin column */
 	--gutter: 1.5rem;
+	--sidenote-w: 15rem;
+	--sidenote-gap: 2.5rem;
 
-	/* code: near-monochrome, the way a paper sets a listing */
-	--astro-code-foreground: #1a1a1a;
-	--astro-code-background: #f7f7f5;
-	--astro-code-token-comment: #6e6e6e;
-	--astro-code-token-keyword: #1a1a1a;
-	--astro-code-token-string: #454545;
-	--astro-code-token-string-expression: #454545;
-	--astro-code-token-function: #1a1a1a;
-	--astro-code-token-constant: #454545;
-	--astro-code-token-parameter: #1a1a1a;
-	--astro-code-token-punctuation: #6e6e6e;
+	/* code: a real listing — cool surface, actual syntax colour */
+	--code-surface: #fbfbfd;
+	--code-rule: #d7dae0;
+	--astro-code-foreground: #24292f;
+	--astro-code-background: #fbfbfd;
+	--astro-code-token-comment: #6a737d;
+	--astro-code-token-keyword: #a626a4;
+	--astro-code-token-string: #1a7f37;
+	--astro-code-token-string-expression: #1a7f37;
+	--astro-code-token-function: #4078f2;
+	--astro-code-token-constant: #b5540b;
+	--astro-code-token-parameter: #24292f;
+	--astro-code-token-punctuation: #57606a;
 	--astro-code-token-link: #8c1515;
 
 	--serif: var(--font-lmroman), Georgia, serif;
@@ -69,7 +74,7 @@ body {
 	background: var(--paper);
 	color: var(--ink);
 	font-family: var(--serif);
-	font-size: 19px;
+	font-size: 17px;
 	line-height: 1.66;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
@@ -83,10 +88,120 @@ body {
 	padding-inline: var(--gutter);
 }
 
+/* Why: the prose column stays centred on the page. Sidenotes do not widen it —
+   they hang out of it into the right-hand whitespace, and only once the viewport
+   is wide enough to give up that strip on both sides (see the query below).
+   Widening main to hold both columns instead would push the reading column off
+   to the left, which is what it looked like. */
 main {
 	max-width: var(--measure);
 	margin: 0 auto;
-	padding: 2.75rem var(--gutter) 4rem;
+	padding: 1.75rem var(--gutter) 3.5rem;
+}
+
+/* ── section rail ──────────────────────────────────────────────── */
+
+/* Why: the rail mirrors the sidenote strip on the other side. It is fixed
+   rather than floated because it has to survive scrolling, and it appears at
+   the same width the sidenotes do — below that there is no strip to put it in
+   and the prose is the only thing that should be on screen. */
+.toc {
+	display: none;
+}
+
+@media (min-width: 1520px) {
+	.toc {
+		display: block;
+		position: fixed;
+		top: 5.5rem;
+		left: calc(
+			50% - var(--measure) / 2 + var(--gutter) - var(--sidenote-gap) -
+				var(--sidenote-w)
+		);
+		width: var(--sidenote-w);
+		max-height: calc(100vh - 9rem);
+		overflow-y: auto;
+		font-size: 0.72em;
+		line-height: 1.42;
+	}
+
+	.toc ol {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		counter-reset: toc;
+	}
+
+	.toc li {
+		margin-bottom: 0.5rem;
+	}
+
+	.toc a {
+		color: var(--faint);
+		border-bottom: 0;
+		display: block;
+		border-left: 2px solid transparent;
+		padding-left: 0.6rem;
+	}
+
+	.toc a:hover {
+		color: var(--ink);
+		background: none;
+	}
+
+	/* the section the reader is in */
+	.toc a.current {
+		color: var(--ink);
+		border-left-color: var(--sig);
+	}
+}
+
+/* ── sidenotes ─────────────────────────────────────────────────── */
+
+/* Default: in the flow, set off by a rule. */
+.sidenote {
+	margin: 1rem 0 1.2rem;
+	padding-left: 0.9rem;
+	border-left: 2px solid var(--rule);
+	font-size: 0.82em;
+	line-height: 1.55;
+	color: var(--muted);
+	text-align: left;
+	hyphens: none;
+}
+
+/* Wide enough that centring the measure leaves a full margin strip on BOTH
+   sides: --measure + 2 × (--sidenote-w + --sidenote-gap) ≈ 1512px, rounded up
+   to clear a scrollbar. Only then does the note leave the flow, so it never
+   forces a horizontal scrollbar. */
+@media (min-width: 1520px) {
+	.sidenote {
+		float: right;
+		clear: right;
+		width: var(--sidenote-w);
+		margin: 0.35rem calc(-1 * (var(--sidenote-w) + var(--sidenote-gap))) 1.1rem 0;
+		padding-left: 0;
+		border-left: 0;
+		font-size: 0.74em;
+		line-height: 1.5;
+	}
+}
+
+.sidenote > :first-child {
+	margin-top: 0;
+}
+
+.sidenote > :last-child {
+	margin-bottom: 0;
+}
+
+.sidenote p {
+	margin: 0 0 0.5rem;
+	text-indent: 0;
+}
+
+.sidenote code {
+	font-size: 0.94em;
 }
 
 /* ── links ─────────────────────────────────────────────────────── */
@@ -210,13 +325,13 @@ code {
 }
 
 pre {
-	background: var(--wash);
-	border: 1px solid var(--rule);
-	padding: 0.85rem 1.05rem;
+	background: var(--code-surface);
+	border: 1px solid var(--code-rule);
+	padding: 1rem 1.15rem;
 	overflow-x: auto;
-	font-size: 0.83em;
-	line-height: 1.55;
-	margin: 0 0 1rem;
+	font-size: 0.73em;
+	line-height: 1.65;
+	margin: 1.5rem 0 1.6rem;
 }
 
 pre > code {
@@ -226,7 +341,7 @@ pre > code {
 
 /* Shiki emits an inline background; the border and padding stay ours. */
 .astro-code {
-	background: var(--wash) !important;
+	background: var(--code-surface) !important;
 }
 
 .astro-code .line span[style*='--astro-code-token-comment'] {
@@ -282,17 +397,9 @@ blockquote p:last-child {
 
 /* ── the post body is set as a paper, not as a blog column ─────── */
 
-article.paper {
-	counter-reset: section;
-}
-
-article.paper h2 {
-	counter-increment: section;
-}
-
-article.paper h2::before {
-	content: counter(section) ". ";
-}
+/* Why: sections are numbered in the markdown, not by a CSS counter. The prose
+   cross-references them by number (“§8’de geleceğiz”), and a counter would also
+   number the Abstract — shifting every reference by one. */
 
 /* Why: the child combinator matters. The byline and the placeholder callout
    live in the article's <header>; without `>` they inherit the indent and the
@@ -381,16 +488,10 @@ pre::-webkit-scrollbar-track,
 	}
 }
 
-@media (max-width: 640px) {
-	body {
-		font-size: 18px;
-	}
-}
-
-/* Why: the narrower gutter buys ~40 characters at 390px. Dropping the body
-   to 17px was measured to buy zero additional characters, and Latin Modern's
-   small x-height makes it read smaller than its nominal size, so the type
-   stays at 18px. */
+/* Why: the narrower gutter buys ~40 characters at 390px — the type itself is
+   left alone. The body is one step everywhere (17px); shrinking it further was
+   measured to buy zero additional characters, and Latin Modern's small
+   x-height already makes it read smaller than its nominal size. */
 @media (max-width: 400px) {
 	:root {
 		--gutter: 1.1rem;

@@ -4,9 +4,15 @@ import FormattedDate from '../components/FormattedDate.astro';
 import Layout from './Layout.astro';
 import { SITE_TITLE } from '../consts';
 
-type Props = CollectionEntry<'blog'>['data'];
+type Props = CollectionEntry<'blog'>['data'] & {
+	headings?: { depth: number; slug: string; text: string }[];
+};
 
-const { title, description, pubDate, updatedDate, placeholder } = Astro.props;
+const { title, description, pubDate, updatedDate, placeholder, headings = [] } = Astro.props;
+
+/** Why: only h2 carries a section in these posts; h3 is used inside a section
+    for sub-parts and would make the rail longer than the prose it indexes. */
+const sections = headings.filter((h) => h.depth === 2);
 ---
 
 <Layout
@@ -15,6 +21,19 @@ const { title, description, pubDate, updatedDate, placeholder } = Astro.props;
 	article={{ pubDate, updatedDate, headline: title }}
 >
 	<main>
+		{
+			sections.length > 1 && (
+				<nav class="toc" aria-label="Bölümler">
+					<ol>
+						{sections.map((s) => (
+							<li>
+								<a href={`#${s.slug}`}>{s.text}</a>
+							</li>
+						))}
+					</ol>
+				</nav>
+			)
+		}
 		<article class="paper">
 			<header>
 				<h1>{title}</h1>
@@ -44,6 +63,30 @@ const { title, description, pubDate, updatedDate, placeholder } = Astro.props;
 		</article>
 	</main>
 </Layout>
+
+<script>
+	// Marks the rail entry for the section the reader is currently in. Purely
+	// additive: without JS the rail is still a working list of anchors.
+	const rail = document.querySelector('.toc');
+	if (rail) {
+		const heads = [...document.querySelectorAll('article.paper h2[id]')];
+		const links = new Map(
+			heads.map((h) => [h.id, rail.querySelector(`a[href="#${CSS.escape(h.id)}"]`)]),
+		);
+
+		const sync = () => {
+			let current = heads[0];
+			for (const h of heads) {
+				if (h.getBoundingClientRect().top < 140) current = h;
+			}
+			for (const a of links.values()) a?.classList.remove('current');
+			links.get(current?.id)?.classList.add('current');
+		};
+
+		addEventListener('scroll', sync, { passive: true });
+		sync();
+	}
+</script>
 
 <style>
 	header {
