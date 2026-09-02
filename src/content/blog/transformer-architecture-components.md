@@ -16,26 +16,32 @@ BİTİRİRKEN: figürler · placeholder: true sil · drafts kopyasını sil.
 
 ## Abstract
 
-Bir dil modelinin mimarisi anlatılırken hâlâ 2017'nin Transformer'ı çiziliyor.
+DeepSeek-V3'te tek bir isteğin 128K bağlamdaki KV-cache'i 8.6 GiB. Aynı model
+2017'nin attention'ıyla kurulsaydı 488 GiB olurdu, ve aradaki fark mimarinin tek
+bir bileşeninden geliyor. Buna rağmen bir dil modelinin mimarisi anlatılırken
+hâlâ 2017'nin Transformer'ı çiziliyor.
+
 Oysa bugün sevk edilen bir modelin konfigürasyon dosyasını açtığınızda o tarifin
 neredeyse hiçbir maddesi yerinde değil: sinüzoidal konum kodlaması, ReLU'lu
 feed-forward ağı, alt katmanın çıktısına uygulanan normalizasyon, kendi anahtar
 ve değerine sahip attention kafaları — hepsi değişti. Yerinde kalan liste kısa:
 attention işleminin kendisi, artık bağlantılar, ve aynı bloğu üst üste yığma
-fikri. Bu yazı aradaki sekiz yılı parça parça geziyor ve her değişikliği adı
-konmuş bir baskıya bağlıyor — decode belleği, parametre başına hesap, eğitim
-kararlılığı, bağlam uzunluğu — çünkü bunları tek bir sebebe indirmek bu konuda
-yapılan en yaygın hata. Yakından bakınca bazı gerekçeler ününden zayıf çıkıyor:
-GQA'nın kaynak makalesi yöntemi yalnızca encoder-decoder modellerde ölçtüğünü
-kendi sınırlar bölümünde yazıyor, 2017'nin kendi ablasyonu öğrenilen konum
-gömmelerini sinüzoidalle farksız buluyor, SwiGLU'nun makalesi neden işe
-yaradığına dair hiçbir açıklama sunmadığını açıkça söylüyor. Sayılar mimarisi
-kamuya açık modellerden geliyor ve türetilen her rakam kaynağın kendi yayımladığı
-sayıyı yeniden üretiyor — DeepSeek-V3'te tek bir isteğin 128K bağlamdaki
-KV-cache'i 8.6 GiB; aynı model 2017'nin attention'ıyla kurulsaydı 488 GiB
-olacaktı. Ortaya bir "modern transformer tarifi" çıkmıyor: beş açık ağırlıklı
-model aynı dört baskıya beş farklı cevap veriyor, ve hangisinin doğru olduğunu
-söyleyecek eşit bütçeli bir karşılaştırma kamuya açık literatürde yok.
+fikri.
+
+Bu yazı aradaki sekiz yılı parça parça geziyor ve her değişikliği adı konmuş bir
+baskıya bağlıyor — decode belleği, parametre başına hesap, eğitim kararlılığı,
+bağlam uzunluğu — çünkü bunları tek bir sebebe indirmek bu konuda yapılan en
+yaygın hata. Sayılar mimarisi kamuya açık modellerden geliyor ve türetilen her
+rakam kaynağın kendi yayımladığı sayıyı yeniden üretiyor.
+
+Yakından bakınca bazı gerekçeler ününden zayıf çıkıyor: GQA'nın kaynak makalesi
+yöntemi yalnızca encoder-decoder modellerde ölçtüğünü kendi sınırlar bölümünde
+yazıyor, 2017'nin kendi ablasyonu öğrenilen konum gömmelerini sinüzoidalle
+farksız buluyor, SwiGLU'nun makalesi neden işe yaradığına dair hiçbir açıklama
+sunmadığını açıkça söylüyor. Ve ortaya bir "modern transformer tarifi" çıkmıyor:
+beş açık ağırlıklı model aynı dört baskıya beş farklı cevap veriyor, hangisinin
+doğru olduğunu söyleyecek eşit bütçeli bir karşılaştırma ise kamuya açık
+literatürde yok.
 
 ---
 
@@ -130,7 +136,7 @@ geldiğinde geri çağrılmış hâlleri.
 
 Envantere değişmeyen parçadan başlayalım.
 
-## 2. Attention mekanizması
+## 2. Attention: beş çeşit, tek işlem
 
 "Attention" tek bir işlemin adı. Bu bölümde sayacağım beş çeşidi ayrı
 mekanizmalar değil — aynı işlemin farklı argümanlarla çağrılmış hâlleri. Önce
@@ -389,7 +395,7 @@ Bugün bu, tek başına değil **karışım hâlinde** kullanılıyor:
 
 Neden yapıldığı — yani cache maliyeti — sıradaki bölümün konusu.
 
-## 3. KV-cache
+## 3. KV-cache: hesabı belleğe çeviren takas
 
 §2.3'ün lemması bir imkân tanımlıyordu: causal bir yığında geçmiş anahtar ve
 değerler değişmiyor, dolayısıyla saklanabilirler. Bu bölüm o imkânın faturasını
@@ -479,7 +485,7 @@ için var.
 
 Sıradaki bölüm o literatür.
 
-## 4. MQA, GQA, MLA
+## 4. MQA, GQA, MLA: tek çarpana üç saldırı
 
 §3'ün problemi tek cümleyle şu: cache çok büyük ve her token için baştan
 okunuyor. Formüle bakınca kısılabilecek çarpanlar sınırlı — $L$ ve $d_{	ext{head}}$
@@ -644,7 +650,7 @@ Bir mimarinin nasıl gerçekten tasarlandığını görmek isterseniz burası iy
 yer: iki bileşen ayrı ayrı gerekçelendirilmiş, çarpışmışlar, ve uzlaşma
 konfigürasyon dosyasında görünür bir sayı olarak kalmış.
 
-## 5. Positional encoding
+## 5. Positional encoding: toplamaktan döndürmeye
 
 Attention işleminde konum diye bir kavram yok. $\operatorname{softmax}(QK^\top)V$
 ifadesinde satırları karıştırırsanız çıktı da aynı şekilde karışıyor; işlemin
@@ -865,7 +871,7 @@ gürültü artıyor ve **NoPE katmanlarının arama yeteneği bozuluyor.** $\the
 değerlendirme skoru 8.036'dan 6.203'e iniyor. Taban frekansını büyütmek bedava
 değil.
 
-## 6. Mixture-of-Experts
+## 6. Mixture-of-Experts: parametreyi hesaptan ayırmak
 
 Buradan itibaren baskı değişiyor. §3–§5 decode belleği ve bağlam uzunluğu
 hakkındaydı; MoE tamamen başka bir şeye cevap veriyor ve ikisini karıştırmamak
@@ -1022,7 +1028,7 @@ aşmak: *"yük dengelemede yardımcı kayıp kullanmayan bir strateji"*, gerekç
 *"yük dengesini teşvik etme çabasından doğan performans düşüşünü asgariye
 indirmek."*
 
-## 7. Normalizasyon
+## 7. Normalizasyon: yeri de biçimi de değişti
 
 Normalizasyon 2017'de de vardı, hâlâ var — ama hem yeri hem biçimi değişti. Bu
 bölüm baştan sona kararlılık baskısının bölümü.
@@ -1092,6 +1098,12 @@ ortalamayı çıkarıyor (yeniden merkezleme) ve standart sapmaya bölüyor (yen
 Ortalamayı hesaplamamak bir istatistik geçişini ortadan kaldırıyor; kazanç
 tamamen hız. Qwen3, Gemma 3, OLMo 2 ve gpt-oss'un dördü de RMSNorm kullanıyor.
 
+Şu %7–%64 aralığına dikkat: dokuz kat açıklık, ve 2019'un donanımında, o
+dönemin modellerinde ölçülmüş. Makalenin kalite iddiası da "daha iyi" değil,
+"karşılaştırılabilir". RMSNorm'u sevk eden dört modelin hiçbiri kendi ölçeğinde
+LayerNorm'a karşı bir ablasyon yayımlamıyor — yani bugünkü yaygınlığı ölçülmüş
+bir üstünlüğe değil, bedava görünen bir hıza dayanıyor.
+
 ### 7.3 2024–25: yer yeniden tartışmaya açıldı
 
 Pre-LN yerleşik görünüyordu, ama son iki yıl konuyu yeniden açtı.
@@ -1148,7 +1160,7 @@ Xiao ve ark., *Efficient Streaming Language Models with Attention Sinks*, [arXiv
 
 </aside>
 
-## 8. FFN ve aktivasyon
+## 8. FFN: gerekçesi yazılmamış tek değişiklik
 
 Bloğun daha az konuşulan yarısı, ama parametrelerin çoğunu tutan taraf burası.
 2017'nin tarifi sade (Vaswani ve ark. 2017, §3.3): iki doğrusal katman, aralarında bir ReLU, her
@@ -1204,7 +1216,7 @@ Shazeer, *GLU Variants Improve Transformer*, [arXiv:2002.05202](https://arxiv.or
 
 </aside>
 
-## 9. Blok, bütün hâlde
+## 9. Blok bütün hâlde: beş model, beş cevap
 
 Bileşenleri tek tek gezdik. Şimdi ikisini yan yana koyalım: 2017'nin çizdiği
 blok, ve bugün sevk edilen blok. Aradaki sekiz yılın tamamı bu iki şemanın

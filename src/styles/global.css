@@ -17,10 +17,18 @@
 	--sig-wash: #f0dcdc;
 
 	/* measures */
-	--measure: 59.5rem; /* prose — 952px */
+	--measure: 62rem; /* prose — 992px, minus two gutters = a 944px column.
+	                     Why: the author's own value, set after reading a 608px
+	                     and a 784px column beside it and calling both too
+	                     narrow. At 18px Latin Modern the average character is
+	                     8.78px, so 944px runs ~107 characters — well past the
+	                     65–75 textbook range; the 18px body is what keeps a
+	                     line this long trackable. Every strip measurement below
+	                     is derived from the 944px column, so moving this value
+	                     moves both breakpoints with it. */
 	--wide: 78rem; /* masthead, footer */
-	--fig: 59.5rem; /* figures, code, pull quotes — capped at the measure so they
-	                   never reach into the margin column */
+	--fig: 62rem; /* figures, code, pull quotes — pinned to the measure so they
+	                never reach into the margin column */
 	--gutter: 1.5rem;
 	--sidenote-w: 15rem;
 	--sidenote-gap: 2.5rem;
@@ -46,17 +54,36 @@
 }
 
 /* ── the narrow tier ───────────────────────────────────────────────
-   Why: the full-width margin strips need ~1520px, which a 1080p screen at
-   125–150% OS scaling never reaches — the author cannot see the site's own
-   margins. Narrower strips and a slightly shorter measure fit from 1200px up.
-   Only the four measurements are re-declared; the rail and sidenote rules are
-   written in terms of them and follow on their own. */
+   Why: the strips hang off the text column (944px — the measure less its two
+   gutters), so a full-width pair needs 944 + 2 × 280 = 1504px. Below that the
+   1080p screen the author works on would see no margins at all — which is the
+   whole point of the design, unseen on the machine it is made on.
+
+   Strips still fit from 1200px up, but only if the column gives ground with
+   them: 800 + 2 × 188 = 1176px. So this tier moves the measure, unlike the
+   full-width one. Two constraints fix the numbers:
+
+     the pair must fit          800 + 2 × (160 + 28) = 1176 ≤ 1200
+     a plate must clear a note  376 + 28 = 404 > 800 / 2 = 400
+
+   The second is the one that bites. --fig is pinned to --measure, so a figure
+   or a listing overhangs the column by one gutter on each side; if the strip's
+   inner edge sits inside that overhang, a plate lands on top of a note. That
+   is exactly what a 1.25rem gap did here — a 4px overlap on every code block
+   beside a citation.
+
+   The cost is the measure: measured on this prose, the 752px column runs ~80
+   characters a line against ~113 at 944px — so the narrow tier is nearer the
+   textbook range than the full-width one, not further from it. Still one
+   reading column at every width; below 1200px both strips fold into the
+   flow instead. */
 @media (min-width: 1200px) and (max-width: 1519.98px) {
 	:root {
-		--measure: 52rem; /* 832px — still ~85 characters */
-		--fig: 52rem;
-		--sidenote-w: 11rem;
-		--sidenote-gap: 1.25rem;
+		/* Derivation, and why the gap is 1.75rem, in the note above. */
+		--measure: 50rem; /* 800px, less two gutters = a 752px column */
+		--fig: 50rem;
+		--sidenote-w: 10rem;
+		--sidenote-gap: 1.75rem;
 	}
 }
 
@@ -89,7 +116,9 @@ body {
 	background: var(--paper);
 	color: var(--ink);
 	font-family: var(--serif);
-	font-size: 17px;
+	font-size: 18px; /* Why: Latin Modern's x-height is small for its nominal
+	                    size — at 17px the face read a step under what it was.
+	                    One step, at every width; the gutter narrows instead. */
 	line-height: 1.66;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
@@ -185,11 +214,10 @@ main {
 	hyphens: none;
 }
 
-/* Wide enough that centring the measure leaves a margin strip on BOTH sides:
-   --measure + 2 × (--sidenote-w + --sidenote-gap). With the narrow tier's
-   measurements that is 832 + 2 × 196 = 1224px, so 1200px clears it once the
-   gutter is counted. Only then does the note leave the flow, so it never
-   forces a horizontal scrollbar. */
+/* Wide enough that centring the column leaves a margin strip on BOTH sides:
+   the text column + 2 × (--sidenote-w + --sidenote-gap). With the narrow
+   tier's column and strips that is 800 + 2 × 188 = 1176px, inside 1200px. Only then does
+   the note leave the flow, so it never forces a horizontal scrollbar. */
 @media (min-width: 1200px) {
 	.sidenote {
 		float: right;
@@ -251,19 +279,23 @@ h6 {
 }
 
 h1 {
-	font-size: 1.55em; /* display */
+	font-size: 1.9em; /* display */
 }
 
-/* Why: a section head set one step above the body in the caps face reads as
-   emphasised prose, not as a heading — the two were 1.03em and 0.95em against
-   a 1.03em body, an 8% gap between h2 and h3. Each level now takes its own
-   step of the documented ramp, and h2 leaves the caps face: at headline size
-   the small caps fight the Turkish dotless ı, and a paper's section head is
-   set in the text face anyway. */
+/* Why: the ramp is read top to bottom, so each level has to be recognisable
+   without its neighbour beside it. The old steps were 1.55 / 1.45 / 1.03 /
+   0.95 against a 1em body — a 7% gap between the page title and a section
+   head, and an 8% gap between h3 and h4, which is not a hierarchy, it is a
+   rounding error. Every level now takes a real step (1.9 / 1.35 / 1.15 / 1.0)
+   and carries a second signal besides size: h2 is bold upright in the text
+   face, h3 and h4 are the drawn caps face, h4 drops to muted. Why not
+   italic: a full section head in Latin Modern's italic reads as a long
+   quotation rather than as a head, and its Turkish ı, ğ and ş sit looser
+   than the roman's. Italic stays for the byline, the blockquote and inline
+   emphasis — never for a heading. */
 h2 {
-	font-size: 1.45em; /* headline */
+	font-size: 1.35em; /* headline */
 	font-weight: 700;
-	font-style: italic;
 	margin: 2.6rem 0 0.7rem;
 }
 
@@ -275,11 +307,11 @@ h4 {
 }
 
 h3 {
-	font-size: 1.03em; /* title */
+	font-size: 1.15em; /* title */
 }
 
 h4 {
-	font-size: 0.95em; /* subtitle */
+	font-size: 1em; /* subtitle */
 	color: var(--muted);
 }
 
@@ -368,6 +400,34 @@ pre > code {
 	background: var(--code-surface) !important;
 }
 
+/* Why: half the fenced blocks in these posts are not source but the output the
+   block above them actually produced — the standing claim that no output here
+   was typed by hand. Rendered in an identical panel, that distinction is
+   invisible, so the claim is unverifiable at a glance. Shiki tags a
+   language-less fence `plaintext`, and an output is exactly a plaintext block
+   adjoining a python one, so this needs no change to the markdown and cannot
+   catch a standalone diagram that happens to be unhighlighted. */
+pre[data-language='python'] + pre[data-language='plaintext'] {
+	position: relative;
+	/* closes the gap left by the code block's own margin-bottom, so the result
+	   reads as attached to what produced it rather than as a second listing */
+	margin-top: -1.6rem;
+	border-top: 0;
+	padding-top: 1.75rem;
+	background: var(--wash) !important;
+}
+
+pre[data-language='python'] + pre[data-language='plaintext']::before {
+	content: 'çıktı';
+	position: absolute;
+	top: 0.5rem;
+	left: 1.15rem;
+	font-family: var(--mono);
+	font-size: 0.9em;
+	letter-spacing: 0.04em;
+	color: var(--faint);
+}
+
 .astro-code .line span[style*='--astro-code-token-comment'] {
 	font-style: italic;
 }
@@ -435,13 +495,15 @@ blockquote p:last-child {
    live in the article's <header>; without `>` they inherit the indent and the
    justification, which indents a bordered callout and hyphenates it against
    its own frame. Only the slotted body is set as a paper. */
+/* Why: every paragraph is indented, including the first one after a section
+   head, and the space between them is kept as well. Typographic convention
+   picks one mark or the other; the author asked for both and for the run to
+   start indented, so the two marks are tuned to agree instead of competing —
+   the space is 0.5rem, wide enough to read as a break but under a full line,
+   and the indent stays at the classic 1.6em. */
 article.paper > p {
-	margin-bottom: 0.3rem;
-}
-
-/* A paragraph continuing a run is indented rather than spaced off. */
-article.paper > p + p {
-	text-indent: 1.6em;
+	margin-bottom: 0.8rem;
+	text-indent: 1.85em;
 }
 
 /* Why NOT justified: justification is only legible when the renderer can
@@ -525,7 +587,7 @@ pre::-webkit-scrollbar-track,
 }
 
 /* Why: the narrower gutter buys ~40 characters at 390px — the type itself is
-   left alone. The body is one step everywhere (17px); shrinking it further was
+   left alone. The body is one step everywhere (18px); shrinking it further was
    measured to buy zero additional characters, and Latin Modern's small
    x-height already makes it read smaller than its nominal size. */
 @media (max-width: 400px) {
