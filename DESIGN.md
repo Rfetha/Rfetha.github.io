@@ -470,6 +470,13 @@ transparent track.
 - **CV:** a 7.5rem italic tabular-faint date column beside a body column at `0.92em`; role names in the caps face. Collapses to one column at 640px.
 - **Work:** no date column. Repository names are links in red at `0.95em` in the roman face — deliberately *not* the caps face, per the Identifier Exemption.
 
+### Citation Block
+- **Character:** the last thing in a post — a hairline, a caps-face `Cite.` run-in, and the entry as a BibTeX listing in the code panel.
+- **Source:** generated in `BlogPost.astro`, never authored in markdown. The canonical URL comes from `Astro.site` (the `site` constant in `astro.config.mjs`, which is the one place a domain change lands) and everything else from frontmatter, so a post gets a citation by being a post.
+- **Key:** `<surname><year><topic>`, where topic is the first slug word that is not a leading interrogative — `ersoy2026decoder`, not `ersoy2026why`.
+- **The title is double-braced.** BibTeX lowercases a title it is allowed to restyle; these titles carry proper nouns (Transformer, decoder-only) that have to survive.
+- **`Cite.` stays English**, like every other chrome label, which is also what keeps it clear of The Turkish Lowercase Rule.
+
 ### Placeholder Marker
 - **Character:** an honest label on unwritten content, driven by a `placeholder: boolean` in the blog collection schema. It is a content-state device, not a decorative badge.
 - **On a post:** a four-sided 1px red frame, red text at `0.82em`, 0.6rem/0.85rem padding, with a caps-face run-in `Placeholder.` — an English label, so the caps face is safe here; it lives in the article `<header>` and is therefore outside the paper typesetting selector.

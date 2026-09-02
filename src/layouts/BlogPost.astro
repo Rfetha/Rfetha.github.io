@@ -13,6 +13,36 @@ const { title, description, pubDate, updatedDate, placeholder, headings = [] } =
 /** Why: only h2 carries a section in these posts; h3 is used inside a section
     for sub-parts and would make the rail longer than the prose it indexes. */
 const sections = headings.filter((h) => h.depth === 2);
+
+/* Why: the BibTeX entry is built here rather than typed into each post's
+   markdown. The canonical URL is `site` in astro.config.mjs — which calls
+   itself "one place to change when the site moves to its own domain" — and a
+   hand-written copy in every post would silently rot the day that changes.
+   Everything else already exists as frontmatter, so a post gets its citation
+   by being a post. */
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const [given, ...rest] = SITE_TITLE.split(' ');
+const surname = rest.at(-1) ?? given;
+const year = pubDate.getUTCFullYear();
+
+/* Why: a key like `ersoy2026why` reads as a typo, so the leading interrogative
+   is skipped — the first word that actually names the subject wins. */
+const SKIP = new Set(['why', 'how', 'what', 'the', 'a', 'an', 'and', 'of', 'on', 'in', 'to']);
+const topic =
+	Astro.url.pathname
+		.replace(/^\/blog\/|\/$/g, '')
+		.split('-')
+		.find((w) => w.length > 2 && !SKIP.has(w)) ?? 'post';
+
+/* Why: the title is double-braced. BibTeX lowercases a title it is allowed to
+   restyle, and these titles carry proper nouns (Transformer, decoder-only)
+   that must survive. */
+const bibtex = `@misc{${surname.toLowerCase()}${year}${topic},
+  author       = {${surname}, ${given}},
+  title        = {{${title}}},
+  year         = {${year}},
+  howpublished = {\\url{${canonical}}}
+}`;
 ---
 
 <Layout
@@ -66,6 +96,11 @@ const sections = headings.filter((h) => h.depth === 2);
 				}
 			</header>
 			<slot />
+
+			<footer class="cite">
+				<p><b>Cite.</b> This entry, as BibTeX.</p>
+				<pre><code>{bibtex}</code></pre>
+			</footer>
 		</article>
 
 		{/* Why: figures are dense enough that the 952px column is not always
@@ -185,6 +220,25 @@ const sections = headings.filter((h) => h.depth === 2);
 		font-family: var(--caps);
 		font-weight: 400;
 		letter-spacing: 0.05em;
+	}
+
+	/* ── citation ─────────────────────────────────────────────────── */
+
+	.cite {
+		margin-top: 2.6rem;
+		padding-top: 1.3rem;
+		border-top: 1px solid var(--rule);
+	}
+	.cite p {
+		margin: 0 0 0.2rem;
+		font-size: 0.82em;
+		color: var(--muted);
+	}
+	.cite b {
+		font-family: var(--caps);
+		font-weight: 400;
+		letter-spacing: 0.05em;
+		color: var(--ink);
 	}
 
 	/* ── figure, full screen ─────────────────────────────────────── */
