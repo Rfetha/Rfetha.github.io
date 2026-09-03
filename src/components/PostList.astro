@@ -29,7 +29,7 @@ const t = UI[lang];
 				<a href={localePath(lang, `/blog/${splitId(post.id).slug}/`)}>{post.data.title}</a>
 				<span class="desc">{post.data.description}</span>
 				<span class="meta">
-					<FormattedDate date={post.data.pubDate} />
+					<FormattedDate date={post.data.pubDate} lang={lang} />
 				</span>
 			</li>
 		))

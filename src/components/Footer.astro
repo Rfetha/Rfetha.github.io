@@ -1,5 +1,12 @@
 ---
 import { GITHUB_URL, LINKEDIN_URL, SITE_TITLE } from '../consts';
+import { localePath, type Lang } from '../i18n';
+
+interface Props {
+	lang: Lang;
+}
+
+const { lang } = Astro.props;
 
 const year = new Date().getFullYear();
 ---
@@ -10,7 +17,7 @@ const year = new Date().getFullYear();
 		<span class="links">
 			<a href={GITHUB_URL}>GitHub</a>
 			<a href={LINKEDIN_URL}>LinkedIn</a>
-			<a href="/rss.xml">RSS</a>
+			<a href={localePath(lang, '/rss.xml')}>RSS</a>
 		</span>
 	</div>
 </footer>

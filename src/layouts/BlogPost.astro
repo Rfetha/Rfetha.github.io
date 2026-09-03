@@ -91,13 +91,13 @@ const bibtex = `@misc{${surname.toLowerCase()}${year}${topic},
 			<header>
 				<h1>{title}</h1>
 				<p class="byline">
-					{SITE_TITLE} &nbsp;·&nbsp; <FormattedDate date={pubDate} />
+					{SITE_TITLE} &nbsp;·&nbsp; <FormattedDate date={pubDate} lang={lang} />
 					{
 						updatedDate && (
 							<>
 								<br />
 								<span class="revised">
-									revised <FormattedDate date={updatedDate} />
+									revised <FormattedDate date={updatedDate} lang={lang} />
 								</span>
 							</>
 						)
@@ -107,7 +107,7 @@ const bibtex = `@misc{${surname.toLowerCase()}${year}${topic},
 			<slot />
 
 			<footer class="cite">
-				<p><b>Cite.</b> This entry, as BibTeX.</p>
+				<p><b>{t.cite}</b> {t.citeBody}</p>
 				<pre><code>{bibtex}</code></pre>
 			</footer>
 		</article>

@@ -119,7 +119,7 @@ single cause is the most common mistake in the field.
 
 <figure>
 
-<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-1-timeline.svg" alt="A timeline running from 2016 to 2025. Components are placed by publication date and grouped by four pressures: decode memory, compute per parameter, training stability, context length. Sparsely-gated MoE sits five months to the left of the Transformer.">
+<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-1-timeline.svg" alt="A timeline running from 2017 to 2025. Components are placed by publication date and split into five lanes: decode memory and bandwidth, compute per parameter, training stability, context length, and unnamed (SwiGLU). Sparsely-gated MoE sits five months to the left of the Transformer.">
 
 <figcaption><b>Figure 1.</b> The parts of the block and when they entered (arXiv v1 submission dates). The bands show which pressure each part answers. The red mark on the left: sparsely-gated <b>MoE</b> was published five months before the Transformer — older than the block it lives in.</figcaption>
 

@@ -3,10 +3,8 @@ import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import PostList from '../../components/PostList.astro';
 import {
-	AFFILIATION,
 	GITHUB_URL,
 	LINKEDIN_URL,
-	SITE_DESCRIPTION,
 	SITE_TITLE,
 } from '../../consts';
 import { LANGS, UI, localePath, splitId, type Lang } from '../../i18n';
@@ -24,11 +22,11 @@ const all = (await getCollection('blog'))
 const recent = all.slice(0, 5);
 ---
 
-<Layout title={SITE_TITLE} description={SITE_DESCRIPTION} lang={lang}>
+<Layout title={SITE_TITLE} description={t.siteDescription} lang={lang}>
 	<main>
 		<div class="titleblock">
 			<h1>{SITE_TITLE}</h1>
-			<p class="affiliation">{AFFILIATION}</p>
+			<p class="affiliation">{t.affiliation}</p>
 			<div class="abstract">
 				<b>{t.abstractLabel}</b> {t.abstract}{' '}
 				<a href={localePath(lang, '/about')}>{t.moreAbout}</a>.

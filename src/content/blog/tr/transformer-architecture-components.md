@@ -80,7 +80,7 @@ Bu dört baskıyı birbirinden ayrı tutmak gerekir. MoE'nin KV-cache ile ya da 
 
 <figure>
 
-<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-1-timeline.svg" alt="2016'dan 2025'e uzanan zaman çizelgesi. Bileşenler yayımlanma tarihlerine göre yerleştirilmiş ve dört baskıya göre gruplanmış: decode belleği, parametre başına hesap, eğitim kararlılığı, bağlam uzunluğu. Sparsely-gated MoE, Transformer'ın beş ay solunda duruyor.">
+<img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-1-timeline.svg" alt="2017'den 2025'e uzanan zaman çizelgesi. Bileşenler yayımlanma tarihlerine göre yerleştirilmiş ve beş şeride ayrılmış: decode belleği ve bant genişliği, parametre başına hesap, eğitim kararlılığı, bağlam uzunluğu, ve adı konmamış (SwiGLU). Sparsely-gated MoE, Transformer'ın beş ay solunda duruyor.">
 
 <figcaption><b>Figure 1.</b> Bloğun parçaları ve giriş tarihleri (arXiv v1 gönderim tarihleri). Şeritler, her parçanın cevap verdiği baskıyı gösteriyor. Soldaki kırmızı işaret: sparsely-gated <b>MoE</b>, Transformer'dan beş ay önce yayımlandı — içinde yaşadığı bloktan eski.</figcaption>
 

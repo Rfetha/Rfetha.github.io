@@ -1,7 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import {
-	AFFILIATION,
 	GITHUB_HANDLE,
 	GITHUB_URL,
 	LINKEDIN_URL,
@@ -143,7 +142,7 @@ const c = COPY[lang];
 			The paper convention supplies the fix: the author note carries its own title
 			and the name drops to the byline beneath it. -->
 			<h1>{c.h1}</h1>
-			<p class="affiliation">{SITE_TITLE}, {AFFILIATION}</p>
+			<p class="affiliation">{SITE_TITLE}, {t.affiliation}</p>
 		</header>
 
 		<h2>{c.whatIDo}</h2>

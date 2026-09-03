@@ -57,6 +57,18 @@ export const UI = {
 		   line and gets clicked by accident. */
 		switchTo: 'Türkçe',
 		switchAria: 'Bu sayfayı Türkçe oku',
+		/* Why: the plate labels inside a post (`Abstract`, `Figure n.`) stay
+		   English in both languages — they are typographic furniture of the
+		   preprint form, not interface (PRODUCT.md). Everything below is
+		   interface and does get localised. */
+		dateLocale: 'en-GB',
+		cite: 'Cite.',
+		citeBody: 'This entry, as BibTeX.',
+		siteDescription:
+			'Working notes on machine learning systems and the theory underneath them.',
+		affiliation: 'AI engineer · beginning graduate researcher',
+		notFound: 'Not found',
+		notFoundLede: 'There is no entry at this address.',
 	},
 	tr: {
 		writing: 'Yazılar',
@@ -77,6 +89,14 @@ export const UI = {
 		abstractLabel: 'Özet.',
 		switchTo: 'English',
 		switchAria: 'Read this page in English',
+		dateLocale: 'tr-TR',
+		cite: 'Atıf.',
+		citeBody: 'Bu yazı, BibTeX olarak.',
+		siteDescription:
+			'Makine öğrenmesi sistemleri ve altındaki teori üzerine çalışma notları.',
+		affiliation: 'Yapay zekâ mühendisi · yeni başlayan araştırmacı',
+		notFound: 'Bulunamadı',
+		notFoundLede: 'Bu adreste bir yazı yok.',
 	},
 } as const;
 
