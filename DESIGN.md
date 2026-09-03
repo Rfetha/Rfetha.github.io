@@ -49,7 +49,7 @@ typography:
     fontStyle: "italic"
   body:
     fontFamily: "Latin Modern Roman, Georgia, serif"
-    fontSize: "18px"
+    fontSize: "16px"
     fontWeight: 400
     lineHeight: 1.66
     letterSpacing: "normal"
@@ -188,8 +188,8 @@ straw paper rather than as a notebook; they now carry a real six-color syntax
 palette on a cool near-white ground, deliberately cooler than the warm paper
 around them so a listing reads as a pane of machine output set into the page.
 
-Density is high and confident. The text column is wide — 992px, holding ~107
-characters of 18px Latin Modern. The measure is the author's decision, taken
+Density is high and confident. The text column is wide — 992px, holding ~119
+characters of 16px Latin Modern. The measure is the author's decision, taken
 against 656px and 784px columns set side by side with it and rejected as too
 narrow; the larger body step
 is what keeps a line this long readable. Paragraphs carry both marks of a
@@ -248,14 +248,14 @@ a closed set: nothing outside `pre` and its Shiki tokens may use them.
 **Label Font:** Latin Modern Roman Caps (fallback Georgia, serif) — a *drawn* small-caps face, regular only.
 **Mono Font:** the system UI-monospace stack (`ui-monospace`, SFMono-Regular, Cascadia Mono, Menlo).
 
-**Character:** Latin Modern Roman is the Unicode successor to Computer Modern — the voice of a typeset paper. It was chosen over KaTeX_Main specifically because KaTeX_Main drops accented Latin (10 missing glyphs, among them `À É Î Õ Ü ç ñ`), which would break author names mid-word; here prose and rendered formulas share one drawing. Its x-height is small, so the face reads smaller than its nominal size — body sizes compensate upward, not downward.
+**Character:** Latin Modern Roman is the Unicode successor to Computer Modern — the voice of a typeset paper. It was chosen over KaTeX_Main specifically because KaTeX_Main drops accented Latin (10 missing glyphs, among them `À É Î Õ Ü ç ñ`), which would break author names mid-word; here prose and rendered formulas share one drawing. Its x-height is small, so the face reads smaller than its nominal size — at the 16px body step the prose sits optically below a 16px sans.
 
 ### Hierarchy
 - **Display** (400, `1.9em`, line-height 1.24): the site name in the home title block and the About page's heading, centered above an italic affiliation.
 - **Headline** (700, upright, `1.35em`, 1.24): a post's title, centered above its byline, and `<h2>` section heads. Never italic — a whole head in Latin Modern's italic reads as a long quotation.
 - **Title** (700 italic, `1.15em`): `<h3>` sub-heads, 1.85rem above / 0.5rem below. Section *numbers* are typed in the markdown, not generated. Italic, not the caps face — see The Turkish Lowercase Rule.
 - **Subtitle** (700 italic, `1em`): `<h4>`, in muted.
-- **Body** (400, 18px / 1.66): all prose. One *size* step at every width — the column width is tiered, the type is not.
+- **Body** (400, 16px / 1.66): all prose. One *size* step at every width — the column width is tiered, the type is not.
 - **Secondary** (400, `0.9`–`0.92em` / 1.55–1.6, muted): abstract copy, definition-list bodies, closing notes.
 - **Meta** (400 italic, `0.76`–`0.84em`, tabular-nums, faint or muted): dates, bylines, affiliation, CV years, footer, captions. Dates always render long-form `en-GB` (`14 March 2026`) inside a `<time>` element.
 - **Sidenote** (400, `0.82em` / 1.55, muted, `hyphens: none`): notes in the flow behind a 2px rule — the default; `0.74em` / 1.5 when promoted into the margin at ≥1200px.
@@ -272,7 +272,7 @@ a closed set: nothing outside `pre` and its Shiki tokens may use them.
 
 **The Identifier Exemption.** Identifiers are never set in the caps face. Repository names, file names, and code symbols keep the roman face at full size, because the caps face renders `ORKIKS` full-height and `fin-cli` half-height off the same baseline. Caps are for editorial labels only.
 
-**The Single Body Step Rule.** Body type is 18px at every width; no media query changes it. Latin Modern's x-height is small for its nominal size, so 17px read a step under what it was; the value moved once, globally. When space runs out the *gutter* narrows to 1.1rem below 400px; the prose size does not move.
+**The Single Body Step Rule.** Body type is 16px at every width; no media query changes it. 16px is the reference step taken from longcat.ai/blog. Every other font-size in the sheet is `em`-relative to this one value, so the whole ramp moves with it and the ratios hold — the body step is the only number to change. When space runs out the *gutter* narrows to 1.1rem below 400px; the prose size does not move.
 
 **The Two-Step Code Rule.** Block and inline code are deliberately different steps: `0.73em` in a listing, `0.86em` in a sentence. Do not collapse them back to one value — the listing is a panel measured against its own line count, the inline span is measured against the words on either side of it.
 
@@ -497,7 +497,7 @@ transparent track.
 - **Do** use the drawn `--caps` family for editorial labels, section heads, and run-in heads, at 0.045–0.05em letter-spacing and weight 400.
 - **Do** set every date, numeral column, and counted list with `font-variant-numeric: tabular-nums`.
 - **Do** keep display math's `em`-based vertical padding and KaTeX's `content-box` override; both were measured and both prevent visible clipping.
-- **Do** keep body type at a single 18px step at every width; narrow the gutter instead when space runs out.
+- **Do** keep body type at a single 16px step at every width; narrow the gutter instead when space runs out.
 - **Do** keep listings at `0.73em` and inline code at `0.86em` — two steps, on purpose.
 - **Do** build the section rail from the rendered `headings` array filtered to `depth === 2`, never from a hand-written list, and keep it working as plain anchors with JavaScript off.
 - **Do** number sections by hand in the markdown, so in-text cross-references stay correct.

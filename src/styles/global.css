@@ -20,10 +20,11 @@
 	--measure: 62rem; /* prose — 992px, minus two gutters = a 944px column.
 	                     Why: the author's own value, set after reading a 608px
 	                     and a 784px column beside it and calling both too
-	                     narrow. At 18px Latin Modern the average character is
-	                     8.78px, so 944px runs ~107 characters — well past the
-	                     65–75 textbook range; the 18px body is what keeps a
-	                     line this long trackable. Every strip measurement below
+	                     narrow. At the 16px body step Latin Modern's average
+	                     character measures ~7.9px, so 944px runs ~119
+	                     characters — well past the 65–75 textbook range; the
+	                     line is long, and the tiering below is what keeps it
+	                     trackable. Every strip measurement below
 	                     is derived from the 944px column, so moving this value
 	                     moves both breakpoints with it. */
 	--wide: 78rem; /* masthead, footer */
@@ -99,10 +100,10 @@
    is exactly what a 1.25rem gap did here — a 4px overlap on every code block
    beside a citation.
 
-   The cost is the measure: measured on this prose, the 752px column runs ~80
-   characters a line against ~113 at 944px — so the narrow tier is nearer the
-   textbook range than the full-width one, not further from it. Still one
-   reading column at every width; below 1200px both strips fold into the
+   The cost is the measure: measured on this prose at the 16px body step, the
+   752px column runs ~97 characters a line against ~119 at 944px — so the
+   narrow tier is nearer the textbook range than the full-width one, not
+   further from it. Still one reading column at every width; below 1200px both strips fold into the
    flow instead. */
 @media (max-width: 1519.98px) {
 	:root {
@@ -153,9 +154,12 @@ body {
 	background: var(--paper);
 	color: var(--ink);
 	font-family: var(--serif);
-	font-size: 18px; /* Why: Latin Modern's x-height is small for its nominal
-	                    size — at 17px the face read a step under what it was.
-	                    One step, at every width; the gutter narrows instead. */
+	font-size: 16px; /* Why: matched to the 16px body text of the reference
+	                    (longcat.ai/blog). Every other font-size in the sheet is
+	                    em-relative to this one, so the whole scale moves with it
+	                    and the ratios hold. Latin Modern's x-height is small for
+	                    its nominal size, so this reads optically smaller than a
+	                    16px sans. */
 	line-height: 1.66;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
@@ -612,7 +616,7 @@ article.paper > p {
 /* Why: a caption belongs to its figure, so the gap under the equation must be
    visibly tighter than the gap to the paragraph below. The 0.9em slack above
    is load-bearing (it stops 	op being clipped); below it is not — measured
-   descender slack there is ~18px. */
+   descender slack there is ~1em. */
 figure .katex-display {
 	width: 100%;
 	margin-left: 0;
@@ -657,10 +661,11 @@ pre::-webkit-scrollbar-track,
 	}
 }
 
-/* Why: the narrower gutter buys ~40 characters at 390px — the type itself is
-   left alone. The body is one step everywhere (18px); shrinking it further was
-   measured to buy zero additional characters, and Latin Modern's small
-   x-height already makes it read smaller than its nominal size. */
+/* Why: at 390px the narrower gutter widens the column 327px → 340px, worth
+   ~2 characters a line (43 → 45) — the type itself is left alone. The body is
+   one step everywhere (16px), and Latin Modern's small x-height already makes
+   it read smaller than its nominal size, so shrinking it further is not the
+   lever here; the gutter is. */
 @media (max-width: 400px) {
 	:root {
 		--gutter: 1.1rem;
