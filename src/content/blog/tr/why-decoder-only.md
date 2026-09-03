@@ -1,7 +1,7 @@
 ---
 title: 'Neden herkes decoder-only kullanıyor?'
 description: 'Decoder-only nedir ve alan neden ona yakınsadı — beş aday cevabı birincil kaynaklara karşı test eden bir yazı.'
-pubDate: '2026-09-02'
+pubDate: '2026-08-02'
 ---
 
 ## Abstract

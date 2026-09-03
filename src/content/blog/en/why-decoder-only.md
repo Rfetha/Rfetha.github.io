@@ -1,7 +1,7 @@
 ---
 title: 'Why is everyone using decoder-only?'
 description: 'What decoder-only is, and why the field converged on it — five candidate answers tested against the primary sources.'
-pubDate: '2026-09-02'
+pubDate: '2026-08-02'
 ---
 
 ## Abstract
