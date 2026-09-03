@@ -46,6 +46,7 @@ const schema = article
 			'@type': 'BlogPosting',
 			headline: article.headline,
 			description,
+			image: ogImage.href,
 			datePublished: article.pubDate.toISOString(),
 			...(article.updatedDate && { dateModified: article.updatedDate.toISOString() }),
 			inLanguage: HTML_LANG[lang],

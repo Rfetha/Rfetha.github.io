@@ -81,13 +81,7 @@ const bibtex = `@misc{${surname.toLowerCase()}${year}${topic},
 				</nav>
 			)
 		}
-		{/* Why: the page is genuinely bilingual — English chrome and title, Turkish
-		    prose. `hyphens: auto` resolves against the nearest lang, and under the
-		    document's `en` the English patterns find almost no break points in
-		    Turkish, so justified text opened up into rivers. Marking the article
-		    itself is more accurate than flipping the document language, and it
-		    also switches screen-reader pronunciation at the right boundary. */}
-		<article class="paper" lang="tr">
+		<article class="paper">
 			<header>
 				<h1>{title}</h1>
 				<p class="byline">
