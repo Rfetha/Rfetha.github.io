@@ -31,3 +31,6 @@ PRODUCT.md
 # obsidian vault ayarlari - drafts/ zaten ignore'da
 .obsidian/
 .vscode/
+
+# dagitim notlari - yayina gitmez
+SOCIAL-MEDIA.md
