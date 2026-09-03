@@ -2,20 +2,30 @@
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import { HTML_LANG, type Lang } from '../i18n';
 
 interface Props {
 	title: string;
 	description: string;
+	lang: Lang;
+	/** Languages this page exists in; drives the hreflang set. */
+	alternates?: Lang[];
 	article?: { pubDate: Date; updatedDate?: Date; headline: string };
 }
 
-const { title, description, article } = Astro.props;
+const { title, description, lang, alternates, article } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={HTML_LANG[lang]}>
 	<head>
-		<BaseHead title={title} description={description} article={article} />
+		<BaseHead
+			title={title}
+			description={description}
+			lang={lang}
+			alternates={alternates}
+			article={article}
+		/>
 	</head>
 	<body>
 		<!--
@@ -35,7 +45,7 @@ FORM: Preprint / arXiv article. Candidate 1 of 7, user-pinned over assigned
 index 6. Seed dcbb25f1.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 		-->
-		<Header />
+		<Header lang={lang} />
 		<slot />
 		<Footer />
 	</body>

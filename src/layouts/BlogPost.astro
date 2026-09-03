@@ -3,12 +3,28 @@ import type { CollectionEntry } from 'astro:content';
 import FormattedDate from '../components/FormattedDate.astro';
 import Layout from './Layout.astro';
 import { SITE_TITLE } from '../consts';
+import { UI, type Lang } from '../i18n';
 
 type Props = CollectionEntry<'blog'>['data'] & {
 	headings?: { depth: number; slug: string; text: string }[];
+	lang: Lang;
+	/** The shared slug, language segment stripped. */
+	slug: string;
+	/** Languages this post exists in; drives hreflang. */
+	alternates?: Lang[];
 };
 
-const { title, description, pubDate, updatedDate, headings = [] } = Astro.props;
+const {
+	title,
+	description,
+	pubDate,
+	updatedDate,
+	headings = [],
+	lang,
+	slug,
+	alternates,
+} = Astro.props;
+const t = UI[lang];
 
 /** Why: only h2 carries a section in these posts; h3 is used inside a section
     for sub-parts and would make the rail longer than the prose it indexes. */
@@ -29,8 +45,7 @@ const year = pubDate.getUTCFullYear();
    is skipped — the first word that actually names the subject wins. */
 const SKIP = new Set(['why', 'how', 'what', 'the', 'a', 'an', 'and', 'of', 'on', 'in', 'to']);
 const topic =
-	Astro.url.pathname
-		.replace(/^\/blog\/|\/$/g, '')
+	slug
 		.split('-')
 		.find((w) => w.length > 2 && !SKIP.has(w)) ?? 'post';
 
@@ -48,12 +63,14 @@ const bibtex = `@misc{${surname.toLowerCase()}${year}${topic},
 <Layout
 	title={`${title} — ${SITE_TITLE}`}
 	description={description}
+	lang={lang}
+	alternates={alternates}
 	article={{ pubDate, updatedDate, headline: title }}
 >
 	<main>
 		{
 			sections.length > 1 && (
-				<nav class="toc" aria-label="Bölümler">
+				<nav class="toc" aria-label={t.sections}>
 					<ol>
 						{sections.map((s) => (
 							<li>

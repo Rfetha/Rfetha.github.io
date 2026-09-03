@@ -1,0 +1,36 @@
+---
+import { type CollectionEntry, getCollection, render } from 'astro:content';
+import BlogPost from '../../../layouts/BlogPost.astro';
+import { splitId, type Lang } from '../../../i18n';
+
+export async function getStaticPaths() {
+	const posts = await getCollection('blog');
+	/* Why: the alternates map is built once here rather than looked up per
+	   page. A post only advertises hreflang for the languages that actually
+	   have a file — advertising a translation that is not there is the exact
+	   thing PRODUCT.md warns against. */
+	const bySlug = new Map<string, Lang[]>();
+	for (const post of posts) {
+		const { lang, slug } = splitId(post.id);
+		bySlug.set(slug, [...(bySlug.get(slug) ?? []), lang]);
+	}
+
+	return posts.map((post) => {
+		const { lang, slug } = splitId(post.id);
+		return {
+			params: { lang, slug },
+			props: { post, alternates: bySlug.get(slug) ?? [lang] },
+		};
+	});
+}
+
+type Props = { post: CollectionEntry<'blog'>; alternates: Lang[] };
+
+const { post, alternates } = Astro.props;
+const { lang, slug } = splitId(post.id);
+const { Content, headings } = await render(post);
+---
+
+<BlogPost {...post.data} headings={headings} lang={lang} slug={slug} alternates={alternates}>
+	<Content />
+</BlogPost>

@@ -40,13 +40,30 @@ const postDates = new Map(
 				.slice(posts.length + 1)
 				.replace(/\.mdx?$/, '')
 				.replace(/(^|\/)index$/, '');
-			return [[`/blog/${id}/`.replace(/\/+$/, '/'), date]];
+			// Why: a content id is `<lang>/<slug>` but the route is
+			// `/<lang>/blog/<slug>/` — the language segment leads the path, it
+			// does not sit inside /blog/. Mapping the id straight through would
+			// key every lastmod to a URL that does not exist.
+			const [lang, ...rest] = id.split('/');
+			if (!rest.length) return [];
+			return [[`/${lang}/blog/${rest.join('/')}/`.replace(/\/+$/, '/'), date]];
 		}),
 );
 
 // https://astro.build/config
 export default defineConfig({
 	site,
+	/* Why: every page moved under a /<lang>/ prefix, and the old URLs are
+	   already public-facing — an external link into a post must not break
+	   (PRODUCT.md, "Deferred: the language switch"). Posts redirect to
+	   Turkish because that is the language those URLs actually served; the
+	   site's own default for a fresh visitor is English, which is what a
+	   bare / resolves to. */
+	redirects: {
+		'/': '/en/',
+		'/about': '/en/about/',
+		'/blog': '/tr/blog/',
+	},
 	integrations: [
 		mdx(),
 		sitemap({
@@ -54,7 +71,14 @@ export default defineConfig({
 			// it asks Google to index a page with nothing on it. The check is a
 			// directory read, so the route returns to the sitemap on its own the
 			// build after the first post is written.
-			filter: (page) => postDates.size > 0 || !page.endsWith('/blog/'),
+			filter: (page) => {
+				// Why: /blog/<slug>/ is now a redirect stub for the pre-split URL and
+				// carries noindex. Listing it in the sitemap would ask Google to index
+				// a page whose only content is a meta refresh, and would compete with
+				// the language route that actually holds the post.
+				if (new URL(page).pathname.startsWith('/blog/')) return false;
+				return postDates.size > 0 || !page.endsWith('/blog/');
+			},
 			serialize(item) {
 				// Why: sliced rather than parsed with `new URL`. Every entry here was
 				// built by the integration from `site`, so the prefix is guaranteed —

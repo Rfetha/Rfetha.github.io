@@ -5,6 +5,7 @@ import path from 'node:path';
 import satori from 'satori';
 import sharp from 'sharp';
 import { AFFILIATION, SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import { splitId } from '../../i18n';
 
 // Why: satori needs real font bytes and reads ttf/otf/woff only — the same
 // woff files the site serves, so the card is set in the site's own face.
@@ -33,7 +34,10 @@ export async function getStaticPaths() {
 			props: { title: SITE_TITLE, subtitle: SITE_DESCRIPTION, showName: false } satisfies Card,
 		},
 		...posts.map((post) => ({
-			params: { slug: `blog/${post.id}` },
+			// Why: BaseHead derives the card URL from the page pathname, which is
+			// /<lang>/blog/<slug>/ — so the params here have to be in that order,
+			// not the collection id's <lang>/<slug>.
+			params: { slug: `${splitId(post.id).lang}/blog/${splitId(post.id).slug}` },
 			props: {
 				title: post.data.title,
 				subtitle: post.data.description,

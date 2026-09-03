@@ -7,17 +7,32 @@ import 'katex/dist/katex.min.css';
 import '../styles/global.css';
 import { GITHUB_HANDLE, GITHUB_URL, LINKEDIN_URL, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 import { Font } from 'astro:assets';
+import { DEFAULT_LANG, HTML_LANG, LANGS, localePath, type Lang } from '../i18n';
 
 interface Props {
 	title: string;
 	description: string;
+	lang: Lang;
+	/** Only the languages that actually have a file for this page. */
+	alternates?: Lang[];
 	/** Present on post pages only; switches the page from `website` to `article`. */
 	article?: { pubDate: Date; updatedDate?: Date; headline: string };
 }
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
-const { title, description, article } = Astro.props;
+const { title, description, lang, alternates, article } = Astro.props;
+
+/* Why: hreflang is advertised only for languages this page really has
+   (PRODUCT.md: adding one early "would advertise a page that is not there").
+   x-default points at the default language, which is what a bare / resolves
+   to, so a crawler with no language preference lands where a person does. */
+const langPath = Astro.url.pathname.replace(/^\/[a-z]{2}(?=\/|$)/, '') || '/';
+const available = alternates ?? [...LANGS];
+const alternateLinks = available.map((l) => ({
+	hreflang: HTML_LANG[l],
+	href: new URL(localePath(l, langPath), Astro.site).href,
+}));
 
 // Generated at build time by src/pages/og/[...slug].png.ts, in the site's own face.
 const ogImage = new URL(
@@ -33,7 +48,7 @@ const schema = article
 			description,
 			datePublished: article.pubDate.toISOString(),
 			...(article.updatedDate && { dateModified: article.updatedDate.toISOString() }),
-			inLanguage: 'en',
+			inLanguage: HTML_LANG[lang],
 			mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalURL.href },
 			author: {
 				'@type': 'Person',
@@ -64,8 +79,18 @@ const schema = article
 	rel="alternate"
 	type="application/rss+xml"
 	title={SITE_TITLE}
-	href={new URL('rss.xml', Astro.site)}
+	href={new URL(localePath(lang, '/rss.xml'), Astro.site)}
 />
+{alternateLinks.map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
+{
+	available.includes(DEFAULT_LANG) && (
+		<link
+			rel="alternate"
+			hreflang="x-default"
+			href={new URL(localePath(DEFAULT_LANG, langPath), Astro.site).href}
+		/>
+	)
+}
 <meta name="generator" content={Astro.generator} />
 
 <Font cssVariable="--font-lmroman" preload />

@@ -1,11 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { SITE_TITLE } from '../consts';
+import { DEFAULT_LANG, localePath } from '../i18n';
 ---
 
 <Layout
 	title={`Not found — ${SITE_TITLE}`}
 	description="No entry at this address."
+	lang={DEFAULT_LANG}
 >
 	<main>
 		<div class="block">
@@ -14,8 +16,8 @@ import { SITE_TITLE } from '../consts';
 			<p class="lede">There is no entry at this address.</p>
 			<p>
 				The page may have been renamed, or the link that brought you here may be wrong.
-				The <a href="/blog">writing index</a> lists everything published, and{' '}<a
-					href="/">the front page</a
+				The <a href={localePath(DEFAULT_LANG, '/blog')}>writing index</a> lists everything published, and{' '}<a
+					href={localePath(DEFAULT_LANG)}>the front page</a
 				> is the shortest way back.
 			</p>
 		</div>

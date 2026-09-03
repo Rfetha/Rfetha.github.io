@@ -1,0 +1,283 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import {
+	AFFILIATION,
+	GITHUB_HANDLE,
+	GITHUB_URL,
+	LINKEDIN_URL,
+	SITE_TITLE,
+} from '../../consts';
+import { LANGS, UI, type Lang } from '../../i18n';
+
+export async function getStaticPaths() {
+	return LANGS.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Lang;
+const t = UI[lang];
+
+/* Why: the two language copies sit in one object rather than two page files.
+   The facts here — employer, degrees, project scope — are load-bearing in a
+   professional-evaluation context (PRODUCT.md, "Evidence on Hand"), so they
+   must not drift apart between languages. One object makes a divergence a
+   visible diff instead of a silent one. A handful of bodies carry inline
+   links and are rendered with set:html; they are this file's own static copy,
+   never user input. */
+const COPY = {
+	en: {
+		pageTitle: 'About',
+		description: 'Who writes here, what he works on, and why the writing exists.',
+		h1: 'About the author',
+		whatIDo: 'What I do',
+		whatIDoP1:
+			'I am an AI engineer at <a href="https://egeist.com.tr">Egeist Teknoloji</a> in İzmir. Enough of the job has turned out to be architecture rather than modelling that a fair amount of what I write here is about design.',
+		whatIDoP2:
+			'I have recently started graduate study, heading toward research. That means I now read papers with the intention of arguing with them rather than only applying them, and this site is where a good deal of that arguing ends up.',
+		why: 'Why this site exists',
+		whyP1:
+			'I write to understand. Explaining a thing is the fastest way I know to find the places where I only thought I understood it — the step that seemed obvious until it had to be written down in order, the constant nobody bothers to justify. So the posts here tend to be written while the material is still difficult rather than after it stopped being.',
+		whyP2:
+			'The consequence is that they are written for someone in my position rather than for someone who already knows. If a derivation is skipped, it is because I could genuinely do it in my head, not because it was tedious to type.',
+		what: 'What I write about',
+		whatP:
+			'Machine learning systems, mostly, and the theory underneath them. Occasionally something from the wider computer science that a problem dragged me into. Length follows the subject: some entries are a page of reading notes, some are a long derivation with the algebra left in.',
+		background: 'Background',
+		cv: [
+			{
+				when: '2025 –',
+				what: '<b>AI Engineer</b>, Egeist Teknoloji — İzmir. Building ORKIKS: AI core, LLM layer, and the backend architecture beneath both.',
+			},
+			{
+				when: '2026 –',
+				what: '<b>M.Sc. Computer Science</b>, Dokuz Eylül University. Thesis in progress: moving what is currently bought with runtime prompt text — persona, document faithfulness, tool use, flow discipline — into model weights, and measuring whether those capabilities survive together rather than one at a time. A direction rather than a result; it may still move.',
+			},
+			{
+				when: '2021 – 2025',
+				what: '<b>B.Sc. Computer Science</b>, Dokuz Eylül University.',
+			},
+		],
+		work: 'Selected work',
+		projects: [
+			{
+				name: 'ORKIKS',
+				href: 'https://hub.orkiks.com',
+				body: 'Multi-agent AI platform, in production. Three specialized agents behind a LangGraph supervisor with intent routing; ReAct with per-SKU RAG over Postgres and pgvector; transactional-outbox persistence; a TypeScript storefront and BFF integrating Shopify, Trendyol and the WhatsApp Cloud API behind adapters.',
+			},
+			{
+				name: 'Hukuk-SLM',
+				href: 'https://github.com/Rfetha/Hukuk-SLM',
+				body: 'A Turkish legal small language model, in progress: a 9B Qwen-class model fine-tuned with QLoRA down to a 4-bit GGUF that fits 8&nbsp;GB of VRAM, evaluated on a four-axis suite — groundedness gating, abstention against hard-negative trap sets, and a dual LLM judge — over 21.5K grounded question–answer pairs synthesized from real statutes. The scope changed partway on a negative result worth reporting: supervised fine-tuning collapsed abstention from 0.74 to zero.',
+			},
+			{
+				name: 'rfetha-skills',
+				href: 'https://github.com/Rfetha/rfetha-skills',
+				body: 'A library of agent skills distilling software-design material — deep modules, domain-driven design, hexagonal architecture, the GoF and PoEAA patterns — into narrowly triggered, reusable form.',
+			},
+		],
+		moreWork:
+			'The rest, including a PyTorch chess engine and a set of from-scratch computer-vision builds, is on',
+	},
+	tr: {
+		pageTitle: 'Hakkında',
+		description: 'Burada kimin yazdığı, ne üzerine çalıştığı, ve yazının neden var olduğu.',
+		h1: 'Yazar hakkında',
+		whatIDo: 'Ne yapıyorum',
+		whatIDoP1:
+			'İzmir’de <a href="https://egeist.com.tr">Egeist Teknoloji</a>’de yapay zekâ mühendisiyim. İşin yeterince büyük bir kısmı modellemeden çok mimari çıktığı için, burada yazdıklarımın hatırı sayılır bir bölümü tasarım üzerine.',
+		whatIDoP2:
+			'Kısa süre önce yüksek lisansa başladım, yönüm araştırma. Yani makaleleri artık yalnızca uygulamak için değil, onlarla tartışmak niyetiyle okuyorum; bu tartışmanın epeyce bir kısmı da bu sitede birikiyor.',
+		why: 'Bu site neden var',
+		whyP1:
+			'Anlamak için yazıyorum. Bir şeyi anlatmak, yalnızca anladığımı sandığım yerleri bulmanın bildiğim en hızlı yolu — sırayla yazılması gerekene kadar bariz görünen adım, kimsenin gerekçelendirmeye tenezzül etmediği sabit. Bu yüzden buradaki yazılar malzeme hâlâ zorken yazılıyor, zorluğu geçtikten sonra değil.',
+		whyP2:
+			'Sonucu şu: benim konumumdaki biri için yazılıyorlar, zaten bilen biri için değil. Bir türetme atlanmışsa, gerçekten kafamda yapabildiğim içindir; yazması sıkıcı olduğu için değil.',
+		what: 'Ne üzerine yazıyorum',
+		whatP:
+			'Çoğunlukla makine öğrenmesi sistemleri ve altındaki teori. Arada bir de, bir problemin beni içine sürüklediği daha geniş bilgisayar biliminden bir şey. Uzunluk konuya uyuyor: kimi yazı bir sayfalık okuma notu, kimi cebiri içinde bırakılmış uzun bir türetme.',
+		background: 'Geçmiş',
+		cv: [
+			{
+				when: '2025 –',
+				what: '<b>Yapay Zekâ Mühendisi</b>, Egeist Teknoloji — İzmir. ORKIKS’i kuruyorum: yapay zekâ çekirdeği, LLM katmanı, ve ikisinin altındaki backend mimarisi.',
+			},
+			{
+				when: '2026 –',
+				what: '<b>Bilgisayar Bilimleri Yüksek Lisansı</b>, Dokuz Eylül Üniversitesi. Tez sürüyor: şu anda çalışma zamanı prompt metniyle satın alınan şeyleri — persona, belgeye sadakat, araç kullanımı, akış disiplini — model ağırlıklarına taşımak, ve bu yeteneklerin tek tek değil birlikte ayakta kalıp kalmadığını ölçmek. Bir sonuç değil bir yön; hâlâ değişebilir.',
+			},
+			{
+				when: '2021 – 2025',
+				what: '<b>Bilgisayar Bilimleri Lisansı</b>, Dokuz Eylül Üniversitesi.',
+			},
+		],
+		work: 'Seçilmiş çalışmalar',
+		projects: [
+			{
+				name: 'ORKIKS',
+				href: 'https://hub.orkiks.com',
+				body: 'Çok ajanlı yapay zekâ platformu, üretimde. Niyet yönlendirmeli bir LangGraph süpervizörünün arkasında üç uzmanlaşmış ajan; Postgres ve pgvector üzerinde SKU başına RAG ile ReAct; transactional-outbox kalıcılığı; Shopify, Trendyol ve WhatsApp Cloud API’yi adaptörlerin arkasında birleştiren bir TypeScript vitrini ve BFF.',
+			},
+			{
+				name: 'Hukuk-SLM',
+				href: 'https://github.com/Rfetha/Hukuk-SLM',
+				body: 'Türkçe hukuk alanında küçük bir dil modeli, sürüyor: QLoRA ile ince ayar yapılıp 8&nbsp;GB VRAM’e sığan 4-bit GGUF’a indirilmiş 9B Qwen sınıfı bir model; gerçek mevzuattan sentezlenen 21,5 bin dayanaklı soru–cevap çifti üzerinde dört eksenli bir takımla değerlendirildi — dayanak kapısı, zorlu-negatif tuzak kümelerine karşı çekimserlik, ve ikili LLM jürisi. Kapsam yolun ortasında, raporlanmaya değer bir negatif sonuç yüzünden değişti: gözetimli ince ayar çekimserliği 0,74’ten sıfıra düşürdü.',
+			},
+			{
+				name: 'rfetha-skills',
+				href: 'https://github.com/Rfetha/rfetha-skills',
+				body: 'Yazılım tasarımı malzemesini — derin modüller, alana dayalı tasarım, altıgen mimari, GoF ve PoEAA kalıpları — dar tetiklenen, yeniden kullanılabilir biçime indirgeyen bir ajan yetenekleri kütüphanesi.',
+			},
+		],
+		moreWork:
+			'Gerisi, bir PyTorch satranç motoru ve sıfırdan yazılmış bir dizi bilgisayarlı görü çalışması dahil,',
+	},
+} as const;
+
+const c = COPY[lang];
+---
+
+<Layout title={`${c.pageTitle} — ${SITE_TITLE}`} description={c.description} lang={lang}>
+	<main>
+		<header class="titleblock">
+			<!-- Why: the home page's h1 is already the bare name. Repeating it here gave
+			two URLs the same heading, which reads to a crawler as one page served twice.
+			The paper convention supplies the fix: the author note carries its own title
+			and the name drops to the byline beneath it. -->
+			<h1>{c.h1}</h1>
+			<p class="affiliation">{SITE_TITLE}, {AFFILIATION}</p>
+		</header>
+
+		<h2>{c.whatIDo}</h2>
+		<p set:html={c.whatIDoP1} />
+		<p>{c.whatIDoP2}</p>
+
+		<h2>{c.why}</h2>
+		<p>{c.whyP1}</p>
+		<p>{c.whyP2}</p>
+
+		<h2>{c.what}</h2>
+		<p>{c.whatP}</p>
+
+		<h2>{c.background}</h2>
+		<dl class="cv">
+			{
+				c.cv.map((row) => (
+					<>
+						<dt>{row.when}</dt>
+						<dd set:html={row.what} />
+					</>
+				))
+			}
+		</dl>
+
+		<h2>{c.work}</h2>
+		<dl class="work">
+			{
+				c.projects.map((p) => (
+					<>
+						<dt>
+							<a href={p.href}>{p.name}</a>
+						</dt>
+						<dd set:html={p.body} />
+					</>
+				))
+			}
+		</dl>
+		<p class="more-work">
+			{c.moreWork} <a href={GITHUB_URL}>GitHub</a>.
+		</p>
+
+		<h2>{t.elsewhere}</h2>
+		<p>
+			<a href={GITHUB_URL}>GitHub</a> <span class="handle">@{GITHUB_HANDLE}</span>{' · '}<a
+				href={LINKEDIN_URL}>LinkedIn</a
+			>
+		</p>
+	</main>
+</Layout>
+
+<style>
+	.titleblock {
+		text-align: center;
+		margin-bottom: 1.7rem;
+	}
+	h1 {
+		font-size: 1.55em;
+		margin-bottom: 0.2rem;
+	}
+	.affiliation {
+		font-style: italic;
+		font-size: 0.82em;
+		color: var(--muted);
+		margin: 0;
+	}
+	dl {
+		margin: 0;
+	}
+	.cv,
+	.work {
+		width: min(var(--fig), 100vw - 3rem);
+		margin-left: 50%;
+		transform: translateX(-50%);
+	}
+	.cv {
+		display: grid;
+		grid-template-columns: 7.5rem 1fr;
+		gap: 0 1rem;
+	}
+	.cv dt {
+		font-style: italic;
+		font-size: 0.82em;
+		color: var(--faint);
+		font-variant-numeric: tabular-nums;
+		padding-top: 0.32em;
+	}
+	.cv dd,
+	.work dd {
+		margin: 0 0 0.85rem;
+		font-size: 0.92em;
+		line-height: 1.55;
+	}
+	.cv dd b {
+		font-weight: 400;
+		font-family: var(--caps);
+		letter-spacing: 0.045em;
+		color: var(--ink);
+	}
+	/* Why: repository names are identifiers. The small-caps face renders
+	   `ORKIKS` full-height and `fin-cli` half-height off the same rule, which
+	   both mismatches their real spelling and reads as inconsistent sizing. */
+	.work dt {
+		font-size: 0.95em;
+		margin-top: 0.9rem;
+		color: var(--ink);
+	}
+	.work dt a {
+		color: var(--sig);
+	}
+	.handle {
+		font-size: 0.86em;
+		color: var(--faint);
+		font-style: italic;
+	}
+	.more-work {
+		font-size: 0.92em;
+		color: var(--muted);
+	}
+	@media (max-width: 900px) {
+		.cv,
+		.work {
+			width: 100%;
+			margin-left: 0;
+			transform: none;
+		}
+	}
+	@media (max-width: 640px) {
+		.cv {
+			grid-template-columns: 1fr;
+			gap: 0;
+		}
+		.cv dt {
+			padding-top: 0.5rem;
+		}
+	}
+</style>

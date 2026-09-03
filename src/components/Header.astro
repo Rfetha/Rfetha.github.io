@@ -1,15 +1,37 @@
 ---
 import { SITE_TITLE } from '../consts';
 import HeaderLink from './HeaderLink.astro';
+import { LANGS, LANG_LABEL, UI, localePath, type Lang } from '../i18n';
+
+interface Props {
+	lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = UI[lang];
+const other = LANGS.find((l) => l !== lang) ?? lang;
+
+/* Why: the counterpart URL is the current path with its language segment
+   swapped, not a link to the other home page. Landing a reader on the home
+   page because they asked for the other language of the post they are reading
+   is the failure this control exists to avoid. Every route is generated in
+   both languages, so the swapped path always resolves. */
+const rest = Astro.url.pathname.replace(/^\/[a-z]{2}(?=\/|$)/, '') || '/';
+const counterpart = localePath(other, rest);
 ---
 
 <header>
 	<div class="shell">
-		<a class="brand" href="/">{SITE_TITLE}</a>
+		<a class="lang" href={counterpart} hreflang={other} aria-label={t.switchAria}>
+			<span aria-hidden="true">{LANG_LABEL[lang]}</span>
+			<span class="sep" aria-hidden="true">/</span>
+			<span class="target">{LANG_LABEL[other]}</span>
+		</a>
+		<a class="brand" href={localePath(lang)}>{SITE_TITLE}</a>
 		<nav>
-			<HeaderLink href="/blog">Writing</HeaderLink>
-			<HeaderLink href="/about">About</HeaderLink>
-			<HeaderLink href="/rss.xml">Feed</HeaderLink>
+			<HeaderLink href={localePath(lang, '/blog')}>{t.writing}</HeaderLink>
+			<HeaderLink href={localePath(lang, '/about')}>{t.about}</HeaderLink>
+			<HeaderLink href={localePath(lang, '/rss.xml')}>{t.feed}</HeaderLink>
 		</nav>
 	</div>
 </header>
@@ -21,11 +43,13 @@ import HeaderLink from './HeaderLink.astro';
 	.shell {
 		display: flex;
 		align-items: baseline;
-		justify-content: space-between;
 		gap: 1rem;
 		padding-block: 0.8rem;
 	}
+	/* Why: the brand takes the free space so the switch stays pinned left and
+	   the nav pinned right, whatever the name's length. */
 	.brand {
+		flex: 1;
 		font-size: 0.9em;
 		color: var(--ink);
 		border-bottom: 0;
@@ -34,9 +58,40 @@ import HeaderLink from './HeaderLink.astro';
 		text-decoration: underline;
 		text-underline-offset: 3px;
 	}
+	/* Why: drawn small caps, not synthetic — a two-letter code in the synthetic
+	   variant reads as a defect next to the serif. The current language is
+	   stated and the target carries the signal colour, so the control shows
+	   both state and destination at a glance. */
+	.lang {
+		font-family: var(--font-lmcaps), Georgia, serif;
+		font-size: 0.74em;
+		letter-spacing: 0.06em;
+		color: var(--faint);
+		border-bottom: 0;
+		white-space: nowrap;
+	}
+	.lang .sep {
+		margin: 0 0.15em;
+		color: var(--rule);
+	}
+	.lang .target {
+		color: var(--sig);
+	}
+	.lang:hover .target {
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
 	nav {
 		display: flex;
 		gap: 1rem;
 		font-size: 0.79em;
+	}
+	@media (max-width: 420px) {
+		.shell {
+			gap: 0.7rem;
+		}
+		nav {
+			gap: 0.7rem;
+		}
 	}
 </style>

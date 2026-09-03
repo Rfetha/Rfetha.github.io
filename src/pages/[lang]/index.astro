@@ -1,35 +1,54 @@
 ---
 import { getCollection } from 'astro:content';
-import Layout from '../layouts/Layout.astro';
-import PostList from '../components/PostList.astro';
-import { AFFILIATION, GITHUB_URL, LINKEDIN_URL, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import Layout from '../../layouts/Layout.astro';
+import PostList from '../../components/PostList.astro';
+import {
+	AFFILIATION,
+	GITHUB_URL,
+	LINKEDIN_URL,
+	SITE_DESCRIPTION,
+	SITE_TITLE,
+} from '../../consts';
+import { LANGS, UI, localePath, splitId, type Lang } from '../../i18n';
 
-const all = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
+export async function getStaticPaths() {
+	return LANGS.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Lang;
+const t = UI[lang];
+
+const all = (await getCollection('blog'))
+	.filter((post) => splitId(post.id).lang === lang)
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 const recent = all.slice(0, 5);
 ---
 
-<Layout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+<Layout title={SITE_TITLE} description={SITE_DESCRIPTION} lang={lang}>
 	<main>
 		<div class="titleblock">
 			<h1>{SITE_TITLE}</h1>
 			<p class="affiliation">{AFFILIATION}</p>
 			<div class="abstract">
-				<b>Abstract.</b> I write to understand. These are working notes on machine learning
-				systems and the theory underneath them, written while the material is still difficult
-				rather than after it stopped being. <a href="/about">More about me</a>.
+				<b>{t.abstractLabel}</b> {t.abstract}{' '}
+				<a href={localePath(lang, '/about')}>{t.moreAbout}</a>.
 			</div>
 		</div>
 
 		<section>
-			<h2>Writing</h2>
-			<PostList posts={recent} startAt={all.length} />
-			{all.length > recent.length && <p class="all"><a href="/blog">All writing</a></p>}
+			<h2>{t.writing}</h2>
+			<PostList posts={recent} startAt={all.length} lang={lang} />
+			{
+				all.length > recent.length && (
+					<p class="all">
+						<a href={localePath(lang, '/blog')}>{t.allWriting}</a>
+					</p>
+				)
+			}
 		</section>
 
 		<section>
-			<h2>Elsewhere</h2>
+			<h2>{t.elsewhere}</h2>
 			<p class="elsewhere">
 				<a href={GITHUB_URL}>GitHub</a>{' · '}<a href={LINKEDIN_URL}>LinkedIn</a>
 			</p>

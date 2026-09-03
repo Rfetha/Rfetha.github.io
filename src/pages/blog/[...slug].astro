@@ -1,20 +1,40 @@
 ---
-import { type CollectionEntry, getCollection, render } from 'astro:content';
-import BlogPost from '../../layouts/BlogPost.astro';
+import { getCollection } from 'astro:content';
+import { splitId } from '../../i18n';
 
+/* Why: this is a redirect page, not a post. The old `/blog/<slug>/` URLs are
+   already public-facing and must keep resolving (PRODUCT.md, "Deferred: the
+   language switch"). Astro's `redirects` config cannot express this one: the
+   destination `/tr/blog/[...slug]` is not a route — the real route is
+   `/[lang]/blog/[...slug]`, and a config redirect has no way to bind `lang`.
+   So the redirect is emitted here, which is what the config would have
+   produced anyway: a canonical plus a meta refresh.
+
+   Turkish is the target because Turkish is what these URLs actually served.
+   The site's default for a fresh visitor is English; that is a different
+   question and `/` answers it. */
 export async function getStaticPaths() {
 	const posts = await getCollection('blog');
-	return posts.map((post) => ({
-		params: { slug: post.id },
-		props: post,
-	}));
+	// The old URL carried no language, so one page per shared slug, not per post.
+	const slugs = [...new Set(posts.map((post) => splitId(post.id).slug))];
+	return slugs.map((slug) => ({ params: { slug }, props: { slug } }));
 }
-type Props = CollectionEntry<'blog'>;
 
-const post = Astro.props;
-const { Content, headings } = await render(post);
+const { slug } = Astro.props as { slug: string };
+const target = `/tr/blog/${slug}/`;
+const absolute = new URL(target, Astro.site).href;
 ---
 
-<BlogPost {...post.data} headings={headings}>
-	<Content />
-</BlogPost>
+<!doctype html>
+<html lang="tr">
+	<head>
+		<meta charset="utf-8" />
+		<title>{target}</title>
+		<link rel="canonical" href={absolute} />
+		<meta name="robots" content="noindex, follow" />
+		<meta http-equiv="refresh" content={`0;url=${target}`} />
+	</head>
+	<body>
+		<p>Bu sayfa taşındı: <a href={target}>{target}</a></p>
+	</body>
+</html>

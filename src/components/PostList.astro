@@ -1,28 +1,32 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import FormattedDate from './FormattedDate.astro';
+import { UI, localePath, splitId, type Lang } from '../i18n';
 
 interface Props {
 	posts: CollectionEntry<'blog'>[];
+	lang: Lang;
 	/** Numbering counts down from here, so the newest post carries the highest number. */
 	startAt?: number;
 }
 
-const { posts, startAt = posts.length } = Astro.props;
+const { posts, startAt = posts.length, lang } = Astro.props;
+const t = UI[lang];
 ---
 
 {
 	posts.length === 0 ? (
 		<p class="empty">
-			Nothing published yet. The <a href="/rss.xml">feed</a> is live if you want to be
-			told when that changes.
+			{t.empty} {t.emptyFeedPre}
+			<a href={localePath(lang, '/rss.xml')}>{t.emptyFeedLink}</a>
+			{t.emptyFeedPost}
 		</p>
 	) : (
 		<ol style={`--start:${startAt + 1}`}>
 	{
 		posts.map((post) => (
 			<li>
-				<a href={`/blog/${post.id}/`}>{post.data.title}</a>
+				<a href={localePath(lang, `/blog/${splitId(post.id).slug}/`)}>{post.data.title}</a>
 				<span class="desc">{post.data.description}</span>
 				<span class="meta">
 					<FormattedDate date={post.data.pubDate} />
