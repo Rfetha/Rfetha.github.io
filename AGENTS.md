@@ -10,16 +10,27 @@ Manage the background server with `astro dev stop`, `astro dev status`, and `ast
 
 ## Language
 
-Posts are written in **Turkish**; the site chrome (title, nav, dates, `Abstract`,
-`Figure n.` labels) is English. The site publishes Turkish first — there is no
-English version of a post yet, and none is a prerequisite for shipping one.
+Every page ships in both languages. Turkish is the **source of truth**: a post
+is written and verified against primary sources in Turkish, then translated.
+English is the **default** — a bare `/` resolves to `/en/`.
 
-An English track is planned but **not built**: a TR/EN switch over parallel
-`/tr/blog/<slug>/` and `/en/blog/<slug>/` routes. Until it lands, do not add
-`hreflang`, a locale prefix, or a language-suffixed slug — the language belongs
-in the path segment, never in the filename, and today's `/blog/<slug>/` URLs
-must keep resolving. Rationale and the full constraint list are in `PRODUCT.md`
-(untracked, local).
+`src/i18n.ts` is the only place that knows which languages exist; adding a third
+is one entry there plus one content directory. Content lives in
+`src/content/blog/<lang>/<slug>.md` — the slug is shared and the language is a
+path segment, never a filename suffix. Pages generate under `/[lang]/`, and the
+pre-split `/blog/<slug>/` URLs survive as `noindex` redirect stubs pointing at
+Turkish, which is the language those URLs actually served.
+
+Two rules when writing:
+
+- **Add both files.** A post with only one language makes the switch land the
+  reader on a 404.
+- **Quotations are restored, not translated.** The English version of a post
+  must carry the *original English sentence* from the cited paper. Translating
+  the Turkish rendering back into English produces text that looks like a quote
+  and is not one, which breaks the thing these posts are built on.
+
+Rationale and the full constraint list are in `PRODUCT.md` (untracked, local).
 
 ## Documentation
 
