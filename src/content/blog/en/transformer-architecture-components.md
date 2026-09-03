@@ -6,33 +6,35 @@ pubDate: '2026-08-01'
 
 ## Abstract
 
-In DeepSeek-V3, a single request's KV-cache at 128K context is 8.6 GiB. Built
-with 2017's attention, the same model would sit at 488 GiB, and the whole gap
-comes from one component of the architecture. Yet when a language model's
-architecture gets explained, the thing drawn on the board is still 2017's
-Transformer.
+When a language model's architecture gets explained today, the thing drawn on
+the board is still 2017's original Transformer diagram. Yet since that day the
+Transformer has changed beyond recognition next to that first design.
 
-Open the config file of a model shipped today and almost none of that recipe is
-still in place: sinusoidal positional encoding, a feed-forward network with
-ReLU, normalization applied to the sub-layer's output, attention heads owning
-their own keys and values — all changed. The list of survivors is short: the
-attention operation itself, residual connections, and the idea of stacking the
-same block on top of itself.
+The starkest proof of it hides in the enormous gap opened by one specific
+component. While most current models look for ways to optimize memory,
+DeepSeek-V3 made a radical move and adopted MLA (Multi-Head Latent Attention),
+which, rather than storing the key/value matrices at all, reduces them to a
+single compressed vector. The result? In DeepSeek-V3 a single request's KV-cache
+(key/value cache) at 128K context is only 8.6 GiB. Built with 2017's standard
+attention, a model of the same size would have sat at 488 GiB.
 
-This piece walks the eight years in between, part by part, and ties every change
-to a named pressure — decode memory, compute per parameter, training stability,
-context length — because collapsing them into a single cause is the most common
-mistake made here. The numbers come from models whose architecture is public,
-and every derived figure reproduces a number the source published itself.
+Open the config file of a model published today and you find the insides renewed
+from top to bottom. Almost none of the ingredients of that first 2017 recipe are
+still in place: the sinusoidal positional encoding by which the model memorized
+word order, the feed-forward network built on ReLU (Rectified Linear Unit), the
+normalization applied to sub-layer outputs, and heads owning their own key/value
+matrices have all passed into history. What is left of the original design is
+only the load-bearing skeleton: the attention operation itself, residual
+connections, and the idea of stacking layers on top of one another.
 
-Look closely and some of the rationales turn out weaker than their reputation:
-GQA's own paper says in its limitations section that the method was measured
-only on encoder-decoder models, 2017's own ablation finds learned positional
-embeddings indistinguishable from sinusoidal, and SwiGLU's paper states plainly
-that it offers no explanation for why the thing works. And no "modern
-transformer recipe" emerges: five open-weight models give five different answers
-to the same four pressures, and the equal-budget comparison that would say which
-one is right does not exist in the public literature.
+This piece works through the Transformer's eight-year evolution part by part,
+and ties every change to one of four root causes — decode memory, compute per
+parameter, training stability, context length — because collapsing the whole
+transformation into a single cause is the most common mistake in the field. Yet
+putting all those root causes and the evolution side by side, no universal
+"modern Transformer recipe" emerges; on the contrary, the five open-weight
+models examined here each chart their own path, giving five entirely different
+answers to the same four structural pressures.
 
 ---
 
@@ -55,17 +57,20 @@ Vaswani et al., *Attention Is All You Need*, [arXiv:1706.03762](https://arxiv.or
 
 Eight years on, the items of that recipe have been displaced one by one:
 
-- **Sinusoidal encoding is gone.** RoPE took its place — encoding position by
-  rotating rather than adding. Qwen3, Gemma 3, OLMo 2, gpt-oss and DeepSeek all
-  use RoPE.
-- **ReLU is gone.** SwiGLU took its place (Qwen3, gpt-oss, OLMo 2).
-- **LayerNorm is gone.** RMSNorm, which never computes the mean at all, took its
-  place — in all four of Qwen3, Gemma 3, OLMo 2 and gpt-oss.
+- **Sinusoidal encoding is gone.** RoPE (Rotary Position Embedding) took its
+  place — encoding position by rotating rather than adding. Qwen3, Gemma 3,
+  OLMo 2, gpt-oss and DeepSeek all use RoPE.
+- **ReLU is gone.** SwiGLU (Swish-Gated Linear Unit) took its place (Qwen3,
+  gpt-oss, OLMo 2).
+- **LayerNorm is gone.** RMSNorm (Root Mean Square Normalization), which never
+  computes the mean at all, took its place — in all five of the models covered
+  in this piece.
 - **Normalization moved.** In 2017 it was applied to the sub-layer's output;
   today it is applied to its input. Gemma 3 does both, and OLMo 2 has gone back
   to 2017's placement.
 - **In most models the feed-forward network is not a single network.** In
-  DeepSeek-V3 every layer holds 256 experts and eight of them run per token.
+  DeepSeek-V3 every MoE layer holds 1 shared plus 256 routed experts, and nine
+  of them run per token (§6.2).
 - **Attention heads do not own their key and value matrices.** Either they share
   them (Qwen3, Gemma 3, gpt-oss), or they collapse into one compressed vector
   (DeepSeek-V3).
@@ -73,45 +78,44 @@ Eight years on, the items of that recipe have been displaced one by one:
 So what survived? The skeleton: the attention operation itself, residual
 connections, and the idea of stacking the same block on top of itself.
 
-### 1.1 What this piece does not cover
+### 1.1 The scope of this piece
 
 2017's single design split into three families before long — encoder-only,
 decoder-only, encoder-decoder — and
 [decoder-only became the dominant paradigm over time](/en/blog/why-decoder-only/).
-*Why* that split resolved the way it did is another piece's subject; there, five
-candidate answers are tested one by one against primary sources and most do not
-survive.
+*Why* that split happened is the subject of a separate study.
 
-That argument is not here. This piece covers what came after the split: the
-inside of the winning block, part by part. Which part is left over from 2017,
-which one arrived later, and what the arrivals are answering.
+This piece covers what came after the split: the inside of the winning block,
+taken part by part. Which part is left over from 2017, which one arrived later,
+and what the arrivals are answering.
 
 ### 1.2 Four pressures
 
-Behind every part that entered the block stands a named pressure, and there are
-four of them.
+Behind nearly every new part that entered the block stands a defined structural
+pressure — the single exception is §8's subject:
 
-**Decode memory and bandwidth.** While the model produces a token, it has to
-read the key and value of every token so far out of memory. That read is the
-real cost of generation — not the compute. MQA, GQA, MLA and sliding window
-attention are all attempts to shrink that read (§3, §4).
+- **Decode memory and bandwidth:** while the model produces a token, it has to
+  read the key and value of every token so far out of memory. The real cost at
+  inference is not the computation but this memory traffic. MQA (Multi-Query
+  Attention), GQA (Grouped-Query Attention), MLA and sliding window attention
+  were all developed to reduce that read load.
 
-**Compute per parameter.** The cost of growing a model is measured not by total
-parameter count but by the number of parameters that *run* per token.
-Mixture-of-Experts separates the two (§6).
+- **Compute per parameter:** the real cost of growing a model is measured not by
+  total parameter count but by the number of parameters that *run* per token.
+  Mixture-of-Experts (MoE) separates the two notions.
 
-**Training stability at scale.** Above a certain size, training loss diverges
-for no visible reason. Pre-LN, RMSNorm, QK-Norm and attention sinks are all
-measures taken against that divergence (§5, §7).
+- **Training stability at scale:** above a certain size, training loss can
+  diverge for no reason. Pre-LN (pre-layer normalization), RMSNorm, QK-Norm
+  (query–key normalization) and attention sinks are the measures taken against
+  that instability.
 
-**Context length.** A positional encoding designed for 512 tokens does not work
-at 128,000. Rescaling RoPE's base frequency and the NoPE debate both come out of
-here (§5).
+- **Context length:** a positional encoding designed for 512 tokens does not
+  work at a context of 128,000 tokens. Rescaling RoPE's base frequency and the
+  NoPE (No Positional Encoding) debate were both born of that need.
 
-These four have to be kept apart, because mixing them is both easy and wrong:
-MoE has nothing to do with the KV-cache, QK-Norm has nothing to do with context
-length. Explaining an architecture by a single cause is the most frequent
-mistake.
+These four pressures have to be kept apart. MoE has no direct connection to the
+KV-cache, nor QK-Norm to context length. Reducing an entire architecture to a
+single cause is the most common mistake in the field.
 
 <figure>
 
@@ -127,19 +131,19 @@ hardware and the right scale arrived.
 
 Start the inventory with the part that did not change.
 
-## 2. Attention: five variants, one operation
+## 2. Attention: four variants, one operation
 
-"Attention" is the name of a single operation. The five variants counted in this
-section are not separate mechanisms — they are the same operation invoked with
-different arguments. The differences between them collect into just two things:
-**which positions a query can look at**, and **where the key and the value come
-from**.
+"Attention" is the name of a single operation. The four variants in this section
+are not separate mechanisms — they are the same operation invoked with different
+arguments. The differences between them collect into just two things: **which
+positions a query ($Q$) can look at**, and **where the key and the value ($K$,
+$V$) come from**.
 
 MQA, GQA and MLA also get called "attention variants", but they sit on a
 different axis: they do not change who can look at whom, they change **how the
-key and value are stored**. That axis does not exist in 2017's design space — it
-opened later, once the cost of generation became a problem. Which is why they
-are in §4, with §3 standing in between: the section that defines the problem.
+key and value are stored**. That axis did not exist in 2017; it opened once the
+cost of generation became a problem. All three are in §4 for that reason. First,
+§3 defines the problem.
 
 ### 2.1 Self-attention
 
@@ -156,22 +160,30 @@ $$
 
 </figure>
 
-Each row is a query position. That position's query is multiplied against every
-key, the resulting scores pass through a softmax and turn into a probability
-distribution, and that distribution takes a weighted average of the values. In
-one sentence: **every position decides for itself how much information to take
-from the others.**
+Each row of $QK^{\top}$ is a query position. That position's query is multiplied
+against every key, the resulting scores pass through a softmax and turn into a
+probability distribution, and that distribution takes a weighted average of the
+values. In one sentence: **every position decides for itself how much
+information to take from the others.**
 
-Its cost is quadratic in the sequence. Table 1 of the paper gives attention a
-per-layer complexity of $O(n^2 \cdot d)$: **quadratic** in the sequence, but
-fully parallel, with a constant-length path between any two positions. In 2017
-the winning side was parallelism — and the subject of the rest of this piece is
-the form in which that quadratic term came back eight years later. Not as
-compute: in production the binding constraint is memory traffic (§3).
+The arguments are the frame for this whole section. Over a sequence $X$ of $n$
+tokens, $Q = XW_Q$, $K = XW_K$, $V = XW_V$ — all three produced from the
+**same** sequence, which is where "self" comes from. That is why the score
+matrix is square: $n \times n$, every token against every token, with no cell
+closed. What the remaining three variants do is depart from this setup — either
+by changing the source of one of the three arguments, or by adding a mask to the
+score matrix before the softmax.
+
+On the cost side: Table 1 of the paper gives attention a per-layer complexity of
+$O(n^2 \cdot d)$ — **quadratic** in the sequence, but fully parallel, with a
+constant-length path between any two positions. In 2017 the winning side was
+parallelism. That quadratic term has come back today, but not from the expected
+direction: the binding constraint is not compute, it is memory traffic. §3 and
+§4 are about that.
 
 One last caveat: the sentence "attention has not changed since 2017" is almost
 true. In 2025 gpt-oss adds a learned term to the **denominator** of the softmax
-and thereby changes the operator itself. Why they did it is in §7.4.
+and thereby changes the operator itself. The rationale is §7.4's subject.
 
 ### 2.2 Multi-head attention
 
@@ -179,7 +191,7 @@ A single attention operation produces a single "point of view". 2017 multiplies
 it: the same operation runs $h$ times in parallel, with different learned
 projections.
 
-But here is the critical detail — the heads do not **widen** the model, they
+The critical detail is this — the heads do not **widen** the model, they
 **divide** it. The paper's own configuration (Vaswani et al. 2017, §3.2.2):
 *"In this work we employ $h=8$ parallel attention layers, or heads. For each of
 these we use $d_k = d_v = d_{\text{model}}/h = 64$."*
@@ -188,19 +200,24 @@ $512 = 8 \times 64$. Eight heads run at roughly the same parameter and compute
 cost as one wide head; what is bought is not capacity but **diversity** — eight
 different relations can be learned in eight different subspaces.
 
+At the level of arguments there is no departure from §2.1: $Q$, $K$ and $V$
+still come from the same $X$, and there is still no mask. What gets divided are
+the projections. Each head runs Figure 2 independently with its own triple
+$Q_i = XW_Q^{(i)}$, $K_i = XW_K^{(i)}$, $V_i = XW_V^{(i)}$, and the $h$ outputs
+are concatenated and passed through a single $W_O$. Per head the score matrix is
+again $n \times n$ — but computed in a subspace of dimension
+$d_{\text{head}} = d_{\text{model}}/h$. Which is why §2.2 is not a "variant": it
+is $h$ copies of the same operation.
+
 The limit of that trade was measured in 2017 as well: in the ablation table the
 number of heads and the width of a head are varied separately
 (ibid., §6.2): *"In Table 3 rows (B), we observe that reducing the attention key
 size $d_k$ hurts model quality."*
 
-Hold on to that sentence, because all of §4 is built on top of it: the obvious
-way to make heads cheaper is to cut $d_k$, and that road was closed in 2017. MQA
-and GQA will press a different button.
-
-**There are models still running plain MHA today.** OLMo 2 is one of them: the
-hyperparameter table in its technical report has a single "Attention Heads" row
-(32 for 7B, 40 for 13B), no separate key/value head count, and neither GQA nor
-MQA appears anywhere in the paper.
+**There are models still running plain MHA (Multi-Head Attention) today.** OLMo
+2 is one of them: the hyperparameter table in its technical report has a single
+"Attention Heads" row (32 for 7B, 40 for 13B), no separate key/value head count,
+and neither GQA nor MQA appears anywhere in the paper.
 
 <aside class="sidenote">
 
@@ -208,35 +225,56 @@ OLMo team, *2 OLMo 2 Furious*, [arXiv:2501.00656](https://arxiv.org/abs/2501.006
 
 </aside>
 
+That limit in the ablation is the ground for all of §4: the obvious way to make
+heads cheaper is to cut $d_k$, and that road was closed in 2017. MQA and GQA
+will press a different button.
+
 ### 2.3 Causal attention and prefix-invariance
 
-The second variant restricts the positions a query can look at: every token sees
-only what came before it and itself, never what comes after. Why this mask was
-chosen and how it separates the three architecture families is
-[the other piece's subject](/en/blog/why-decoder-only/); the only thing that
-matters here is its consequence for this one.
+The second variant moves the first axis: it restricts the positions a query can
+look at. Every token sees only what came before it and itself, never what comes
+after. Why this mask was chosen and how it separates the three architecture
+families is [the other piece's subject](/en/blog/why-decoder-only/); the only
+thing that matters here is its consequence for this one.
+
+This time it is not the arguments that change but the scores. $Q$, $K$ and $V$
+still come from the same $X$; before the softmax a mask is added to the score
+matrix: $M_{ij} = 0$ if $j \le i$, and $M_{ij} = -\infty$ otherwise. With the
+upper triangle at $-\infty$ the softmax produces exact zeros there and the
+forward-looking path closes — the matrix is still $n \times n$, but half of it
+is dead. In the code below this is a single line:
+`np.where(j <= i, S, -np.inf)`.
 
 That consequence is called **prefix-invariance**, and half of the rest of this
-piece comes out of it.
+piece comes out of it. Plainly: **a token's key and value do not depend on what
+comes after it.** Appending a new token to the sequence does not disturb the
+arithmetic of the old ones.
 
 > **Lemma.** In a stack with a causal mask, the key and value at position $j$ of
 > layer $\ell$ are a function of $x_{\le j}$ alone. Therefore appending token
 > $x_{t+1}$ to the sequence **does not change** $k_j^{(\ell)}$ or
 > $v_j^{(\ell)}$ for any $j \le t$ and any $\ell$.
 
-The argument is induction: at the first layer, the input at position $j$ is just
-the embedding of $x_j$. At any higher layer, the output at $j$ looks only at the
-previous-layer states of positions $j' \le j$ — because that is what the mask
-says — and the feed-forward runs position-wise.
+Notation: $x_{\le j}$ is the sequence's prefix up to token $j$, and
+$k_j^{(\ell)}$ the key that layer $\ell$ produces at position $j$.
 
-The converse holds too, and it matters: in a stack with no mask
-($M = \mathbf{0}$) the state at position $j$ depends on **all** positions.
-Appending one token changes the key and value of every position from the second
-layer onward. There is nothing stable to store.
+The proof runs by induction, layer by layer. **Base:** the input of the first
+layer at position $j$ is just the embedding of $x_j$ — nothing from its
+neighbours mixes in. **Step:** the output of layer $\ell$ at $j$ looks only at
+the previous layer's states at positions $j' \le j$; that is exactly what the
+mask does. By the induction hypothesis those states depended on $x_{\le j}$, so
+the output at $j$ does too. The only place that could break the chain is the
+feed-forward layer, and because it is applied to each position separately it
+never mixes positions.
 
-A three-layer stack, random weights, six tokens: run it on the first five
-tokens, then append the sixth and run it again, and compare the key/values of
-the first five positions.
+What happens without a mask matters too: in a stack with no mask
+($M = \mathbf{0}$) the state at position $j$ depends on **all** positions —
+including those to its right. Appending one token changes the key and value of
+every position from the second layer onward. There is nothing stable to store.
+
+A three-layer stack, random weights, six tokens: it runs once on the first five
+and once with the sixth appended; the key/values of the first five positions are
+then compared.
 
 ```python
 def stack(X, causal):
@@ -256,9 +294,9 @@ def stack(X, causal):
 
 for causal in (True, False):
     a, b = stack(x[:5], causal), stack(x[:6], causal)   # 6. token eklendi
-    drift = max(max(np.abs(bk[:5] - ak).max(), np.abs(bv[:5] - av).max())
+    sapma = max(max(np.abs(bk[:5] - ak).max(), np.abs(bv[:5] - av).max())
                 for (ak, av), (bk, bv) in zip(a, b))
-    print(f"{'causal    ' if causal else 'çift yönlü'}  sapma: {drift:.2e}")
+    print(f"{'causal    ' if causal else 'çift yönlü'}  sapma: {sapma:.2e}")
 ```
 
 ```
@@ -279,8 +317,7 @@ identical down to the bit.
 </figure>
 
 This opens the door to a family of optimizations: if the earlier keys and values
-do not change, you can store them instead of recomputing them. §3 is exactly
-about that.
+do not change, you can store them instead of recomputing them.
 
 ### 2.4 Cross-attention
 
@@ -296,28 +333,86 @@ So what changes here is not the mask but **the key set itself**. The natural
 design for translation: read the source sentence once, and return to that
 reading at every step of writing the target sentence.
 
-The interesting thing about cross-attention is its cost: the encoder's output is
-fixed throughout generation, so its keys and values can be computed **once** and
-stored. The encoder runs once per input, not once per token.
+On the algorithm side nothing changes — only the arguments. In self-attention
+$Q$, $K$ and $V$ are produced from the same $X$; in cross-attention the query
+comes from the decoder's own state, the key and value from the encoder's output:
+$\operatorname{Attention}(Q_{\text{dec}}, K_{\text{enc}}, V_{\text{enc}})$. The
+product, the scaling, the softmax, the weighted sum — all of it is the formula
+in Figure 2. The dimensions do not have to match either: the query sequence can be
+$m$ long and the key sequence $n$ long, giving an $m \times n$ score matrix.
+There is no causal mask either — because the source sequence is present from
+beginning to end, every position of the decoder can see all of it.
+
+The cost side is asymmetric: the encoder's output is fixed throughout
+generation, so its keys and values can be computed **once** and stored. The
+encoder runs once per input, not once per token.
+
+That asymmetry carried cross-attention far beyond 2017's translation setting.
+Query and key being able to come from separate stacks means the two can come
+from separate **modalities**:
+
+- **Audio → text.** Whisper uses 2017's encoder-decoder as it stands (Radford et
+  al. 2022, §2.2): an 80-channel log-Mel spectrogram passes through an audio
+  encoder, *"The encoder and decoder have the same width and number of
+  transformer blocks"*, and the decoder attaches to that output in the way this
+  section describes.
+- **Image → text.** Flamingo interleaves cross-attention layers between the
+  layers of a frozen language model (Alayrac et al. 2022, §2.2): *"We freeze the
+  pretrained LM blocks, and insert gated cross-attention dense blocks... trained
+  from scratch."* Visual features enter language here, and the language model's
+  own weights are never touched.
+- **Text → image.** Latent diffusion wires conditioning straight into this
+  operation (Rombach et al. 2022, §3.3): *"We turn DMs into more flexible
+  conditional image generators by augmenting their underlying UNet backbone with
+  the cross-attention mechanism"*. The distribution of the arguments is written
+  out there in full: $Q = W_Q^{(i)} \varphi_i(z_t)$ from the image latent,
+  $K = W_K^{(i)} \tau_\theta(y)$ and $V = W_V^{(i)} \tau_\theta(y)$ from the text
+  encoder. This is where Stable Diffusion listens to the prompt.
+
+<aside class="sidenote">
+
+Radford et al., *Robust Speech Recognition via Large-Scale Weak Supervision* (Whisper), [arXiv:2212.04356](https://arxiv.org/abs/2212.04356) · Alayrac et al., *Flamingo: a Visual Language Model for Few-Shot Learning*, [arXiv:2204.14198](https://arxiv.org/abs/2204.14198) · Rombach et al., *High-Resolution Image Synthesis with Latent Diffusion Models*, [arXiv:2112.10752](https://arxiv.org/abs/2112.10752) · Liu et al., *Visual Instruction Tuning* (LLaVA), [arXiv:2304.08485](https://arxiv.org/abs/2304.08485). Whisper's §2.2 describes the architecture as encoder-decoder but does not separately define cross-attention; the phrase "the decoder attaches to the encoder's output" here follows from 2017's encoder-decoder recipe, and is not a verbatim quotation from the Whisper paper. Flamingo's gating mechanism is in the same section: the output is multiplied by $\tanh(\alpha)$ before being added to the residual, and because $\alpha$ is initialized at zero the model at the outset produces exactly what the frozen language model itself would.
+
+</aside>
+
+But most of today's vision-language models do not take that road. LLaVA carries
+image features straight into the word embedding space with a projection (Liu et
+al. 2023, §4.1): *"We apply a trainable projection matrix $W$ to convert $Z_v$
+into language embedding tokens $H_v$, which have the same dimensionality as the
+word embedding space in the language model"*. The image is thereby lined up
+alongside the text tokens, and everything after that is plain self-attention.
+The two are two answers to one question: should a modality be **kept in a
+separate stack and visited by a query**, or **joined into the same sequence and
+left to a single self-attention**? The first settles for computing the encoder's
+keys and values once. The second writes the image into the context length — and
+hands the bill to the KV-cache, the subject of the next section.
 
 The sentence *"only decoder-only models can use a KV-cache"* is wrong. **Every**
 decoder with a causal mask uses a cache — including the decoder half of an
 encoder-decoder; T5 decodes with a cache too. The correct, narrow statement is
 this: **a bidirectional encoder running over a growing sequence** cannot use a
 cache, because §2.3's lemma does not hold there. Encoder-decoder architectures
-are not penalized on this axis.
+are not penalized on the cache side.
 
 ### 2.5 Sliding window
 
-The fourth variant narrows the causal mask once more: every token can look only
-at the last $W$ tokens. The idea gets systematized in Longformer (Beltagy et al.
-2020) — in the paper's own words, *"an attention mechanism that scales linearly
-with sequence length"* and a component that is *"a drop-in replacement for the
-standard self-attention."*
+The fourth variant moves the first axis again, narrowing the causal mask once
+more: every token can look only at the last $W$ tokens. The idea gets
+systematized in Longformer (Beltagy et al. 2020) — in the paper's own words,
+*"an attention mechanism that scales linearly with sequence length"* and a
+component that is *"a drop-in replacement for the standard self-attention."*
+
+What changes is again only the mask, and its pattern is §2.3's narrowed by one
+step: the condition $j \le i$ becomes $i - W < j \le i$. In the causal mask the
+upper triangle was closed; here the far part of the lower triangle closes too,
+and what stays open is a band of width $W$ along the diagonal. $Q$, $K$ and $V$
+stay where they were. Because the number of open cells per row is fixed at $W$
+instead of growing with $n$, the cost stops being quadratic — this is what
+Longformer means by *"scales linearly"*.
 
 <aside class="sidenote">
 
-Beltagy, Peters and Cohan, *Longformer: The Long-Document Transformer*, [arXiv:2004.05150](https://arxiv.org/abs/2004.05150) · Jiang et al., *Mistral 7B*, [arXiv:2310.06825](https://arxiv.org/abs/2310.06825) · Gemma team, *Gemma 3 Technical Report*, [arXiv:2503.19786](https://arxiv.org/abs/2503.19786) · Brown et al., *Language Models are Few-Shot Learners* (GPT-3), [arXiv:2005.14165](https://arxiv.org/abs/2005.14165).
+Beltagy, Peters and Cohan, *Longformer: The Long-Document Transformer*, [arXiv:2004.05150](https://arxiv.org/abs/2004.05150) · Jiang et al., *Mistral 7B*, [arXiv:2310.06825](https://arxiv.org/abs/2310.06825) · Gemma team, *Gemma 3 Technical Report*, [arXiv:2503.19786](https://arxiv.org/abs/2503.19786) · Brown et al., *Language Models are Few-Shot Learners* (GPT-3), [arXiv:2005.14165](https://arxiv.org/abs/2005.14165). Gemma 3's ratio ablation is in Figure 3, its window-size ablation in Figure 4; both are measured through validation-set perplexity, and by the caption's own record *"This ablation is run with text-only models."* Perplexity does not directly measure whether a distant token can be recalled when needed — the ratio's effect on long-context **retrieval** is outside the scope of that ablation.
 
 </aside>
 
@@ -340,13 +435,27 @@ In exchange, the number of keys/values that must be stored is capped — Mistral
 does this with a *rolling buffer cache*: the key of position $i$ is written to
 slot $i \bmod W$ of the cache, over the old one.
 
-Today this is used not on its own but **in mixtures**:
+But that range is **theoretical**, and that is where the mixtures come from.
+Gemma 3 interleaves global layers among the local ones, and gives its rationale
+in one sentence (Gemma team 2025, §2): *"only the global layers attend to long
+context, and we have 1 global for every 5 local layers."* The indirect
+$k \times W$ range is not what the design relies on; the job of looking far away
+still sits with the full-attention layers.
+
+What determines how far the ratio can be pushed is not quality. The report's own
+ablation varies the local:global ratio (ibid., Figure 3): *"Impact of
+Local:Global ratio on the perplexity on a validation set. The impact is minimal,
+even with 7-to-1 local to global."* So the mixture is not a quality rescue
+operation: a few global layers are enough to carry the long context, perplexity
+barely reacts when the remaining layers are turned local, and the gain collects
+on the memory side — the subject of the next section. The mixtures shipping
+today:
 
 - **Gemma 3**: one global layer for every five local ones (5:1), local window
-  1024 tokens. And a detail that connects to §5.3 — the local layers and the
-  global layers use different RoPE base frequencies.
-- **gpt-oss**: banded window alternating with full dense attention, band width
-  128 tokens. The pattern is inherited from GPT-3 — which says it took its
+  1024 tokens. A detail that connects to §5.3: the local layers and the global
+  layers use different RoPE base frequencies.
+- **gpt-oss**: a 128-token banded window alternating with full dense attention.
+  The pattern is inherited from GPT-3 — which says it took its
   architecture from GPT-2 and lists a single exception (Brown et al. 2020,
   §2.1): *"with the exception that we use alternating dense and locally banded
   sparse attention patterns in the layers of the transformer."* Five years
@@ -360,7 +469,7 @@ Why it is done — the cost of the cache — is the subject of the next section.
 
 ### 3.1 The memory bill
 
-What happens if you do not store? You have to process the whole sequence from
+The price of not storing is plain: you have to process the whole sequence from
 scratch for every new token; producing $n$ tokens means attention work on the
 order of $O(n^3 d)$. If you do store, at each step you only compute the new
 token's projections and multiply them against the accumulated keys. This is the
@@ -378,8 +487,8 @@ $$
 
 </figure>
 
-You can verify this formula yourself, because the vLLM paper spells the product
-out (Kwon et al. 2023, §3):
+Because the vLLM paper spells the product out, the formula can be repeated from
+the outside (Kwon et al. 2023, §3):
 
 > "for the 13B parameter OPT model, the KV cache of a single token demands 800
 > KB of space, calculated as 2 (key and value vectors) × 5120 (hidden state
@@ -404,18 +513,21 @@ token başına : 819200 bayt = 800 KiB
 2048 token   : 1.678 GB
 ```
 
-The formula reproduces the number the paper published, exactly: 1.6 GB for a
-single request against a 13-billion-parameter model.
+The formula reproduces the paper's number: 819,200 bytes per token, exactly the
+800 KB the paper rounds to. A small discrepancy remains in the total — when the
+paper says 1.6 GB it is multiplying its own rounded 800 KB by 2048, while the raw
+product is 1.678 GB. For a single request against a 13-billion-parameter model,
+that is the order of magnitude.
 
 ### 3.2 The real bottleneck is bandwidth, not compute
 
 <aside class="sidenote">
 
-Shazeer, *Fast Transformer Decoding: One Write-Head is All You Need*, [arXiv:1911.02150](https://arxiv.org/abs/1911.02150). The memory/arithmetic ratio for incremental decode is in §2.4.1 and the one for training in §2.3.1; the multi-query proposal is in §3 and its own ratio in §3.1; the experiments are in §4 (Table 1 quality, Table 2 speed). The same author's two other papers in this piece are separate sources: sparsely-gated MoE (Shazeer et al. 2017) and GLU variants (Shazeer 2020); their references are in §6.2 and §8 of this piece.
+Shazeer, *Fast Transformer Decoding: One Write-Head is All You Need*, [arXiv:1911.02150](https://arxiv.org/abs/1911.02150). The section numbers below belong to Shazeer's paper, not to this piece. The memory/arithmetic ratio for incremental decode is in §2.4.1 and the one for training in §2.3.1; the multi-query proposal is in §3 and its own ratio in §3.1; the experiments are in §4 (Table 1 quality, Table 2 speed). The same author's two other papers in this piece are separate sources: sparsely-gated MoE (Shazeer et al. 2017) and GLU variants (Shazeer 2020); their references are in §6.2 and §8 of this piece.
 
 </aside>
 
-So far the cache has been described as a capacity problem; the real issue is
+So far the cache has looked like a capacity problem; the real issue is
 finer. Shazeer (2019, §2.4.1) works out the ratio of arithmetic to memory access
 for incremental generation: the ratio of memory access to operation count is
 $\Theta\!\left(\frac{n}{d}+\frac{1}{b}\right)$, and
@@ -423,14 +535,19 @@ $\Theta\!\left(\frac{n}{d}+\frac{1}{b}\right)$, and
 > "When $n \approx d$ or $b \approx 1$, the ratio is close to 1, causing memory
 > bandwidth to be a major performance bottleneck on modern computing hardware."
 
+The notation here is Shazeer's: $n$ sequence length, $d$ model dimension, $b$
+batch size, $k$ the key dimension per head — that is, Figure 5's $s$ and
+$d_{\text{model}}$.
+
 For comparison: run the same analysis for **training** and the ratio comes out
 $O(1/k + 1/bn)$ (ibid., §2.3.1) — that is, very small. **Incremental decode is a
 fundamentally worse hardware regime than training:** in training the chip
 computes, in decode it waits.
 
-An H100 SXM does 989.5 TFLOPS in dense bf16 and reads its HBM at 3.35 TB/s;
-divide and you get the 295 operations per byte read that the chip needs to be
-saturated. With OLMo 2 7B:
+An H100 SXM does 989.5 teraflops per second (TFLOPS) in bf16 without sparsity
+and reads its HBM (High Bandwidth Memory) at 3.35 TB/s; the ratio says the chip
+needs 295 operations per byte read to be saturated — the quantity the code calls
+**arithmetic intensity**. With OLMo 2 7B:
 
 <aside class="sidenote">
 
@@ -460,20 +577,21 @@ b=64  yoğunluk  6.15 FLOP/bayt   hesap kullanımı %2.08   KV trafiği %90
 ```
 
 Serving a single request, the chip uses **three thousandths** of its compute
-capacity. The rest of the time it waits on memory. And the second column says
-why the obvious fix is not enough: growing the batch raises the intensity, but
-even at 64 it does not clear 2%, because **KV traffic grows with the batch too**
-— the weights are read once and shared across all sequences, the cache is not.
-At b=64, ninety of every hundred bytes read are KV.
+capacity. The rest of the time it waits on memory. And the compute-utilization
+column says why the obvious fix is not enough: growing the batch raises the
+arithmetic intensity, but even at 64 it stays around 2%, because **KV traffic
+grows with the batch too** — the weights are read once and shared across all
+sequences, the cache is not. At b=64, ninety of every hundred bytes read are KV.
 
-Pope et al. make this concrete at 500B+ scale (2022, §2): with batch 512 and
+Pope et al. make this concrete at 500B+ scale, in a model with **multi-head
+attention** (2022, §2.1): with batch 512 and
 2048 tokens of context the KV-cache totals **3TB** — *"3 times the size of the
 model's parameters"* — and this cache is re-read for every token generated,
 *"during which the computational core of the chip is essentially idle."*
 
 <aside class="sidenote">
 
-Pope et al., *Efficiently Scaling Transformer Inference*, [arXiv:2211.05102](https://arxiv.org/abs/2211.05102). The 3TB figure is the value they report; the paper does not give the configuration behind that calculation inline, so use the vLLM example above as the arithmetic you can verify yourself.
+Pope et al., *Efficiently Scaling Transformer Inference*, [arXiv:2211.05102](https://arxiv.org/abs/2211.05102). The 3TB figure is the value they report; the paper gives the batch and the context length, but because it does not write the model's layer count and hidden size in that sentence the product cannot be repeated from the outside — so use the vLLM example above as the arithmetic you can verify yourself.
 
 </aside>
 
@@ -487,10 +605,11 @@ That literature is the next section.
 ## 4. MQA, GQA, MLA: three attacks on one factor
 
 Look at §3's formula and the factors that can be cut are limited — $L$ and
-$d_{\text{head}}$ are the model itself, $s$ is the user's request, $b$ is the
-thing that already raises revenue. That leaves **$h_{\text{kv}}$**: the number of
-key/value heads. This section covers three attacks on that factor, in
-chronological order.
+$d_{\text{head}}$ are the model itself, $b$ is the thing that already raises
+revenue. The only way to trim $s$ is §2.5's sliding window — and that is a mask
+change, which does not touch how things are stored. That leaves
+**$h_{\text{kv}}$**: the number of key/value heads. This section covers three
+attacks on that factor, in chronological order.
 
 ### 4.1 MQA — let all heads share a single key set
 
@@ -509,14 +628,20 @@ a decoder step costs **46 µs** per token, in multi-query **3.8 µs**. The encod
 barely moves (1.7 → 1.5 µs) — the gain is entirely on the decode side, which is
 where the problem was.
 
-And quality? There is a price, and the paper does not hide it (Table 1):
+And quality? There is a price, and the paper does not hide it (Table 1; ln(PPL)
+is log-perplexity, BLEU a translation quality score — low PPL and high BLEU are
+good):
 
-| Attention | $h$ | $d_k, d_v$ | ln(PPL) | BLEU (dev) | BLEU test (beam 1 / 4) |
-|---|---|---|---|---|---|
-| multi-head | 8 | 128 | 1.424 | 26.7 | 27.7 / 28.4 |
-| **multi-query** | 8 | 128 | 1.439 | 26.5 | 27.5 / **28.5** |
-| multi-head | 2 | 64 | 1.480 | 26.2 | 26.8 / 27.9 |
-| multi-head | 8 | 16 | 1.513 | 25.8 | — |
+| Attention | $h$ | $d_k, d_v$ | $d_{ff}$ | ln(PPL) | BLEU (dev) | BLEU test (beam 1 / 4) |
+|---|---|---|---|---|---|---|
+| multi-head | 8 | 128 | 4096 | 1.424 | 26.7 | 27.7 / 28.4 |
+| **multi-query** | 8 | 128 | 5440 | 1.439 | 26.5 | 27.5 / **28.5** |
+| multi-head | 2 | 64 | 6784 | 1.480 | 26.2 | 26.8 / 27.9 |
+| multi-head | 8 | 16 | 6784 | 1.513 | 25.8 | — |
+
+The $d_{ff}$ column is no accident: Shazeer gives back to the feed-forward what
+he cuts from attention, so all four rows sit at the same parameter budget. The
+quality difference does not come from a difference in size.
 
 What the table really says is not how much MQA gives up — it is **how much the
 alternatives give up.** Shazeer's own reading (ibid., §4.2): the multi-query
@@ -592,7 +717,7 @@ elements, where $l$ denotes the number of layers."*
 
 Their own comparison table, in elements per token:
 
-| | KV cache per token | Capability (their own labels) |
+| | KV cache per token | Model capability (their own labels) — not an independent measurement |
 |---|---|---|
 | MHA | $2 n_h d_h l$ | Strong |
 | GQA | $2 n_g d_h l$ | Moderate |
@@ -627,19 +752,24 @@ MLA (gerçek) : 35,136 eleman/token   -> 56.9x küçük
 
 A single request's cache at 128K context: 8.6 GiB instead of 488 GiB.
 
+<aside class="sidenote">
+
+The "if it were MHA" row is an upper bound, not a literally realistic alternative: DeepSeek-V3's `config.json` has 128 heads × 128 dimensions per head = 16,384, while the model's `hidden_size` is 7168. In classic MHA those two numbers are kept equal (§2.2: heads do not widen the model, they divide it); since only a design that compresses key and value can afford this many heads, a model building the same head count with MHA would never have been made in the first place.
+
+</aside>
+
 <figure>
 
 <img loading="lazy" decoding="async" src="/figures/transformer-architecture-components/fig-6-kv-footprint.svg" alt="Four horizontal bars: MHA 1,998,848 elements and 488 GiB, GQA-8 124,928 elements and 30.5 GiB, MQA 15,616 elements and 3.8 GiB, MLA 35,136 elements and 8.6 GiB. MLA's bar is one fifty-seventh of MHA's.">
 
-<figcaption><b>Figure 6.</b> The same model under four mechanisms. Only <b>MLA</b> shipped; the other three are that mechanism applied to DeepSeek-V3's configuration. The capability column holds DeepSeek's own labels — not an independent measurement.</figcaption>
+<figcaption><b>Figure 6.</b> The same model under four mechanisms. Only <b>MLA</b> shipped; the other three are that mechanism applied to DeepSeek-V3's configuration. The bars are elements per token; the GiB values are for 128K context and bf16.</figcaption>
 
 </figure>
 
 ### 4.4 The collision with RoPE
 
-The nicest detail in this piece sits inside MLA's story: the method is
-**mathematically incompatible** with another component chosen for entirely
-independent reasons.
+The real detail in MLA's story is here: the method is **mathematically
+incompatible** with another component chosen for entirely independent reasons.
 
 DeepSeek-AI 2024a, §2.1.3:
 
@@ -662,9 +792,9 @@ that carries the position information, and rotate only those. The $d_h^R = 64$
 in DeepSeek-V3's configuration is exactly this — a cavity left outside the
 compression, reserved for RoPE.
 
-If you want to see how an architecture actually gets designed, this is a good
-place: two components justified separately, colliding, and the settlement
-surviving as a visible number in a config file.
+How an architecture actually gets designed is visible right here: two components
+justified separately, colliding, and the settlement left behind as a number in a
+config file.
 
 ## 5. Positional encoding: from adding to rotating
 
@@ -695,12 +825,11 @@ function because we hypothesized it would allow the model to easily learn to
 attend by relative positions, since for any fixed offset $k$, $PE_{pos+k}$ can
 be represented as a linear function of $PE_{pos}$."*
 
-Underline that sentence: what is wanted is **relative** position, what is
-obtained is an absolute signal the model **might learn** to use that way. A
-hope, not a guarantee.
+That sentence deserves underlining: what is wanted is **relative** position,
+what is obtained is an absolute signal the model **might learn** to use that
+way. A hope, not a guarantee.
 
-And the sentence that comes right after is the most surprising thing in this
-section (ibid., §3.5):
+The sentence that comes right after is a surprising one (ibid., §3.5):
 
 > "We also experimented with using learned positional embeddings instead, and
 > found that the two versions produced **nearly identical** results (see Table 3
@@ -742,7 +871,7 @@ rotating each at its own frequency: $\boldsymbol{R}^d_{\Theta,m}$ is a
 block-diagonal rotation matrix and the frequencies are
 $\Theta = \{\theta_i = 10000^{-2(i-1)/d}\}$.
 
-**Note that constant: $10000$, Vaswani's constant.** RoPE did not change the
+**The constant is familiar: $10000$, Vaswani's constant.** RoPE did not change the
 sines — it changed *how they enter the computation*. Multiplication instead of
 addition, applied to the query and the key rather than to the embedding.
 
@@ -805,19 +934,22 @@ Su et al., *RoFormer: Enhanced Transformer with Rotary Position Embedding*, [arX
 In RoPE's design, $10000$ was a fixed number. Today it is a hyperparameter — and
 there is exactly one reason it gets moved: long context.
 
-- **OLMo 2**: raises $\theta$ from $10^4$ to $5 \times 10^5$; the rationale is
-  that it *"increases the resolution of positional encoding."*
-- **Qwen3**: *"we increase the base frequency of RoPE from 10,000 to 1,000,000
-  using the ABF technique"*, plus YaRN and Dual Chunk Attention at inference.
-- **Gemma 3**: *"We increase RoPE base frequency from 10k to 1M on global
-  self-attention layers, and keep the frequency of the local layers at 10k."*
+- **OLMo 2** (OLMo team 2025, §2.1): raises $\theta$ from $10^4$ to
+  $5 \times 10^5$; the rationale is that it *"increases the resolution of
+  positional encoding."*
+- **Qwen3** (Qwen team 2025, §3.2): *"we increase the base frequency of RoPE from
+  10,000 to 1,000,000 using the ABF [Adjusted Base Frequency] technique"*, plus
+  YaRN (Yet another RoPE extensioN) and Dual Chunk Attention (DCA) at inference.
+- **Gemma 3** (Gemma team 2025, §2.2): *"We increase RoPE base frequency from 10k
+  to 1M on global self-attention layers, and keep the frequency of the local
+  layers at 10k."*
 
 That last item connects back to §2.5 and is interesting on its own: **two
 different $\theta$ values inside one model.** The local layers see only 1024
 tokens, so they have no need for a stretched frequency. Positional encoding is
 no longer a global property but a setting chosen per layer type.
 
-So what exactly does raising $\theta$ buy? OLMo 2's rationale said it
+What exactly does raising $\theta$ buy? OLMo 2's rationale said it
 *"increases the resolution"*; write the frequencies out and it turns out that is
 not what happens. RoPE's fastest-rotating plane has frequency $\theta^{0} = 1$,
 i.e. a wavelength of $2\pi$ — **6.28 tokens, whatever $\theta$ is.** Only the
@@ -853,8 +985,9 @@ still 10,000, Vaswani's constant. On top of that, because decoupled RoPE rotates
 only 64 dimensions, the exponent shrinks too and the slowest wavelength drops to
 47 thousand. Across a 163,840-token context that means **3.48 full turns**: the
 only one of the five whose context exceeds its slowest wavelength. The second
-half of the settlement §4.4 called "a visible number in a config file" is here —
-that cavity was borrowed from positional resolution.
+half of the settlement §4.4 called "a number left behind in a config file" is
+here — that cavity was borrowed from the width of the position band: halving the
+number of rotating planes clips the range in half too.
 
 <aside class="sidenote">
 
@@ -869,8 +1002,8 @@ rather than the context-length one. The idea is simple: normalize the query and
 the key before the dot product.
 
 Its origin is low-resource translation (Henry et al. 2020), but the citation the
-field uses is ViT-22B. What it solves there is very clear (Dehghani et al. 2023,
-§2):
+field uses is ViT-22B (Vision Transformer). What it solves there is very clear
+(Dehghani et al. 2023, §2):
 
 > "In scaling ViT beyond prior works, we observed divergent training loss after
 > a few thousand steps. In particular, this instability was observed for models
@@ -887,7 +1020,7 @@ as the reason. In Gemma 3's phrasing, it replaces Gemma 2's soft-capping.
 
 **But it is not free**, and there is a controlled study that shows it. Yang et
 al. (2025) train RoPE, NoPE and QK-Norm variants at 8 billion parameters under
-the same recipe and compare them. Their finding (ibid., §2.2):
+the same recipe and compare them. Their finding (ibid., §2.2.1):
 
 > "the RoPE and QK-Norm variants exhibit comparable performance on standard
 > benchmarks... For long context evaluations, QK-Norm performs the **worst**
@@ -915,8 +1048,8 @@ counterintuitive, but there is a rationale: the causal mask already carries
 position information. The first position sees one token, the second two, the
 third three — the mask is itself a counter.
 
-This is not an analogy. Kazemnejad et al. do not merely prove that the mask
-*can* carry position, they construct the weights explicitly (ibid., App. C.1):
+This is not an analogy. Kazemnejad et al. (2023) do not merely prove that the
+mask *can* carry position, they construct the weights explicitly (App. C.1):
 let one dimension of the embedding be 1 at every token and another be 1 only at
 the first token; let the key read the first and the value read the second. Then
 all keys become identical, the softmax flattens over the causal prefix, and the
@@ -948,8 +1081,10 @@ A single attention layer, given no positional signal whatsoever, carries the
 rank of every position in readable form.
 
 Kazemnejad et al. (2023) measure this systematically: in decoder-only models
-trained from scratch they compare APE, T5-relative, ALiBi, RoPE and no encoding
-at all — NoPE — on length generalization. The conclusion of their abstract:
+trained from scratch they compare APE (Absolute Position Embedding — absolute
+encoding added to the embedding), T5's relative position bias, ALiBi (Attention
+with Linear Biases), RoPE and no encoding at all — NoPE — on length
+generalization. The conclusion of their abstract:
 
 <aside class="sidenote">
 
@@ -969,7 +1104,7 @@ et al.'s 8B comparison the NoPE variant also trails RoPE on standard benchmarks.
 
 Even so, the same study shows that mixing the two approaches **layer by layer**
 does work. Measured layer-wise, NoPE layers and RoPE layers behave in clearly
-distinct ways (Yang et al. 2025, §3): the NoPE layers are strong at retrieval —
+distinct ways (ibid., §2.2.3): the NoPE layers are strong at retrieval —
 they put high attention mass on the token they are looking for; the RoPE layers
 show a strong recency bias, leaning on the last tokens.
 
@@ -989,7 +1124,8 @@ The question it answers: **how do you grow a model without growing the compute
 done per token at the same rate?**
 
 The idea is old: sparsely-gated MoE was published in January 2017, five months
-before the Transformer; its implementation at the time sat between LSTM layers.
+before the Transformer; its implementation at the time sat between LSTM (Long
+Short-Term Memory) layers.
 In their own abstract (Shazeer et al. 2017):
 
 > "The capacity of a neural network to absorb information is limited by its
@@ -1009,8 +1145,9 @@ per token stays flat.
 Switch Transformer (Fedus et al. 2021) makes the most radical simplification
 (ibid., §2.1): *"Contrary to these ideas, we instead use a simplified strategy
 where we route to only a single expert. We show this simplification preserves
-model quality, reduces routing computation and performs better."* They report
-more than a 7x pre-training speedup over T5 at the same compute budget.
+model quality, reduces routing computation and performs better."* They report a
+pre-training speedup of up to 7x over T5-Base and T5-Large at the same compute
+budget.
 
 DeepSeekMoE (Dai et al. 2024) goes the other way — more, smaller experts — and
 proposes two ideas (ibid., §1): *"(1) finely segmenting the experts into $mN$
@@ -1051,7 +1188,7 @@ DeepSeek-V3's number has to be stated correctly, because it is usually reported
 wrong. The report says (DeepSeek-AI 2024b, §4.2): *"Each MoE layer consists of 1
 shared expert and 256 routed experts... Among the routed experts, 8 experts will
 be activated for each token."* Because the shared expert is always on, nine
-experts run in total (ibid., §5.2). So it is not "256 experts, 9 active": there
+experts run in total (ibid., §2.1.2). So it is not "256 experts, 9 active": there
 are **257** experts per layer, and 8 routed plus the 1 always-on shared expert
 run. Of the 671 billion total parameters, 37 billion run per token — **5.5%**.
 
@@ -1080,8 +1217,8 @@ sentence (Qwen team 2025, §2): *"Unlike Qwen2.5-MoE, the Qwen3-MoE design
 excludes shared experts."* They publish no ablation for their own removal
 decision.
 
-But a third lab does publish one, and it is the only equal-budget comparison
-among this piece's MoE evidence. OLMoE trains two models side by side: active
+But a third lab measures it without being the side that proposed the idea. OLMoE
+trains two models side by side: active
 parameters, total parameters and FLOPs identical; the only difference is that
 one has 4 of 32 routed experts on, the other 1 always-on shared expert plus 3 of
 31 routed. The result (Muennighoff et al. 2024, §4.1.3):
@@ -1114,7 +1251,8 @@ OLMoE turns **against** the shared expert. The same study also measures the
 granularity side and confirms DeepSeekMoE (ibid., §4.1.2): quartering the expert
 size and raising the count from 8 to 32 — again at constant active parameters
 and constant compute — yields an improvement of *"around 10%"* on HellaSwag and
-MMLU. §6.1's combinatorial explosion is not a claim but a measured effect.
+MMLU (at around 130 billion tokens). §6.1's combinatorial explosion is not a
+claim but a measured effect.
 
 <aside class="sidenote">
 
@@ -1123,11 +1261,14 @@ Muennighoff et al., *OLMoE: Open Mixture-of-Experts Language Models*, [arXiv:240
 </aside>
 
 Its limit has to be stated too: OLMoE is at 1B active / 7B total, two orders of
-magnitude below DeepSeek-V3, and again on a single lab's own recipe. It does not
-close the question — but one side now has a measured number and the other does
-not.
+magnitude below DeepSeek-V3, and again on a single lab's own recipe. The other
+side is not unmeasured either: DeepSeekMoE's own ablation (Dai et al. 2024, §4.4)
+reports that isolating a shared expert *"yields improved performance across a
+majority of benchmarks"* — but that measurement sits on the recipe of the lab
+that proposed the idea. Nothing closes the question: both sides have published
+their own experiment, and both inside their own recipe.
 
-One last technical note: routing has to be balanced, or a handful of experts
+Routing has a problem of its own: it has to be balanced, or a handful of experts
 take the whole load. The standard method is to add an auxiliary loss, and it is
 known to cost quality — one of DeepSeek-V3's contributions is precisely getting
 past this: *"an auxiliary-loss-free strategy for load balancing"*, with the
@@ -1137,17 +1278,20 @@ from the effort to encourage load balancing."*
 ## 7. Normalization: both its place and its form changed
 
 Normalization existed in 2017 and still does; what changed is where it sits and
-what it computes. The whole section belongs to the stability pressure.
+what it computes. Its place changing (§7.1, §7.3) is a consequence of the
+stability pressure; its form changing (§7.2) of the speed calculation, and the
+term added to the softmax denominator (§7.4) of long context.
 
 ### 7.1 Post-LN and Pre-LN
 
 Both names answer a single question: **does normalization sit on the main path,
 or on the copy that goes down the branch?** Both blocks contain the same three
-parts — a sub-layer (attention or FFN), a residual add, a normalization. Only
-the order differs.
+parts — a sub-layer (attention or FFN — feed-forward network), a residual add,
+a normalization. Only the order differs.
 
-**Post-LN** (the 2017 original): run the sub-layer, add the residual, *then*
-normalize. Normalization sits **on top of** the main path, between blocks.
+**Post-LN** (post-layer normalization, the 2017 original): run the sub-layer,
+add the residual, *then* normalize. Normalization sits **on top of** the main
+path, between blocks.
 
 $$x_{l+1} = \mathrm{LayerNorm}\big(x_l + \mathrm{Sublayer}(x_l)\big)$$
 
@@ -1183,7 +1327,7 @@ The practical consequence: with Pre-LN the learning-rate warm-up stage can be
 **removed**.
 
 Pre-LN did not win on quality; it won because it eliminated a hyperparameter
-whose tuning cost grows with the model. Most of the changes in this piece are
+whose tuning cost grows with the model. Some of the changes in this piece are
 like that — not an architectural victory, an operational convenience.
 
 Pre-LN has a visible price too: because the residual stream is never normalized
@@ -1210,8 +1354,9 @@ subtracts the mean (re-centering) and divides by the standard deviation
 Not computing the mean removes one statistics pass; the gain is entirely speed.
 Qwen3, Gemma 3, OLMo 2 and gpt-oss all four use RMSNorm.
 
-Note that 7%–64% range: a ninefold spread, measured on 2019's hardware and on
-that era's models. The paper's quality claim is not "better" either, but
+The range itself says something — 7%–64%, a ninefold spread, and measured on
+2019's hardware, on that era's models. The paper's quality claim is not "better"
+either, but
 "comparable". None of the four models shipping RMSNorm publishes an ablation
 against LayerNorm at its own scale — so today's ubiquity rests not on a measured
 advantage but on a speedup that looks free.
@@ -1223,13 +1368,13 @@ attention and feedforward (MLP) layers within each transformer block, instead of
 the inputs."* Which is close to 2017's placement — but with RMSNorm rather than
 LayerNorm, and again with stability as the rationale.
 
-**Gemma 3 does both** (Gemma team 2025, §2.1): *"We use a Grouped-Query
+**Gemma 3 does both** (Gemma team 2025, §2): *"We use a Grouped-Query
 Attention (GQA) with post-norm and pre-norm with RMSNorm."* Two normalizations
 in the same block.
 
 So the sentence "Pre-LN won" was right for 2020 and too definite for today.
 
-### 7.4 Attention sink — the caveat left open in §2.1
+### 7.4 Attention sink — the counterpart of §2.1's caveat
 
 Xiao et al. (2023) start from a strange observation: in trained models,
 surprisingly high attention goes to the **first** tokens of the sequence —
@@ -1250,19 +1395,21 @@ The models find their own way out: they use the first tokens as a garbage bin.
 So much so that when using a sliding window, keeping the key/value of only
 **four** initial tokens is enough to bring performance back.
 
-And in 2025 gpt-oss walks straight out of the constraint (OpenAI 2025, §2):
+And in 2025 gpt-oss walks straight out of the constraint (OpenAI 2025, §2.2):
 
 > "Each attention head has a learned bias in the denominator of the softmax,
 > similar to off-by-one attention and attention sinks, which enables the
 > attention mechanism to pay no attention to any tokens."
 
-The denominator is no longer just the sum of the token scores; it also contains
-a learned term. As a result the weights going to real tokens **do not sum to
-1.** The model can now say "I am looking at none of them."
+The term shifts here: in Xiao et al. the sink is a *token*, in gpt-oss it is a
+*learned number* that takes over that token's job. The denominator is no longer
+just the sum of the token scores; it also contains a learned term. As a result
+the weights going to real tokens **do not sum to 1.** The model can now say "I
+am looking at none of them."
 
-One constraint, two consequences eight years apart: first a compensation the
-models found on their own, then an architectural change that makes it
-unnecessary.
+A constraint set in 2017, two consequences within eight years: first (2023) a
+compensation the models found on their own, then an architectural change that
+makes it unnecessary.
 
 <aside class="sidenote">
 
@@ -1278,7 +1425,7 @@ layers with a ReLU between them, applied to each position separately. The
 dimensions are $d_{\text{model}} = 512$, $d_{ff} = 2048$.
 
 Today's counterpart is SwiGLU. Shazeer's 2020 formulation, a variant of gated
-linear units:
+linear units (GLU):
 
 $$
 \mathrm{SwiGLU}(x, W, V) = \mathrm{Swish}_1(xW) \otimes xV, \qquad
@@ -1298,9 +1445,9 @@ explains the odd numbers in modern configurations (Shazeer 2020, §2):
 This is why 2017's ratio of $4 \times d_{\text{model}}$ looks more like
 $\approx 8/3$ today.
 
-A shipped configuration lets you check both claims at once: does the FFN really
-hold most of the parameters, and does the $\frac{2}{3}$ correction really keep
-the budget flat. OLMo 2 7B's `config.json` gives $d_{\text{model}} = 4096$,
+In a shipped configuration both claims can be checked at once: does the FFN
+really hold most of the parameters, and does the $\frac{2}{3}$ correction really
+keep the budget flat. OLMo 2 7B's `config.json` gives $d_{\text{model}} = 4096$,
 $d_{ff} = 11008$ and 32 layers — and its `num_key_value_heads` equals the head
 count, so the MHA claim from §2.2 shows up here too.
 
@@ -1339,27 +1486,34 @@ The configuration was verified from two independent places. OLMo team 2025, Tabl
 
 </aside>
 
-The measured difference, with parameters and computation matched (Table 1,
-heldout log-perplexity):
+The measured difference, with parameters and computation matched (Shazeer 2020,
+six of the eight rows of Table 1; heldout log-perplexity, standard deviation in
+parentheses):
 
 | FFN variant | 65,536 steps | 524,288 steps |
 |---|---|---|
-| ReLU (baseline) | 1.997 | 1.677 |
-| GELU | 1.983 | 1.679 |
-| Swish | 1.994 | 1.683 |
-| GEGLU | **1.942** | **1.633** |
-| SwiGLU | 1.944 | 1.636 |
+| ReLU (baseline) | 1.997 (0.005) | 1.677 |
+| GELU | 1.983 (0.005) | 1.679 |
+| Swish | 1.994 (0.003) | 1.683 |
+| GLU (gated, no Swish) | 1.982 (0.006) | 1.663 |
+| GEGLU | 1.942 (0.004) | 1.633 |
+| SwiGLU | 1.944 (0.010) | 1.636 |
 
-The gain is real but modest. The real point is the paper's **closing sentence**
-(ibid., §4):
+The gain is real but modest — and its source is visible in the table. On the
+long run the three ungated variants collect between 1.677 and 1.683, while the
+three gated ones drop to 1.633–1.663. The difference comes not from the
+activation but from the **gate**. And the 0.002 between GEGLU and SwiGLU sits
+inside the measurement's own noise: SwiGLU's standard deviation is 0.010.
+
+The real point is the paper's **closing sentence** (ibid., §4):
 
 > "We offer no explanation as to why these architectures seem to work; we
 > attribute their success, as all else, to divine benevolence."
 
-The sentence reads like a joke, but it is the most honest place in the paper.
-Every component in this inventory has a named pressure behind it — cache,
-compute, stability, context. This one has a table and a shrug. And it went into
-everything anyway, from Llama to Qwen3, from gpt-oss to OLMo 2.
+The sentence reads like a joke, but it is one of the most honest sentences in
+the field. Every *other* component in this inventory has a named pressure behind
+it — cache, compute, stability, context. This one has a table and a shrug. And
+it went into everything anyway, from Llama to Qwen3, from gpt-oss to OLMo 2.
 
 Not every part of the modern block is explained. The field knows this too.
 
@@ -1436,6 +1590,7 @@ training a frontier model twice, changing one component, is higher than the
 price of wondering what the answer is.
 
 So this piece can claim the following: every change has a named pressure and a
-primary source documenting that pressure. It cannot claim this: that the choices
+primary source documenting that pressure — except SwiGLU (§8), whose primary
+source explicitly declines to give one. It cannot claim this: that the choices
 made are the **best** answers available to those pressures. That second one was
 never measured.

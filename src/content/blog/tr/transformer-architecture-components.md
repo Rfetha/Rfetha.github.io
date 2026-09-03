@@ -917,7 +917,7 @@ oynatmamış — sevk edilen konfigürasyonda $\theta$ hâlâ 10.000, yani Vaswa
 sabiti. Üstelik decoupled RoPE yalnızca 64 boyutu döndürdüğü için üs de küçülüyor
 ve en yavaş dalga boyu 47 bine iniyor. 163.840 token'lık bağlamda bu **3,48 tam
 tur** demek: beşi içinde bağlamı en yavaş dalga boyunu aşan tek model. §4.4'te
-"konfigürasyon dosyasında görünür bir sayı olarak kalmış" denen uzlaşmanın
+"konfigürasyon dosyasında bir sayı olarak kalmış" denen uzlaşmanın
 ikinci yarısı burada — o oyuk, konum bandının genişliğinden ödünç alınmış:
 dönen düzlem sayısı yarıya inince menzil de yarı yarıya kırpılıyor.
 
@@ -1200,7 +1200,7 @@ Muennighoff ve ark., *OLMoE: Open Mixture-of-Experts Language Models*, [arXiv:24
 Sınırını da söylemek gerekiyor: OLMoE 1B aktif / 7B toplam ölçeğinde, yani
 DeepSeek-V3'ün iki mertebe altında, ve yine tek bir labın kendi reçetesi
 üzerinde. Karşı taraf da ölçüsüz değil: DeepSeekMoE'nin kendi ablasyonu
-(a.g.e., §4.4) paylaşılan uzmanı yalıtmanın *"kıyaslamaların çoğunda daha iyi
+(Dai ve ark. 2024, §4.4) paylaşılan uzmanı yalıtmanın *"kıyaslamaların çoğunda daha iyi
 performans verdiğini"* bildiriyor — ama o ölçüm, fikri öneren labın kendi
 reçetesi üzerinde. Soruyu kapatan yok: iki taraf da kendi deneyini yayımlamış,
 ikisi de kendi tarifi içinde.
