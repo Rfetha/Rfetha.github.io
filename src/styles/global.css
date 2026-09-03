@@ -31,7 +31,30 @@
 	                never reach into the margin column */
 	--gutter: 1.5rem;
 	--sidenote-w: 15rem;
-	--sidenote-gap: 2.5rem;
+	--edge: 3.5rem; /* what a margin strip leaves against the viewport edge.
+	                   Why 3.5rem and not 3: the gap below is figured in vw,
+	                   which counts the scrollbar, while the column is centred
+	                   in the body, which does not — ~7px of the value goes to
+	                   that mismatch and the strip lands ~48px (≈1.3cm) off the
+	                   edge as measured. */
+
+	/* Why: the strips belong to the outer margin, not to the column. Solving
+	     50% − --measure/2 + --gutter − gap − --sidenote-w = --edge
+	   for the gap pins BOTH strips --edge from their own viewport edge — the
+	   rail's `left` and the note's negative margin are the same expression
+	   mirrored, so one variable moves the pair and the column never shifts.
+	   The floor is the old fixed gap: it is what keeps a plate off a note (see
+	   the narrow-tier note below), and under ~1600px the computed value dips
+	   below it. The ceiling stops an ultrawide from parking the strips a screen
+	   away from the prose they annotate. */
+	--sidenote-gap: clamp(
+		2.5rem,
+		calc(
+			50vw - var(--measure) / 2 + var(--gutter) - var(--sidenote-w) -
+				var(--edge)
+		),
+		14rem
+	);
 
 	/* code: a real listing — cool surface, actual syntax colour */
 	--code-surface: #fbfbfd;
@@ -87,7 +110,17 @@
 		--measure: 50rem; /* 800px, less two gutters = a 752px column */
 		--fig: 50rem;
 		--sidenote-w: 10rem;
-		--sidenote-gap: 1.75rem;
+		/* Same solve as in :root, on this tier's floor — 1.75rem is the value
+		   the 404 > 400 clearance above is derived from, so the strips may be
+		   pushed outward from it but never pulled inside it. */
+		--sidenote-gap: clamp(
+			1.75rem,
+			calc(
+				50vw - var(--measure) / 2 + var(--gutter) - var(--sidenote-w) -
+					var(--edge)
+			),
+			14rem
+		);
 	}
 }
 
