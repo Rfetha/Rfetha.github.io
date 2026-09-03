@@ -32,6 +32,58 @@ Two rules when writing:
 
 Rationale and the full constraint list are in `PRODUCT.md` (untracked, local).
 
+## Writing a post
+
+**Posts are authored directly in `src/content/blog/<lang>/<slug>.md`. There is
+no `drafts/` directory** — one existed, and keeping a parallel copy produced a
+three-month divergence in which every correction sat in the draft and none of
+it reached the published page. Do not reintroduce that pattern.
+
+Unfinished work goes on a branch off `main`, merged when the post is ready:
+a push to `main` deploys the live site with no confirmation step. A local-only
+`workspace` branch exists for exactly this.
+
+Filename is the URL segment — lowercase, hyphens, ASCII. `kv-cache.md` serves
+at `/tr/blog/kv-cache/` and `/en/blog/kv-cache/`.
+
+Frontmatter: `title` and `description` are required (`description` is the list
+line and the `<meta name="description">`, so it is never left empty); `pubDate`
+orders the index; `updatedDate` is optional and renders a "revised" line.
+
+Two house constructs, both written as raw HTML with **blank lines inside the
+tags** or the markdown will not be processed:
+
+```html
+<figure>
+
+$$ ... $$
+
+<figcaption><b>Figure 1.</b> Caption.</figcaption>
+
+</figure>
+```
+
+```html
+<aside class="sidenote">
+
+Source citation, measurement condition, or aside.
+
+</aside>
+```
+
+The margin carries citations, "this number was measured under these
+conditions" caveats, and asides — never a step of the main argument; a reader
+who skips the margin must still get the whole case. `DESIGN.md` is the
+authority on both.
+
+Obsidian wikilinks (`[[link]]`, `![[image.png]]`) do **not** render — they
+appear literally. Use `[text](/tr/blog/slug/)` and put images in `public/`.
+
+Verification material lives **outside the repo**, in `../blog-research/`: the
+evidence files that record each claim's primary source, and the scripts that
+produce the numbers printed in the posts. When a post's measured number or
+verbatim quote changes, update the record there too.
+
 ## Documentation
 
 Full documentation: https://docs.astro.build
