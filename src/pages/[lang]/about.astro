@@ -50,7 +50,6 @@ const COPY = {
 		projects: [
 			{
 				name: 'ORKIKS',
-				href: 'https://hub.orkiks.com',
 				body: 'Production multi-agent AI platform (LangGraph supervisor, RAG over Postgres/pgvector).',
 			},
 			{
@@ -92,7 +91,6 @@ const COPY = {
 		projects: [
 			{
 				name: 'ORKIKS',
-				href: 'https://hub.orkiks.com',
 				body: 'Üretimde çok ajanlı yapay zekâ platformu (LangGraph süpervizörü, Postgres/pgvector üzerinde RAG).',
 			},
 			{
@@ -140,7 +138,7 @@ const c = COPY[lang];
 				c.projects.map((p) => (
 					<>
 						<dt>
-							<a href={p.href}>{p.name}</a>
+							{'href' in p && p.href ? <a href={p.href}>{p.name}</a> : p.name}
 						</dt>
 						<dd set:html={p.body} />
 					</>
