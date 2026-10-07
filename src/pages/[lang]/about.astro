@@ -25,30 +25,21 @@ const t = UI[lang];
 const COPY = {
 	en: {
 		pageTitle: 'About',
-		description: 'Who writes here, what he works on, and why the writing exists.',
-		h1: 'About the author',
-		whatIDo: 'What I do',
-		whatIDoP1:
-			'I am an AI engineer at <a href="https://egeist.com.tr">Egeist Teknoloji</a> in İzmir. Enough of the job has turned out to be architecture rather than modelling that a fair amount of what I write here is about design.',
-		whatIDoP2:
-			'I have recently started graduate study, heading toward research. That means I now read papers with the intention of arguing with them rather than only applying them, and this site is where a good deal of that arguing ends up.',
-		why: 'Why this site exists',
-		whyP1:
-			'I write to understand. Explaining a thing is the fastest way I know to find the places where I only thought I understood it — the step that seemed obvious until it had to be written down in order, the constant nobody bothers to justify. So the posts here tend to be written while the material is still difficult rather than after it stopped being.',
-		whyP2:
-			'The consequence is that they are written for someone in my position rather than for someone who already knows. If a derivation is skipped, it is because I could genuinely do it in my head, not because it was tedious to type.',
-		what: 'What I write about',
-		whatP:
-			'Machine learning systems, mostly, and the theory underneath them. Occasionally something from the wider computer science that a problem dragged me into. Length follows the subject: some entries are a page of reading notes, some are a long derivation with the algebra left in.',
+		description: 'Who writes here and what he works on.',
+		h1: 'About',
+		intro:
+			'I am an AI engineer at <a href="https://egeist.com.tr">Egeist Teknoloji</a> in İzmir and a graduate student in computer science at Dokuz Eylül University.',
+		aboutWriting:
+			'I write working notes on machine learning systems and the theory underneath them.',
 		background: 'Background',
 		cv: [
 			{
 				when: '2025 –',
-				what: '<b>AI Engineer</b>, Egeist Teknoloji — İzmir. Building ORKIKS: AI core, LLM layer, and the backend architecture beneath both.',
+				what: '<b>AI Engineer</b>, Egeist Teknoloji — İzmir.',
 			},
 			{
 				when: '2026 –',
-				what: '<b>M.Sc. Computer Science</b>, Dokuz Eylül University. Thesis in progress: moving what is currently bought with runtime prompt text — persona, document faithfulness, tool use, flow discipline — into model weights, and measuring whether those capabilities survive together rather than one at a time. A direction rather than a result; it may still move.',
+				what: '<b>M.Sc. Computer Science</b>, Dokuz Eylül University.',
 			},
 			{
 				when: '2021 – 2025',
@@ -60,52 +51,41 @@ const COPY = {
 			{
 				name: 'ORKIKS',
 				href: 'https://hub.orkiks.com',
-				body: 'Multi-agent AI platform, in production. Three specialized agents behind a LangGraph supervisor with intent routing; ReAct with per-SKU RAG over Postgres and pgvector; transactional-outbox persistence; a TypeScript storefront and BFF integrating Shopify, Trendyol and the WhatsApp Cloud API behind adapters.',
+				body: 'Production multi-agent AI platform (LangGraph supervisor, RAG over Postgres/pgvector).',
 			},
 			{
 				name: 'Hukuk-SLM',
 				href: 'https://github.com/Rfetha/Hukuk-SLM',
-				body: 'A Turkish legal small language model, in progress: a 9B Qwen-class model fine-tuned with QLoRA down to a 4-bit GGUF that fits 8&nbsp;GB of VRAM, evaluated on a four-axis suite — groundedness gating, abstention against hard-negative trap sets, and a dual LLM judge — over 21.5K grounded question–answer pairs synthesized from real statutes. The scope changed partway on a negative result worth reporting: supervised fine-tuning collapsed abstention from 0.74 to zero.',
+				body: 'Turkish legal domain small language model (9B Qwen fine-tuned with QLoRA).',
 			},
 			{
 				name: 'rfetha-skills',
 				href: 'https://github.com/Rfetha/rfetha-skills',
-				body: 'A library of agent skills distilling software-design material — deep modules, domain-driven design, hexagonal architecture, the GoF and PoEAA patterns — into narrowly triggered, reusable form.',
+				body: 'Library of modular agent skills distilling software design and architecture patterns.',
 			},
 		],
-		moreWork:
-			'The rest, including a PyTorch chess engine and a set of from-scratch computer-vision builds, is on',
 	},
 	tr: {
 		pageTitle: 'Hakkında',
-		description: 'Burada kimin yazdığı, ne üzerine çalıştığı, ve yazının neden var olduğu.',
-		h1: 'Yazar hakkında',
-		whatIDo: 'Ne yapıyorum',
-		whatIDoP1:
-			'İzmir’de <a href="https://egeist.com.tr">Egeist Teknoloji</a>’de yapay zekâ mühendisiyim. İşin yeterince büyük bir kısmı modellemeden çok mimari çıktığı için, burada yazdıklarımın hatırı sayılır bir bölümü tasarım üzerine.',
-		whatIDoP2:
-			'Kısa süre önce yüksek lisansa başladım, yönüm araştırma. Yani makaleleri artık yalnızca uygulamak için değil, onlarla tartışmak niyetiyle okuyorum; bu tartışmanın epeyce bir kısmı da bu sitede birikiyor.',
-		why: 'Bu site neden var',
-		whyP1:
-			'Anlamak için yazıyorum. Bir şeyi anlatmak, yalnızca anladığımı sandığım yerleri bulmanın bildiğim en hızlı yolu — sırayla yazılması gerekene kadar bariz görünen adım, kimsenin gerekçelendirmeye tenezzül etmediği sabit. ',
-		whyP2:
-			'Sonucu şu: benim konumumdaki biri için yazılıyorlar, zaten bilen biri için değil. Bir türetme atlanmışsa, gerçekten kafamda yapabildiğim içindir; yazması sıkıcı olduğu için değil.',
-		what: 'Ne üzerine yazıyorum',
-		whatP:
-			'Çoğunlukla makine öğrenmesi sistemleri ve altındaki teori. Arada bir de, bir problemin beni içine sürüklediği daha geniş bilgisayar biliminden bir şey. Uzunluk konuya uyuyor: kimi yazı bir sayfalık okuma notu, kimi cebiri içinde bırakılmış uzun bir türetme.',
+		description: 'Burada kimin yazdığı ve ne üzerine çalıştığı.',
+		h1: 'Hakkında',
+		intro:
+			'İzmir’de <a href="https://egeist.com.tr">Egeist Teknoloji</a>’de yapay zekâ mühendisiyim ve Dokuz Eylül Üniversitesi’nde bilgisayar bilimleri alanında yüksek lisans yapıyorum.',
+		aboutWriting:
+			'Burada makine öğrenmesi sistemleri ve altındaki teori üzerine çalışma notlarımı paylaşıyorum.',
 		background: 'Geçmiş',
 		cv: [
 			{
 				when: '2025 –',
-				what: '<b>Yapay Zekâ Mühendisi</b>, Egeist Teknoloji — İzmir. ORKIKS’i kuruyorum: yapay zekâ çekirdeği, LLM katmanı, ve ikisinin altındaki backend mimarisi.',
+				what: '<b>Yapay Zekâ Mühendisi</b>, Egeist Teknoloji — İzmir.',
 			},
 			{
 				when: '2026 –',
-				what: '<b>Bilgisayar Bilimleri Yüksek Lisansı</b>, Dokuz Eylül Üniversitesi. Tez sürüyor: şu anda çalışma zamanı prompt metniyle satın alınan şeyleri — persona, belgeye sadakat, araç kullanımı, akış disiplini — model ağırlıklarına taşımak, ve bu yeteneklerin tek tek değil birlikte ayakta kalıp kalmadığını ölçmek. Bir sonuç değil bir yön; hâlâ değişebilir.',
+				what: '<b>Yüksek Lisans</b>, Bilgisayar Bilimleri, Dokuz Eylül Üniversitesi.',
 			},
 			{
 				when: '2021 – 2025',
-				what: '<b>Bilgisayar Bilimleri Lisansı</b>, Dokuz Eylül Üniversitesi.',
+				what: '<b>Lisans</b>, Bilgisayar Bilimleri, Dokuz Eylül Üniversitesi.',
 			},
 		],
 		work: 'Seçilmiş çalışmalar',
@@ -113,21 +93,19 @@ const COPY = {
 			{
 				name: 'ORKIKS',
 				href: 'https://hub.orkiks.com',
-				body: 'Çok ajanlı yapay zekâ platformu, üretimde. Niyet yönlendirmeli bir LangGraph süpervizörünün arkasında üç uzmanlaşmış ajan; Postgres ve pgvector üzerinde SKU başına RAG ile ReAct; transactional-outbox kalıcılığı; Shopify, Trendyol ve WhatsApp Cloud API’yi adaptörlerin arkasında birleştiren bir TypeScript vitrini ve BFF.',
+				body: 'Üretimde çok ajanlı yapay zekâ platformu (LangGraph süpervizörü, Postgres/pgvector üzerinde RAG).',
 			},
 			{
 				name: 'Hukuk-SLM',
 				href: 'https://github.com/Rfetha/Hukuk-SLM',
-				body: 'Türkçe hukuk alanında küçük bir dil modeli, sürüyor: QLoRA ile ince ayar yapılıp 8&nbsp;GB VRAM’e sığan 4-bit GGUF’a indirilmiş 9B Qwen sınıfı bir model; gerçek mevzuattan sentezlenen 21,5 bin dayanaklı soru–cevap çifti üzerinde dört eksenli bir takımla değerlendirildi — dayanak kapısı, zorlu-negatif tuzak kümelerine karşı çekimserlik, ve ikili LLM jürisi. Kapsam yolun ortasında, raporlanmaya değer bir negatif sonuç yüzünden değişti: gözetimli ince ayar çekimserliği 0,74’ten sıfıra düşürdü.',
+				body: 'Türkçe hukuk alanında küçük dil modeli (QLoRA ile ince ayar yapılmış 9B Qwen).',
 			},
 			{
 				name: 'rfetha-skills',
 				href: 'https://github.com/Rfetha/rfetha-skills',
-				body: 'Yazılım tasarımı malzemesini — derin modüller, alana dayalı tasarım, altıgen mimari, GoF ve PoEAA kalıpları — dar tetiklenen, yeniden kullanılabilir biçime indirgeyen bir ajan yetenekleri kütüphanesi.',
+				body: 'Yazılım tasarımı ve mimari kalıpları derleyen modüler ajan yetenekleri kütüphanesi.',
 			},
 		],
-		moreWork:
-			'Gerisi, bir PyTorch satranç motoru ve sıfırdan yazılmış bir dizi bilgisayarlı görü çalışması dahil,',
 	},
 } as const;
 
@@ -137,24 +115,12 @@ const c = COPY[lang];
 <Layout title={`${c.pageTitle} — ${SITE_TITLE}`} description={c.description} lang={lang}>
 	<main>
 		<header class="titleblock">
-			<!-- Why: the home page's h1 is already the bare name. Repeating it here gave
-			two URLs the same heading, which reads to a crawler as one page served twice.
-			The paper convention supplies the fix: the author note carries its own title
-			and the name drops to the byline beneath it. -->
 			<h1>{c.h1}</h1>
 			<p class="affiliation">{SITE_TITLE}, {t.affiliation}</p>
 		</header>
 
-		<h2>{c.whatIDo}</h2>
-		<p set:html={c.whatIDoP1} />
-		<p>{c.whatIDoP2}</p>
-
-		<h2>{c.why}</h2>
-		<p>{c.whyP1}</p>
-		<p>{c.whyP2}</p>
-
-		<h2>{c.what}</h2>
-		<p>{c.whatP}</p>
+		<p set:html={c.intro} />
+		<p>{c.aboutWriting}</p>
 
 		<h2>{c.background}</h2>
 		<dl class="cv">
@@ -181,9 +147,6 @@ const c = COPY[lang];
 				))
 			}
 		</dl>
-		<p class="more-work">
-			{c.moreWork} <a href={GITHUB_URL}>GitHub</a>.
-		</p>
 
 		<h2>{t.elsewhere}</h2>
 		<p>
