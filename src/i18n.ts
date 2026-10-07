@@ -18,7 +18,7 @@ export const HTML_LANG: Record<Lang, string> = { en: 'en', tr: 'tr' };
 export const LANG_LABEL: Record<Lang, string> = { en: 'EN', tr: 'TR' };
 
 /** Why: a content id is `<lang>/<slug>` because the loader globs the whole
-    blog directory. Splitting it here keeps that shape in one place. */
+	blog directory. Splitting it here keeps that shape in one place. */
 export function splitId(id: string): { lang: Lang; slug: string } {
 	const [head, ...rest] = id.split('/');
 	return { lang: head as Lang, slug: rest.join('/') };
@@ -84,7 +84,7 @@ export const UI = {
 		emptyFeedLink: 'akış',
 		emptyFeedPost: ' yayında.',
 		abstract:
-			'Anlamak için yazıyorum. Bunlar makine öğrenmesi sistemleri ve altındaki teori üzerine çalışma notları; malzeme hâlâ zorken yazıldılar, zorluğu geçtikten sonra değil.',
+			'Anlamak için yazıyorum. Bunlar makine öğrenmesi sistemleri ve altındaki teori üzerine çalışma notları.',
 		moreAbout: 'Hakkımda',
 		abstractLabel: 'Özet.',
 		switchTo: 'English',

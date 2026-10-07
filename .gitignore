@@ -25,6 +25,7 @@ pnpm-debug.log*
 
 # taslaklar + agent calisma alani - yayina gitmez
 drafts/
+archive/
 .impeccable/
 PRODUCT.md
 
